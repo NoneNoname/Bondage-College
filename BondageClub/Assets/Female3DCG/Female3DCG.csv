@@ -779,6 +779,7 @@ ItemMouth,LatexBallMuzzleGag,Latex Ball Muzzle Gag
 ItemMouth,SockStuffing,Sock Stuffing
 ItemMouth,GasMaskGag,Respirator Mask
 ItemMouth,WebGag,Web
+ItemMouth,MilkBottle,Milk Bottle
 ItemMouth2,,Mouth
 ItemMouth2,ClothGag,Cloth Gag
 ItemMouth2,WiffleGag,Wiffle Ball Gag
@@ -924,6 +925,7 @@ ItemDevices,WoodenBoxOpenHead,Exposed Head Wooden Box
 ItemDevices,SmallWoodenBoxOpenHead,Exposed Head Small Wooden Box
 ItemDevices,WoodenStocks,Wooden Stocks
 ItemDevices,Vacbed,Vacbed
+ItemDevices,Crib,Crib
 ItemAddon,,Body
 ItemAddon,BondageBenchStraps,Leather Belt Straps
 ItemBoots,,Feet
