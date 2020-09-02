@@ -49,7 +49,6 @@ const ChainsArmsOptions = [
 		Prerequisite: ["NotMounted", "NotChained", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 		Property: { Type: "SuspensionHogtied", Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], SetPose: ["Hogtied", "SuspensionHogtied"], Difficulty: 6 },
 		Expression: [{ Group: "Blush", Name: "Medium", Timer: 10 }],
-		HiddenItem: "SuspensionChains"
 	}
 ];
 
@@ -142,8 +141,6 @@ function InventoryItemArmsChainsSetPose(NewType) {
 	// Sets the new pose with its effects only if the chains are not locked
 	if (!InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
 		DialogFocusItem.Property = NewType.Property;
-		if (NewType.HiddenItem != null) InventoryWear(C, NewType.HiddenItem, "ItemHidden", DialogFocusItem.Color);
-		else InventoryRemove(C, "ItemHidden");
 	} else {
 		DialogExtendedMessage = DialogFind(Player, "CantChangeWhileLocked");
 		return;
