@@ -119,8 +119,6 @@ function InventoryItemArmsZiptiesSetPose(NewType) {
 
 	// Sets the new pose with its effects and the hidden items if we need to
 	DialogFocusItem.Property = NewType.Property;
-	if (NewType.HiddenItem != null) InventoryWear(C, NewType.HiddenItem, "ItemHidden", DialogFocusItem.Color);
-	else InventoryRemove(C, "ItemHidden");
 	CharacterRefresh(C);
 	ChatRoomCharacterUpdate(C);
 

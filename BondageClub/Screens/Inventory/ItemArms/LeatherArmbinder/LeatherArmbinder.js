@@ -54,7 +54,6 @@ function InventoryItemArmsLeatherArmbinderSetType(NewType) {
 		delete DialogFocusItem.Property.Difficulty;
 	} else {
 		DialogFocusItem.Property.Difficulty = 3;
-		DialogFocusItem.Property.Difficulty = 3;
 	}
 
 	// Pushes the change to the chatroom
@@ -62,10 +61,9 @@ function InventoryItemArmsLeatherArmbinderSetType(NewType) {
 	var msg = "LeatherArmbinderSet" + ((NewType == null) ? "Strap" : NewType);
 	if (NewType != "") msg = "LeatherArmbinderStrapSetNone";
 	var Dictionary = [];
-	Dictionary.push({ Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber });
-	Dictionary.push({ Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber });
+	Dictionary.push({Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber});
+	Dictionary.push({Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber});
 	ChatRoomPublishCustomAction(msg, true, Dictionary);
-	// ChatRoomCharacterItemUpdate(C, "ItemHidden");
 	if (DialogInventory != null) {
 		DialogFocusItem = null;
 		DialogMenuButtonBuild(C);

@@ -225,7 +225,7 @@ function AssetBuildDescription(Family, CSV) {
 	var L = 0;
 	for (let A = 0; A < Asset.length; A++)
 		if (Asset[A].Group.Family == Family) {
-			
+
 			// Checks if the group matches
 			if ((CSV[L] != null) && (CSV[L][0] != null) && (CSV[L][0].trim() != "") && (Asset[A].Group.Name == CSV[L][0].trim())) {
 

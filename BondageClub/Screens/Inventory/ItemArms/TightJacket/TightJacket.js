@@ -106,8 +106,6 @@ function InventoryItemArmsTightJacketSetPose(NewType) {
 	// Sets the new pose with its effects only if the chains are not locked
 	if (!InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
 		DialogFocusItem.Property = NewType.Property;
-		if (NewType.HiddenItem != null) InventoryWear(C, NewType.HiddenItem, "ItemHidden", DialogFocusItem.Color);
-		else InventoryRemove(C, "ItemHidden");
 	} else {
 		DialogExtendedMessage = DialogFind(Player, "CantChangeWhileLocked"); 
 		return;

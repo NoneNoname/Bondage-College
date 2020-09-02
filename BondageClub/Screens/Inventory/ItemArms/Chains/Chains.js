@@ -123,7 +123,6 @@ function InventoryItemArmsChainsClick() {
  * @param {number} NewType.RequiredBondageLevel - THe minimum bondage level, the rigger needs befor she can do this tie
  * @param {Property} NewType.Property - A propperty object, detailing the new pose
  * @param {Expression} NewType.Expression - An expression object, that changes the expressions of the victim
- * @param {string} NewType.HiddenItem - Name of an item from the ItemHidden gropu to apply on the victim
  * @returns {void} - Nothing
  */
 function InventoryItemArmsChainsSetPose(NewType) {

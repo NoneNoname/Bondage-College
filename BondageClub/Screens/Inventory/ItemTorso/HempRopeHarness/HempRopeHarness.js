@@ -97,8 +97,6 @@ function InventoryItemTorsoHempRopeSetPose(NewType) {
 	if (NewType.Expression != null)
 		for (let E = 0; E < NewType.Expression.length; E++)
 			CharacterSetFacialExpression(C, NewType.Expression[E].Group, NewType.Expression[E].Name, NewType.Expression[E].Timer);
-	if (NewType.HiddenItem != null) InventoryWear(C, NewType.HiddenItem, "ItemHidden", DialogFocusItem.Color);
-	else InventoryRemove(C, "ItemHidden");
 	CharacterRefresh(C);
 
 	// Sets the chatroom or NPC message
