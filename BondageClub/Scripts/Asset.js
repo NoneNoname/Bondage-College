@@ -183,7 +183,10 @@ function AssetMapLayer(Layer, AssetDefinition, A, I) {
 		Priority: Layer.Priority || AssetDefinition.Priority || AssetCurrentGroup.DrawingPriority,
 		InheritColor: Layer.InheritColor,
 		Alpha: AssetLayerAlpha(Layer, AssetDefinition, I),
-		Asset: A
+		Asset: A,
+		DrawingLeft: Layer.Left,
+		DrawingTop: Layer.Top,
+		HideAs: Layer.HideAs,
 	};
 }
 
