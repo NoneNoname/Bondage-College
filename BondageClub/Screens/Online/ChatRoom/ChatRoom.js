@@ -1223,14 +1223,23 @@ function ChatRoomSyncItem(data) {
 	for (let C = 0; C < ChatRoomCharacter.length; C++)
 		if (ChatRoomCharacter[C].MemberNumber == data.Item.Target) {
 
+			var FromSelf = data.Source == data.Item.Target;
+			var FromOwner = (ChatRoomCharacter[C].Ownership != null) && ((data.Source == ChatRoomCharacter[C].Ownership.MemberNumber) || FromSelf);
+			var LoverNumbers = ChatRoomCharacter[C].GetLoversNumbers();
+			var FromLoversOrOwner = (LoverNumbers.length != 0) && (LoverNumbers.includes(SourceMemberNumber) || FromOwner);		
+
 			// From another user, we prevent changing the item if the current item is locked by owner/lover locks
-			if (data.Source != data.Item.Target) {
+			if (!FromOwner) {
 				var Item = InventoryGet(ChatRoomCharacter[C], data.Item.Group);
-				if ((Item != null) && (ChatRoomCharacter[C].Ownership != null) && (ChatRoomCharacter[C].Ownership.MemberNumber != data.Source) && InventoryOwnerOnlyItem(Item))
-					if (!ChatRoomAllowChangeLockedItem(data, Item))
-						return;
-				if ((Item != null) && (ChatRoomCharacter[C].GetLoversNumbers().indexOf(data.Source) < 0) && InventoryLoverOnlyItem(Item) && ((ChatRoomCharacter[C].Ownership == null) || (ChatRoomCharacter[C].Ownership.MemberNumber != data.Source)) && !ChatRoomAllowChangeLockedItem(data, Item))
+				if ((Item != null) && (InventoryOwnerOnlyItem(Item) || (!FromLoversOrOwner && InventoryLoverOnlyItem(Item)))) {
+					if (data.Item.Property == null) return;
+					if (Item.Asset.OwnerOnly) return;
+					if (Item.Asset.LoverOnly) return;
+					if (Item.Asset.Name == data.Item.Name) {
+						ServerItemCopyPropery(C, OldItem, data.Item.Property)
+					}
 					return;
+				}			
 			}
 
 			// If there's no name in the item packet, we remove the item instead of wearing it
@@ -1239,13 +1248,22 @@ function ChatRoomSyncItem(data) {
 				InventoryRemove(ChatRoomCharacter[C], data.Item.Group);
 			} else {
 
+				if (!FromOwner) {
+					var Item = { Asset: AssetGet(C.AssetFamily, data.Item.Group, data.Item.Name), Property: data.Item.Property };
+					if (data.Item.Property != null)	ServerValidateProperties(ChatRoomCharacter[C], ChatRoomCharacter[C], Item, { SourceMemberNumber: data.Source, FromOwner: FromOwner, FromLoversOrOwner: FromLoversOrOwner })
+					if (InventoryOwnerOnlyItem(Item) || (!FromLoversOrOwner && InventoryLoverOnlyItem(Item))) {
+						ChatRoomAllowCharacterUpdate = true;
+						return;
+					}
+				}
+ 
 				// Wear the item and applies locks and properties if we need to
 				InventoryWear(ChatRoomCharacter[C], data.Item.Name, data.Item.Group, data.Item.Color, data.Item.Difficulty);
 				if (data.Item.Property != null) {
 					var Item = InventoryGet(ChatRoomCharacter[C], data.Item.Group);
 					if (Item != null) {
 						Item.Property = data.Item.Property;
-						ServerValidateProperties(ChatRoomCharacter[C], Item);
+						ServerValidateProperties(ChatRoomCharacter[C], Item, { SourceMemberNumber: data.Source, FromOwner: FromOwner, FromLoversOrOwner: FromLoversOrOwner });
 						CharacterRefresh(ChatRoomCharacter[C]);
 					}
 				}
