@@ -88,6 +88,11 @@ function ChatRoomCanTakeDrink() { return ((CurrentCharacter != null) && (Current
  */
 function ChatRoomIsCollaredByPlayer() { return ((CurrentCharacter != null) && (CurrentCharacter.Ownership != null) && (CurrentCharacter.Ownership.Stage == 1) && (CurrentCharacter.Ownership.MemberNumber == Player.MemberNumber)) }
 /**
+ * Checks if the current character is lover of the player.
+ * @returns {boolean} - TRUE if the current character is lover of the player.
+ */
+function ChatRoomIsLoverOfPlayer() { return ((CurrentCharacter != null) && CurrentCharacter.GetLoversNumbers().includes(Player.MemberNumber)) }
+/**
  * Checks if the current character can serve drinks.
  * @returns {boolean} - TRUE if the character is a maid and is free.
  */
@@ -1537,14 +1542,17 @@ function ChatRoomDrinkPick(DrinkType, Money) {
 	}
 }
 
+function ChatRoomSendLoverRule(RuleType, Option) { ChatRoomSendOwnerRule(RuleType, Option, "Owner"); }
+function ChatRoomSendOwnerRule(RuleType, Option) { ChatRoomSendOwnerRule(RuleType, Option, "Lover"); }
 /**
- * Sends a rule / restriction / punishment to the player's slave client, it will be handled on the slave's side when received.
+ * Sends a rule / restriction / punishment to the player's slave/lover client, it will be handled on the slave/lover's side when received.
  * @param {string} RuleType - The rule selected.
- * @param {"Quest" | "Leave"} [Option] - If the rule is a quest or we should just leave the dialog.
+ * @param {"Quest" | "Leave"} Option - If the rule is a quest or we should just leave the dialog.
+ * @param {"Owner" | "Lover"} Sender - Type of the sender
  * @returns {void} - Nothing
  */
-function ChatRoomSendRule(RuleType, Option) {
-	ServerSend("ChatRoomChat", { Content: "OwnerRule" + RuleType, Type: "Hidden", Target: CurrentCharacter.MemberNumber });
+function ChatRoomSendRule(RuleType, Option, Sender) {
+	ServerSend("ChatRoomChat", { Content: Sender + "Rule" + RuleType, Type: "Hidden", Target: CurrentCharacter.MemberNumber });
 	if (Option == "Quest") {
 		if (ChatRoomQuestGiven.indexOf(CurrentCharacter.MemberNumber) >= 0) ChatRoomQuestGiven.splice(ChatRoomQuestGiven.indexOf(CurrentCharacter.MemberNumber), 1);
 		ChatRoomQuestGiven.push(CurrentCharacter.MemberNumber);
@@ -1553,7 +1561,7 @@ function ChatRoomSendRule(RuleType, Option) {
 }
 
 /**
- * Processes a rule sent to the player from her owner.
+ * Processes a rule sent to the player from her owner or from her lover.
  * @param {object} data - Received rule data object.
  * @returns {object} - Returns the data object, used to continue processing the chat message.
  */
@@ -1621,6 +1629,12 @@ function ChatRoomSetRule(data) {
 		// Switches it to a server message to announce the new rule to the player
 		data.Type = "ServerMessage";
 
+	}
+
+	// Only works if the sender is the lover of the player
+	if ((data != null) && Play.GetLoversNumbers().includes(data.Sender)) {
+		if (data.Content == "LoverRuleSelfLoverLockAllow") LogDelete("BlockLoverLockSelf", "LoverRule");
+		if (data.Content == "LoverRuleSelfLoverLockBlock") LogAdd("BlockLoverLockSelf", "LoverRule");
 	}
 
 	// Returns the data packet
