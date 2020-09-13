@@ -125,4 +125,6 @@ PlayerGagged,,,(You don't have access to use or remove items on her.),,!DialogDo
 160,0,(Back to main menu.),(Main menu.),,
 210,200,(Allow her to use lovers' locks on herself.),(She will be able to use lovers' locks on herself.),"SendLoverRule(""SelfLoverLockAllow"")",
 210,200,(Block her from using lovers' locks on herself.),(She will not be able to use lovers' locks on herself anymore.),"SendLoverRule(""SelfLoverLockBlock"")",
+210,200,(Allow her owner to use lovers' locks on her.),(Her owner will be able to use lovers' locks on her.),"SendLoverRule(""OwnerLoverLockAllow"")",
+210,200,(Block her owner from using lovers' locks on her.),(Her owner will not be able to use lovers' locks on her anymore.),"SendLoverRule(""OwnerLoverLockBlock"")",
 210,0,(Back to main menu.),(Main menu.),,

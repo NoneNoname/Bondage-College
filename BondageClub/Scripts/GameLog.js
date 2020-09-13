@@ -110,3 +110,17 @@ function LogLoad(NewLog) {
 	}
 	
 }
+
+/**
+ * Searches for an existing log entry on a other character.
+ * @param {string} C - Character to search on
+ * @param {string} NewLogName - The name of the log to search for
+ * @param {string} NewLogGroup - The name of the log's group
+ * @returns {boolean} - Returns TRUE if there is an existing log matching the Name/Group with no value or a value above the current time in ms.
+ */
+function LogQueryRemote(C, QueryLogName, QueryLogGroup) {
+	if (C.ID == 0) return LogQuery(QueryLogName, QueryLogGroup);
+	if (!C.Rule || !Array.isArray(C.Rule)) return false;
+	var R = C.Rule.find(R => R.Name == QueryLogName && R.Group == QueryLogGroup);
+	return (R != null) && ((R.Value == null) || (R.Value >= CurrenTime));
+}

@@ -242,7 +242,7 @@ function ServerValidateProperties(C, Item, Validation) {
 		var Lock = InventoryGetLock(Item);
 		if ((Lock != null) && (Lock.Asset != null)) {
 			if (!Validation.FromOwner && Lock.Asset.OwnerOnly) delete Item.Property.LockMemberNumber;
-			if (!Validation.FromLoversOrOwner && Lock.Asset.LoverOnly) delete Item.Property.LockMemberNumber
+			if (!Validation.FromLoversOrOwner && Lock.Asset.LoverOnly) delete Item.Property.LockMemberNumber;
 		}
 	}
 
@@ -305,8 +305,7 @@ function ServerValidateProperties(C, Item, Validation) {
 					E--;
 				}
 
-				// TODO ... (C.ID == 0) Rule: can owner lock lover's lock?
-				if (Lock.Asset.LoverOnly && ((LockNumber == null) || (C.GetLoversNumbers().length == 0) || ((LockNumber != C.MemberNumber) && !C.GetLoversNumbers().includes(LockNumber) && !(LockNumber == OwnerNumber)))) {
+				if (Lock.Asset.LoverOnly && ((LockNumber == null) || (C.GetLoversNumbers().length == 0) || ((LockNumber != C.MemberNumber) && !C.GetLoversNumbers().includes(LockNumber) && !(LockNumber == OwnerNumber && LogQueryRemote(C, "BlockLoverLockOwner", "LoverRule"))))) {
 					delete Item.Property.LockedBy;
 					delete Item.Property.LockMemberNumber;
 					delete Item.Property.CombinationNumber;

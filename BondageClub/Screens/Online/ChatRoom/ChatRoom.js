@@ -307,6 +307,7 @@ function ChatRoomDrawCharacter(DoClick) {
 					ChatRoomOwnershipOption = "";
 					ChatRoomLovershipOption = "";
 					if (ChatRoomCharacter[C].ID != 0) ServerSend("ChatRoomAllowItem", { MemberNumber: ChatRoomCharacter[C].MemberNumber });
+					if (ChatRoomCharacter[C].IsOwnedByPlayer()) ServerSend("ChatRoomChat", { Content: "RuleInfoGet", Type: "Hidden", Target: ChatRoomCharacter[C].MemberNumber });
 					CharacterSetCurrent(ChatRoomCharacter[C]);
 
 				} else
@@ -868,20 +869,26 @@ function ChatRoomMessage(data) {
 
 			// Hidden messages are processed separately, they are used by chat room mini-games / events
 			if ((data.Type != null) && (data.Type == "Hidden")) {
-				for (let A = 1; A <= 6; A++)
-					if (msg == "StruggleAssist" + A.toString()) {
+				if (msg == "RuleInfoGet") ChatRoomGetLoadRules(SenderCharacter);
+				else if (msg == "RuleInfoSet") ChatRoomSetLoadRules(SenderCharacter, data.Dictionary);
+				else if (msg.startsWith("StruggleAssist")) {
+					var A = parseInt( msg.substr("StruggleAssist".length));
+					if ((A >= 1) && (A <= 7)) {
 						ChatRoomStruggleAssistTimer = CurrentTime + 60000;
 						ChatRoomStruggleAssistBonus = A;
 					}
-					if (msg == "SlowStop"){
-						ChatRoomSlowtimer = CurrentTime + 45000;
-						ChatRoomSlowStop = true;
-					} 
-				if (msg == "MaidDrinkPick0") MaidQuartersOnlineDrinkPick(data.Sender, 0);
-				if (msg == "MaidDrinkPick5") MaidQuartersOnlineDrinkPick(data.Sender, 5);
-				if (msg == "MaidDrinkPick10") MaidQuartersOnlineDrinkPick(data.Sender, 10);
-				if (msg.substring(0, 8) == "PayQuest") ChatRoomPayQuest(data);
-				if (msg.substring(0, 9) == "OwnerRule") data = ChatRoomSetRule(data);
+				}
+				else if (msg == "SlowStop"){
+					ChatRoomSlowtimer = CurrentTime + 45000;
+					ChatRoomSlowStop = true;
+				} 
+				else if (msg.startsWith("MaidDrinkPick")){
+					var A = parseInt(msg.substr("MaidDrinkPick".length));
+					if ((A == 0) || (A == 5) || (A == 10)) MaidQuartersOnlineDrinkPick(data.Sender, A);
+				} 
+				else if (msg.substring(0, 8) == "PayQuest") ChatRoomPayQuest(data);
+				else if (msg.substring(0, 9) == "OwnerRule") data = ChatRoomSetRule(data);
+				else if (msg.substring(0, 9) == "LoverRule") data = ChatRoomSetRule(data);
 				if (data.Type == "Hidden") return;
 			}
 
@@ -1635,6 +1642,8 @@ function ChatRoomSetRule(data) {
 	if ((data != null) && Play.GetLoversNumbers().includes(data.Sender)) {
 		if (data.Content == "LoverRuleSelfLoverLockAllow") LogDelete("BlockLoverLockSelf", "LoverRule");
 		if (data.Content == "LoverRuleSelfLoverLockBlock") LogAdd("BlockLoverLockSelf", "LoverRule");
+		if (data.Content == "LoverRuleOwnerLoverLockAllow") LogDelete("BlockLoverLockOwner", "LoverRule");
+		if (data.Content == "LoverRuleOwnerLoverLockBlock") LogAdd("BlockLoverLockOwner", "LoverRule");
 	}
 
 	// Returns the data packet
@@ -1738,4 +1747,27 @@ function ChatRoomConcatenateBanList(IncludesBlackList, IncludesGhostList, Existi
 	if (IncludesBlackList) BanList = BanList.concat(Player.BlackList);
 	if (IncludesGhostList) BanList = BanList.concat(Player.GhostList);
 	return BanList.filter((MemberNumber, Idx, Arr) => Arr.indexOf(MemberNumber) == Idx);
+}
+
+/**
+ * Resolve a request for the Player current rules
+ * @param {Character} C - Character must be an owner of the Player
+ */
+function ChatRoomGetLoadRules(C) {
+	if ((Play.OwnerOnly == null) || (Player.Ownership.MemberNumber == null) || (Player.Ownership.MemberNumber != C.MemberNumber)) return;  
+	ServerSend("ChatRoomChat", { 
+		Content: "RuleInfoSet", 
+		Type: "Hidden",  
+		Target: C.MemberNumber,
+		Dictionary: Log.filter(L => L.Name == "BlockLoverLockOwner" && L.Group == "LoverRule")
+	})
+}
+
+/**
+ * Loads the rules for a character
+ * @param {Character} C - Character to set the rules on
+ * @param {Rule[]} Rules - An array of rules
+ */
+function ChatRoomSetLoadRules(C, Rules) {
+	if (Array.isArray(Rules)) C.Rules = Rules;
 }
