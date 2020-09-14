@@ -131,8 +131,8 @@ function CommonDrawAppearanceBuild(C, {
 				Expression = Property.Expression + "/";
 
 		// Find the X and Y position to draw on
-		var X = A.DrawingLeft != null ? A.DrawingLeft : AG.DrawingLeft;
-		var Y = A.DrawingTop != null ? A.DrawingTop : AG.DrawingTop;
+		var X = Layer.DrawingLeft != null ? Layer.DrawingLeft : (A.DrawingLeft != null ? A.DrawingLeft : AG.DrawingLeft);
+		var Y = Layer.DrawingTop != null ? Layer.DrawingTop : (A.DrawingTop != null ? A.DrawingTop : AG.DrawingTop);
 		if (C.Pose && C.Pose.length) {
 			C.Pose.forEach(CP => {
 				var PoseDef = PoseFemale3DCG.find(P => P.Name === CP && P.MovePosition);
@@ -239,8 +239,8 @@ function CommonDrawAppearanceBuild(C, {
 
 			// If we just drew the last drawable layer for this asset, draw the lock too (never colorized)
 			if (DrawableLayerCount === LayerCounts[CountKey]) {
-				drawImage("Assets/" + AG.Family + "/" + AG.Name + "/" + Pose + Expression + A.Name + Type + "_Lock.png", X, Y, AlphaMasks);
-				drawImageBlink("Assets/" + AG.Family + "/" + AG.Name + "/" + Pose + BlinkExpression + A.Name + Type + "_Lock.png", X, Y, AlphaMasks);
+				drawImage("Assets/" + AG.Family + "/" + AG.Name + "/" + Pose + Expression + A.Name + (A.HasType ? Type : "") + "_Lock.png", X, Y, AlphaMasks);
+				drawImageBlink("Assets/" + AG.Family + "/" + AG.Name + "/" + Pose + BlinkExpression + A.Name + (A.HasType ? Type : "") + "_Lock.png", X, Y, AlphaMasks);
 			}
 		}
 		
