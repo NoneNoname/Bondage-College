@@ -140,3 +140,10 @@ VisibilityReset,Reset All
 VisibilityResetDescription,This will reset all items to be visible. Click again to confirm and exit.
 LeaveSave,Accept changes
 LeaveNoSave,Cancel changes
+SpamFilterPreferences,Spam Filter Settings
+OnBlockAddToGhostList,Add characters to GhostList on block
+OnBlockAddToBlackList,Add characters to WhiteList on block
+OnBlockAdminKick,Performs Kick action on block if the Player is admin of the room
+OnBlockAdminBan,Performs Ban action on block if the Player is admin of the room
+IgnoreFriendList,Ignores Players's FriendList from test against spam
+IgnoreWhiteList,Ignores Players's WhiteList from test against spam

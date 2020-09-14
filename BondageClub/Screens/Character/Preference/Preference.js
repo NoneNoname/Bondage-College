@@ -286,6 +286,7 @@ function PreferenceInit(C) {
 	// Enables the AFK timer for the current player only
 	AfkTimerSetEnabled((C.ID == 0) && C.GameplaySettings && (C.GameplaySettings.EnableAfkTimer != false));
 
+	PreferenceInitSpamFilter(C.SpamFilter);
 }
 
 /**
@@ -297,7 +298,7 @@ function PreferenceInit(C) {
  * @returns {void} - Nothing
  */
 function PreferenceMigrate(from, to, prefName, defaultValue) {
-	if (to[prefName] == null) {
+	if (to[prefName] == null && from != null) {
 		to[prefName] = from[prefName];
 		if (to[prefName] == null) to[prefName] = defaultValue;
 		if (from[prefName] != null) delete from[prefName];
@@ -360,6 +361,7 @@ function PreferenceRun() {
 	if (PreferenceSubscreen == "Security") return PreferenceSubscreenSecurityRun();
 	if (PreferenceSubscreen == "Visibility") return PreferenceSubscreenVisibilityRun();
 	if (PreferenceSubscreen == "Online") return PreferenceSubscreenOnlineRun();
+	if (PreferenceSubscreen == "SpamFilter") return PreferenceSubscreenSpamFilterRun();
 
 	// Draw the online preferences
 	MainCanvas.textAlign = "left";
@@ -415,6 +417,7 @@ function PreferenceClick() {
 	if (PreferenceSubscreen == "Security") return PreferenceSubscreenSecurityClick();
 	if (PreferenceSubscreen == "Visibility") return PreferenceSubscreenVisibilityClick();
 	if (PreferenceSubscreen == "Online") return PreferenceSubscreenOnlineClick();
+	if (PreferenceSubscreen == "SpamFilter") return PreferenceSubscreenSpamFilterClick();
 
 	// If the user clicks on "Exit"
 	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) PreferenceExit();
@@ -570,6 +573,21 @@ function PreferenceSubscreenOnlineRun() {
 	DrawCheckbox(500, 625, 64, 64, TextGet("EnableAfkTimer"), Player.OnlineSettings.EnableAfkTimer);
 	DrawCheckbox(500, 705, 64, 64, TextGet("EnableWardrobeIcon"), Player.OnlineSettings.EnableWardrobeIcon);
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+	DrawButton(1815, 190, 90, 90, "", "White", "Icons/SpamFilter.png");
+	DrawCharacter(Player, 50, 50, 0.9);
+}
+
+function PreferenceSubscreenSpamFilterRun() {
+	MainCanvas.textAlign = "left";
+	DrawText(TextGet("SpamFilterPreferences"), 500, 125, "Black", "Gray");
+	DrawCheckbox(500, 225, 64, 64, TextGet("OnBlockAddToGhostList"), Player.SpamFilter.OnBlockAddToGhostList);
+	DrawCheckbox(500, 305, 64, 64, TextGet("OnBlockAddToBlackList"), Player.SpamFilter.OnBlockAddToBlackList);
+	DrawCheckbox(500, 385, 64, 64, TextGet("OnBlockAdminKick"), Player.SpamFilter.OnBlockAdminKick);
+	DrawCheckbox(500, 465, 64, 64, TextGet("OnBlockAdminBan"), Player.SpamFilter.OnBlockAdminBan);
+	DrawCheckbox(500, 545, 64, 64, TextGet("IgnoreFriendList"), Player.SpamFilter.IgnoreFriendList);
+	DrawCheckbox(500, 625, 64, 64, TextGet("IgnoreWhiteList"), Player.SpamFilter.IgnoreWhiteList);
+	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
+	DrawButton(1815, 190, 90, 90, "", "White", "Icons/Online.png");
 	DrawCharacter(Player, 50, 50, 0.9);
 }
 
@@ -772,6 +790,7 @@ function PreferenceSubscreenOnlineClick() {
 		PreferenceSubscreen = "";
 		PreferenceMainScreenLoad();
 	}
+	else if (MouseIn(1815, 190, 90, 90) && PreferenceColorPick == "") PreferenceSubscreen = "SpamFilter";
 	else if (MouseIn(500, 225, 64, 64)) OnlineSettings.AutoBanBlackList = !OnlineSettings.AutoBanBlackList;
 	else if (MouseIn(500, 305, 64, 64)) OnlineSettings.AutoBanGhostList = !OnlineSettings.AutoBanGhostList;
 	else if (MouseIn(500, 385, 64, 64)) OnlineSettings.SearchShowsFullRooms = !OnlineSettings.SearchShowsFullRooms;
@@ -782,6 +801,30 @@ function PreferenceSubscreenOnlineClick() {
 		AfkTimerSetEnabled(OnlineSettings.EnableAfkTimer);
 	}
 	else if (MouseIn(500, 705, 64, 64)) OnlineSettings.EnableWardrobeIcon = !OnlineSettings.EnableWardrobeIcon;
+}
+
+function PreferenceSubscreenSpamFilterClick() {
+	if (MouseIn(1815, 75, 90, 90) && PreferenceColorPick == "") {
+		Player.SpamFilter.Save();
+		PreferenceSubscreen = "";
+		PreferenceMainScreenLoad();
+	}
+	else if (MouseIn(1815, 190, 90, 90) && PreferenceColorPick == "") {
+		Player.SpamFilter.Save();
+		PreferenceSubscreen = "Online";
+	}
+	else if (MouseIn(500, 225, 64, 64)) Player.SpamFilter.OnBlockAddToGhostList = !Player.SpamFilter.OnBlockAddToGhostList;
+	else if (MouseIn(500, 305, 64, 64)) Player.SpamFilter.OnBlockAddToBlackList = !Player.SpamFilter.OnBlockAddToBlackList;
+	else if (MouseIn(500, 385, 64, 64)) {
+		Player.SpamFilter.OnBlockAdminKick = !Player.SpamFilter.OnBlockAdminKick;
+		if (Player.SpamFilter.OnBlockAdminKick) Player.SpamFilter.OnBlockAdminBan = false;
+	}
+	else if (MouseIn(500, 465, 64, 64)) {
+		Player.SpamFilter.OnBlockAdminBan = !Player.SpamFilter.OnBlockAdminBan;
+		if (Player.SpamFilter.OnBlockAdminBan) Player.SpamFilter.OnBlockAdminKick = false;
+	}
+	else if (MouseIn(500, 545, 64, 64)) Player.SpamFilter.IgnoreFriendList = !Player.SpamFilter.IgnoreFriendList;
+	else if (MouseIn(500, 625, 64, 64)) Player.SpamFilter.IgnoreWhiteList = !Player.SpamFilter.IgnoreWhiteList;
 }
 
 /**
@@ -1107,4 +1150,95 @@ function PreferenceMainScreenExit() {
  */
 function PreferenceIsPlayerInSensDep() {
 	return (Player.GameplaySettings && ((Player.GameplaySettings.SensDepChatLog == "SensDepNames") || (Player.GameplaySettings.SensDepChatLog == "SensDepTotal")) && (Player.GetDeafLevel() >= 3) && (Player.Effect.indexOf("BlindHeavy") >= 0));
+}
+
+/**
+ * Initialize the Player's SpamFiler
+ * @param {Object} SpamFilter - Object containing information how the filter should work for the Player
+ * @param {boolean} SpamFilter.OnBlockAddToGhostList - Add to GhostList on block
+ * @param {boolean} SpamFilter.OnBlockAddToBlackList - Add to BlackList on block
+ * @param {boolean} SpamFilter.OnBlockAdminKick - Kick the sender form the room on block
+ * @param {boolean} SpamFilter.OnBlockAdminBan - Ban the sender form the room on block
+ * @param {boolean} SpamFilter.IgnoreFriendList - Ignore everyone from the Player FriendList
+ * @param {boolean} SpamFilter.IgnoreWhiteList - Ignore everyone from the Player WhiteList
+ */
+function PreferenceInitSpamFilter(SpamFilter) {
+	if (SpamFilter == null) SpamFilter = {};
+	Player.SpamFilter = {
+		ActionBlockEntries: new Map(),
+		BlockedActions: new Set(["KneelDown", "StandUp", "ServerLeave", "ServerEnter"]),
+		ActionBlockTimespan: 5000,
+		ActionBlockCount: 7,
+		OnBlockAddToGhostList: typeof SpamFilter.OnBlockAddToGhostList == "boolean" ? SpamFilter.OnBlockAddToGhostList : false,
+		OnBlockAddToBlackList: typeof SpamFilter.OnBlockAddToBlackList == "boolean" ? SpamFilter.OnBlockAddToBlackList : false,
+		OnBlockAdminKick: typeof SpamFilter.OnBlockAdminKick == "boolean" ? SpamFilter.OnBlockAdminKick : false,
+		OnBlockAdminBan: typeof SpamFilter.OnBlockAdminBan == "boolean" ? SpamFilter.OnBlockAdminBan : false,
+		IgnoreFriendList: typeof SpamFilter.IgnoreFriendList == "boolean" ? SpamFilter.IgnoreFriendList : true,
+		IgnoreWhiteList: typeof SpamFilter.IgnoreWhiteList == "boolean" ? SpamFilter.IgnoreWhiteList : true,
+		Check: function(data) {
+			if (data.Type == "Action") return this.CheckAction(data);
+			return true;
+		},
+		CheckAction: function(data) {
+			if (data.Sender == Player.MemberNumber) return true;
+			if (this.IgnoreFriendList && Player.FriendList.includes(data.Sender)) return true;
+			if (this.IgnoreWhiteList && Player.WhiteList.includes(data.Sender)) return true;
+			if (!this.BlockedActions.has(data.Content)) return true;
+			let E = this.ActionBlockEntries.get(data.Sender);
+			if (Array.isArray(E)) {
+				const Time = Date.now();
+				E = E.filter(T => T > Time - this.ActionBlockTimespan);
+				if (R.length < this.ActionBlockCount) {
+					E.push(Time);
+					this.ActionBlockEntries.set(data.Sender, E);
+				} else {
+					this.BlockMemberNumber(data.Sender, "Action");
+					this.ActionBlockEntries.set(data.Sender, true);
+					return false;
+				}
+			} else if (E === true) {
+				return false;
+			} else {
+				this.ActionBlockEntries.set(data.Sender, [Date.now()]);
+			}
+			return true;
+		},
+		RemoveActionBlock: function(MemberNumber) { 
+			if (typeof MemberNumber === "string")
+				MemberNumber = parseInt(MemberNumber.substr("/unblock ".length));
+			this.ActionBlockEntries.delete(MemberNumber); 
+		},
+		BlockMemberNumber: function(MemberNumber, Type) {
+			if (this.OnBlockAddToGhostList && !Player.GhostList.includes(MemberNumber)) {
+				Player.GhostList.push(MemberNumber);
+				ServerSend("AccoountUpdate", { GhostList: Player.GhostList });
+			}
+			if (this.OnBlockAddToBlackList && !Player.BlackList.includes(MemberNumber)) {
+				Player.BlackList.push(MemberNumber);
+				ServerSend("AccoountUpdate", { BlackList: Player.BlackList });
+			}
+			if (ChatRoomPlayerIsAdmin()) {
+				if (this.OnBlockAdminKick) ServerSend("ChatRoomAdmin", { Action: 'Kick', MemberNumber: MemberNumber });
+				else if (this.OnBlockAdminBan) ServerSend("ChatRoomAdmin", { Action: 'Ban', MemberNumber: MemberNumber });
+			}
+			const C = ChatRoomCharacter.find(C => C.MemberNumber == MemberNumber);
+			ChatRoomMessage({
+				Content: "SpamFilterBlocked" + Type,
+				Sender: Player.MemberNumber,
+				Dictionary: [{ Tag: "TargetCharacter", Type: "ServerMessage", MemberNumber: MemberNumber, Text: (C && C.Name) || ("#" + MemberNumber) }],
+			});
+		},
+		Save: function() {
+			ServerSend("AccountUpdate", {
+				SpamFilter: {
+					OnBlockAddToGhostList: this.OnBlockAddToGhostList,
+					OnBlockAddToBlackList: this.OnBlockAddToBlackList,
+					OnBlockAdminKick: this.OnBlockAdminKick,
+					OnBlockAdminBan: this.OnBlockAdminBan,
+					IgnoreFriendList: this.IgnoreFriendList,
+					IgnoreWhiteList: this.IgnoreWhiteList,
+				}
+			});
+		},
+	};
 }

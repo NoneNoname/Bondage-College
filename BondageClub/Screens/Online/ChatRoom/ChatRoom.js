@@ -682,6 +682,7 @@ function ChatRoomSendChat() {
 		else if (m.indexOf("/whitelistremove ") == 0) ChatRoomListManipulation(null, Player.WhiteList, msg);
 		else if (m.indexOf("/blacklistadd ") == 0) ChatRoomListManipulation(Player.BlackList, Player.WhiteList, msg);
 		else if (m.indexOf("/blacklistremove ") == 0) ChatRoomListManipulation(null, Player.BlackList, msg);
+		else if (m.indexOf("/unblock ") == 0) Player.SpamFilter.RemoveActionBlock(msg);
 		else if (m.indexOf("/ban ") == 0) ChatRoomAdminChatAction("Ban", msg);
 		else if (m.indexOf("/unban ") == 0) ChatRoomAdminChatAction("Unban", msg);
 		else if (m.indexOf("/kick ") == 0) ChatRoomAdminChatAction("Kick", msg);
@@ -845,6 +846,8 @@ function ChatRoomMessage(data) {
 	if ((data != null) && (typeof data === "object") && (data.Content != null) && (typeof data.Content === "string") && (data.Content != "") && (data.Sender != null) && (typeof data.Sender === "number")) {
 		// Exits right away if the sender is ghosted
 		if (Player.GhostList.indexOf(data.Sender) >= 0) return;
+
+		if (!Player.SpamFilter.Check(data)) return;
 
 		// Make sure the sender is in the room
 		var SenderCharacter = null;
