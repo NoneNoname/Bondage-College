@@ -548,6 +548,7 @@ function CharacterRefresh(C, Push) {
 		ChatRoomRefreshChatSettings(C);
 		ServerPlayerAppearanceSync();
 	}
+	// Also refresh the current dialog menu if the refreshed character is the current character.
 	var Current = CharacterGetCurrent();
 	if (Current && C.ID == Current.ID) {
 		if (DialogFocusItem && DialogFocusItem.Asset) {
