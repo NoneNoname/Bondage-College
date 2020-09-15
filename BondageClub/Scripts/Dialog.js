@@ -569,7 +569,7 @@ function DialogMenuButtonBuild(C) {
 		if ((Item != null) && !IsItemLocked && InventoryItemHasEffect(Item, "Mounted", true) && Player.CanInteract() && InventoryAllow(C, Item.Asset.Prerequisite) && !IsGroupBlocked) DialogMenuButton.push("Dismount");
 		if ((Item != null) && !IsItemLocked && InventoryItemHasEffect(Item, "Enclose", true) && Player.CanInteract() && InventoryAllow(C, Item.Asset.Prerequisite) && !IsGroupBlocked) DialogMenuButton.push("Escape");
 		if (DialogCanUseRemote(C, Item)) DialogMenuButton.push("Remote");
-		if ((Item != null) && Item.Asset.Extended && ((Player.CanInteract()) || DialogAlwaysAllowRestraint() || Item.Asset.AlwaysInteract) && (!IsGroupBlocked || Item.Asset.AlwaysExtend) && (!Item.Asset.OwnerOnly || (C.IsOwnedByPlayer())) && (!Item.Asset.LoverOnly || (C.IsLoverOfPlayer()))) DialogMenuButton.push("Use");
+		if ((Item != null) && Item.Asset.ExtendedOrTypeInfo && ((Player.CanInteract()) || DialogAlwaysAllowRestraint() || Item.Asset.AlwaysInteract) && (!IsGroupBlocked || Item.Asset.AlwaysExtend) && (!Item.Asset.OwnerOnly || (C.IsOwnedByPlayer())) && (!Item.Asset.LoverOnly || (C.IsLoverOfPlayer()))) DialogMenuButton.push("Use");
 		if ((Player.CanInteract()) || DialogAlwaysAllowRestraint()) DialogMenuButton.push("ColorPick");
 
 		// Make sure the target player zone is allowed for an activity
@@ -1125,7 +1125,14 @@ function DialogItemClick(ClickItem) {
 						// Prevent two unique gags being equipped. Also check if selfbondage is allowed for the item if used on self
 						if (ClickItem.Asset.Prerequisite == "GagUnique" && C.Pose.indexOf("GagUnique") >= 0) DialogSetText("CanOnlyEquipOneOfThisGag");
 						else if (ClickItem.Asset.Prerequisite == "GagCorset" && C.Pose.indexOf("GagCorset") >= 0) DialogSetText("CannotUseMultipleCorsetGags");
-						else if ((ClickItem.Asset.SelfBondage <= 0) || (SkillGetLevel(Player, "SelfBondage") >= ClickItem.Asset.SelfBondage) || (C.ID != 0) || DialogAlwaysAllowRestraint()) DialogProgressStart(C, CurrentItem, ClickItem);
+						else if ((ClickItem.Asset.SelfBondage <= 0) || (SkillGetLevel(Player, "SelfBondage") >= ClickItem.Asset.SelfBondage) || (C.ID != 0) || DialogAlwaysAllowRestraint()) {
+							if (ClickItem.Asset.TypeInfo && ClickItem.Asset.TypeInfo.SelectBeforeWear) {
+                                AssetTypeSelectBefore = true;
+                                DialogExtendItem(ClickItem);
+                            } else {
+                                DialogProgressStart(C, CurrentItem, ClickItem);
+                            }
+						}
 						else if (ClickItem.Asset.SelfBondage <= 10) DialogSetText("RequireSelfBondage" + ClickItem.Asset.SelfBondage);
 						else DialogSetText("CannotUseOnSelf");
 
@@ -1144,7 +1151,7 @@ function DialogItemClick(ClickItem) {
 					}
 				}
 				else
-					if ((CurrentItem.Asset.Name == ClickItem.Asset.Name) && CurrentItem.Asset.Extended)
+					if ((CurrentItem.Asset.Name == ClickItem.Asset.Name) && CurrentItem.Asset.ExtendedOrTypeInfo)
 						DialogExtendItem(CurrentItem);
 		return;
 	}
@@ -1154,7 +1161,7 @@ function DialogItemClick(ClickItem) {
 		if (InventoryItemHasEffect(ClickItem, "Unlock-" + CurrentItem.Asset.Name))
 			DialogProgressStart(C, CurrentItem, null);
 		else
-			if ((CurrentItem.Asset.Name == ClickItem.Asset.Name) && CurrentItem.Asset.Extended)
+			if ((CurrentItem.Asset.Name == ClickItem.Asset.Name) && CurrentItem.Asset.ExtendedOrTypeInfo)
 				DialogExtendItem(CurrentItem);
 			else
 				if (!ClickItem.Asset.Wear)
@@ -1240,7 +1247,8 @@ function DialogClick() {
 
 		// If we must are in the extended menu of the item
 		if (DialogFocusItem != null)
-			CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Click()");
+			if (DialogFocusItem.Asset.Extended || DialogFocusItem.Asset.TypeInfo == null) CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Click()");
+			else AssetTypeSetClick();
 		else {
 
 			// If the user wants to speed up the add / swap / remove progress
@@ -1361,7 +1369,8 @@ function DialogExtendItem(Item, SourceItem) {
 	DialogColor = null;
 	DialogFocusItem = Item;
 	DialogFocusSourceItem = SourceItem;
-	CommonDynamicFunction("Inventory" + Item.Asset.Group.Name + Item.Asset.Name + "Load()");
+    if (Item.Asset.TypeInfo) AssetTypeSetLoad();
+    else CommonDynamicFunction("Inventory" + Item.Asset.Group.Name + Item.Asset.Name + "Load()");
 }
 
 /**
@@ -1522,20 +1531,20 @@ function DialogDrawItemMenu(C) {
 
 			// Removes the item & associated items if needed, then wears the new one 
 			InventoryRemove(C, C.FocusGroup.Name);
-			if (DialogProgressNextItem != null) InventoryWear(C, DialogProgressNextItem.Asset.Name, DialogProgressNextItem.Asset.Group.Name, (DialogColorSelect == null) ? "Default" : DialogColorSelect, SkillGetWithRatio("Bondage"), Player.MemberNumber);
+			if (DialogProgressNextItem != null) InventoryWear(C, DialogProgressNextItem.Asset.Name, DialogProgressNextItem.Asset.Group.Name, (DialogColorSelect == null) ? "Default" : DialogColorSelect, SkillGetWithRatio("Bondage"), Player.MemberNumber, DialogProgressNextItem.Property);
 
 			// The player can use another item right away, for another character we jump back to her reaction
 			if (C.ID == 0) {
 				if (DialogProgressNextItem == null) SkillProgress("Evasion", DialogProgressSkill);
 				if ((DialogProgressPrevItem == null) && (DialogProgressNextItem != null)) SkillProgress("SelfBondage", (DialogProgressSkill + DialogProgressNextItem.Asset.SelfBondage) * 2);
-				if ((DialogProgressNextItem == null) || !DialogProgressNextItem.Asset.Extended) {
+				if ((DialogProgressNextItem == null) || !DialogProgressNextItem.Asset.ExtendedOrTypeInfo) {
 					DialogInventoryBuild(C);
 					DialogProgress = -1;
 					DialogColor = null;
 				}
 			} else {
 				if (DialogProgressNextItem != null) SkillProgress("Bondage", DialogProgressSkill);
-				if (((DialogProgressNextItem == null) || !DialogProgressNextItem.Asset.Extended) && (CurrentScreen != "ChatRoom")) {
+				if (((DialogProgressNextItem == null) || !DialogProgressNextItem.Asset.ExtendedOrTypeInfo) && (CurrentScreen != "ChatRoom")) {
 					C.CurrentDialog = DialogFind(C, ((DialogProgressNextItem == null) ? ("Remove" + DialogProgressPrevItem.Asset.Name) : DialogProgressNextItem.Asset.Name), ((DialogProgressNextItem == null) ? "Remove" : "") + C.FocusGroup.Name);
 					DialogLeaveItemMenu();
 				}
@@ -1546,7 +1555,13 @@ function DialogDrawItemMenu(C) {
 				DialogInventoryBuild(C);
 				ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, false);
 				DialogExtendItem(InventoryGet(C, DialogProgressNextItem.Asset.Group.Name));
-			} else ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true);
+			} else if ((DialogProgressNextItem != null) && DialogProgressNextItem.Asset.TypeInfo) {
+                DialogFocusItem = null;
+                DialogProgress = -1;
+                DialogInventoryBuild(C);
+                ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true);
+                if (DialogProgressNextItem.Asset.TypeInfo.ExtraPublish && DialogProgressNextItem.Property && DialogProgressNextItem.Property.Type) AssetTypePublish(C, DialogProgressNextItem);
+            } else ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true);
 
 			// Reset the the character's position
 			if (CharacterAppearanceForceUpCharacter == C.MemberNumber) {
@@ -1644,8 +1659,9 @@ function DialogDraw() {
 
 		// The view can show one specific extended item or the list of all items for a group
 		if (DialogFocusItem != null) {
-			CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Draw()");
-			DrawButton(1885, 25, 90, 90, "", "White", "Icons/Exit.png");
+			if (DialogFocusItem.Asset.Extended || DialogFocusItem.Asset.TypeInfo == null) CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Draw()");
+            else AssetTypeSetDraw();
+            DrawButton(1885, 25, 90, 90, "", "White", "Icons/Exit.png")
 		} else {
 			if (DialogActivityMode) DialogDrawActivityMenu(C);
 			else DialogDrawItemMenu(C);

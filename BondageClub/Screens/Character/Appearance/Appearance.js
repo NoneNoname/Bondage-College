@@ -617,7 +617,7 @@ function AppearanceRun() {
  * @param {string} NewColor - The new color (as "#xxyyzz" hex value) for that item
  * @param {number} DifficultyFactor - The difficulty factor of the ne item
  * @param {number} ItemMemberNumber - The member number of the player adding the item - defaults to -1
- * @param {boolean} Refresh - Determines, wether the character should be redrawn after the item change
+ * @param {boolean|Property} Refresh - Determines, wether the character should be redrawn after the item change
  * @returns {void} - Nothing
  */
 function CharacterAppearanceSetItem(C, Group, ItemAsset, NewColor, DifficultyFactor, ItemMemberNumber, Refresh) {
@@ -644,6 +644,7 @@ function CharacterAppearanceSetItem(C, Group, ItemAsset, NewColor, DifficultyFac
 			Color: ((NewColor == null) ? ItemColor : NewColor),
 			Property: ItemAsset.CharacterRestricted ? {ItemMemberNumber: ItemMemberNumber == null ? -1 : ItemMemberNumber} : undefined
 		}
+		if (typeof Refresh === "object") NA.Property = Object.assign({}, NA.Property, Refresh);
 		C.Appearance.push(NA);
 	}
 

@@ -275,11 +275,12 @@ function InventoryGet(C, AssetGroup) {
 * @param {String} ItemColor - The hex color of the item, can be undefined or "Default"
 * @param {Number} Difficulty - The difficulty level to escape from the item
 * @param {Number} MemberNumber - The member number of the character putting the item on - defaults to -1
+* @param {Property} Property - Property of the new item
 */
-function InventoryWear(C, AssetName, AssetGroup, ItemColor, Difficulty, MemberNumber) {
+function InventoryWear(C, AssetName, AssetGroup, ItemColor, Difficulty, MemberNumber, Property) {
 	for (let A = 0; A < Asset.length; A++)
 		if ((Asset[A].Name == AssetName) && (Asset[A].Group.Name == AssetGroup)) {
-			CharacterAppearanceSetItem(C, AssetGroup, Asset[A], ((ItemColor == null) || (ItemColor == "Default")) ? Asset[A].DefaultColor : ItemColor, Difficulty, MemberNumber);
+			CharacterAppearanceSetItem(C, AssetGroup, Asset[A], ((ItemColor == null) || (ItemColor == "Default")) ? Asset[A].DefaultColor : ItemColor, Difficulty, MemberNumber, Property);
 			InventoryExpressionTrigger(C, InventoryGet(C, AssetGroup));
 			return;
 		}
@@ -775,4 +776,13 @@ function InventoryIsKey(Item) {
 function InventoryStringify(C) {
 	if (!C || !Array.isArray(C.Inventory)) return "";
 	return C.Inventory.map(({ Name, Group }) => Group + Name ).join();
+}
+
+/**
+ * Returns true if the item has the specified type
+ * @param {Item} Item - Item to check
+ * @param {string|null} Type - Type 
+ */
+function InventoryItemIsType(Item, Type) {
+	return ((Item != null) && (Item.Property != null)) ? (Item.Property.Type == Type) : (Type == null);
 }

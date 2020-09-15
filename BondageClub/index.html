@@ -251,6 +251,9 @@
 <script src="Screens/Inventory/Necklace/NecklaceKey/NecklaceKey.js"></script>
 <script src="Screens/Inventory/Necklace/NecklaceLock/NecklaceLock.js"></script>
 <script src="Screens/Inventory/ItemNeckAccessories/CustomCollarTag.js/CustomCollarTag.js"></script>
+
+<!-- Load after the rest make sure all is loaded until all items are transformed-->
+<script src="Scripts/AssetTypeInfo.js"></script>
 <script>
 
 /*
@@ -283,6 +286,7 @@ window.onload = function() {
 	TranslationLoad();
 	DrawLoad();
 	AssetLoadAll();
+	AssetTypeLoad();
 	CommonSetScreen("Character", "Login");
 	ServerInit();
 	MainRun(0);
