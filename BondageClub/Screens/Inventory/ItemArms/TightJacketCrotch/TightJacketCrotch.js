@@ -35,6 +35,8 @@ const TightJacketCrotchArmsOptions = [
 	}
 ];
 
+var InventoryItemArmsTightJacketCrotchOptions = TightJacketCrotchArmsOptions;
+
 function InventoryItemArmsTightJacketCrotchLoad() {
 	ExtendedItemLoad(TightJacketCrotchArmsOptions, "SelectJacketPrep");
 }

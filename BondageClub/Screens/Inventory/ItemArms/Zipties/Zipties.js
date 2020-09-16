@@ -50,6 +50,7 @@ const ZiptiesArmsOptions = [
 	}
 ];
 
+var InventoryItemArmsZiptiesOptions = ZiptiesArmsOptions;
 
 function InventoryItemArmsZiptiesLoad() {
 	ExtendedItemLoad(ZiptiesArmsOptions, "SelectZipTie");

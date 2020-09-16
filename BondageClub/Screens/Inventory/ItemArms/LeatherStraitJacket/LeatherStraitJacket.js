@@ -28,6 +28,8 @@ var ItemArmsLeatherStraitJacketOptions = [
 	},
 ];
 
+var InventoryItemArmsLeatherStraitJacketOptions = ItemArmsLeatherStraitJacketOptions;
+
 /**
  * Loads the item extension properties
  * @returns {void} - Nothing

@@ -6,8 +6,39 @@ var AssetTypeInfo = {
         DildoPlug: AssetTypeInfoOptionTransform("ItemMouthDildoPlugGag", "PlugGagMouthType", "SelectGagType", "DildoPlugGagMouthSet", "ItemMouthDildoPlugGag"),
         MilkBottle: AssetTypeInfoOptionTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
         PlugGag: AssetTypeInfoOptionTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
+    },
+    ItemArms: {
+        BitchSuit: AssetTypeInfoOptionTransform("ItemArmsBitchSuit", "BitchSuitType", "SelectBitchSuitType", "BitchSuitSet", "BitchSuitType"),
+        Chains: AssetTypeInfoOptionTransform("ItemArmsChains", "ChainBondage", "SelectChainBondage", "ArmsChainSet", "ChainBondage"),
+        DuctTape: AssetTypeInfoOptionTransform("ItemArmsDuctTape", "DuctTapePose", "SelectTapeWrapping", "ItemArmsDuctTape", "ItemArmsDuctTape"),
+        HempRope: AssetTypeInfoOptionTransform("ItemArmsHempRope", "RopeBondage", "SelectRopeBondage", "ArmsRopeSet", "RopeBondage"),
+        LatexButterflyLeotard: AssetTypeInfoOptionTransform("ItemArmsLatexButterflyLeotard", "ItemArmsLatexLeotard", "ItemArmsLatexLeotardSelect", "ItemArmsLatexLeotardSet", "ItemArmsLatexButterflyLeotard"),
+        LeatherArmbinder: AssetTypeInfoOptionTransform("ItemArmsLeatherArmbinder", "LeatherArmbinderType", "SelectStrapType", "LeatherArmbinderSet", "LeatherArmbinderSet"),
+        LeatherCuffs: AssetTypeInfoOptionTransform("ItemArmsLeatherCuffs", "LeatherCuffsPose", "SelectBondagePosition", "LeatherCuffsRestrain", "ItemArmsLeatherCuffs"),
+        LeatherStraitJacket: AssetTypeInfoOptionTransform("ItemArmsLeatherStraitJacket", "LeatherStraitJacketSelectTightness", "LeatherStraitJacketPose", "LeatherStraitJacketRestrain", "LeatherStraitJacketNPCReaction"),
+        MermaidSuit: AssetTypeInfoOptionTransform("ItemArmsMermaidSuit", "MermaidSuitType", "MermaidSuitSelect", "MermaidSuitSet", "MermaidSuitNPCReaction"),
+        OrnateCuffs: AssetTypeInfoOptionTransform("ItemArmsOrnateCuffs", "OrnateCuffsPose", "SelectBondagePosition", "OrnateCuffsRestrain", "ItemArmsOrnateCuffsNPCReaction"),
+        StraitJacket: AssetTypeInfoOptionTransform("ItemArmsStraitJacket", "StraitJacketPose", "StraitJacketSelectTightness", "StraitJacketRestrain", "ItemArmStraitJacketNPCReaction"),
+        SturdyLeatherBelts: AssetTypeInfoOptionTransform("ItemArmsSturdyLeatherBelts", "SturdyLeatherBeltsPose", "SturdyLeatherBeltsSelectTightness", "SturdyLeatherBeltsRestrain", "ItemArmsSturdyLeatherBelts"),
+        TightJacket: AssetTypeInfoOptionTransform("ItemArmsTightJacket", "JacketPrep", "SelectJacketPrep", "JacketPrepSet", "JacketPrep"),
+        TightJacketCrotch: AssetTypeInfoOptionTransform("ItemArmsTightJacketCrotch", "JacketPrep", "SelectJacketPrep", "JacketPrepSet", "JacketPrep"),
+        Web: AssetTypeInfoOptionTransform("ItemArmsWeb", "WebBondage", "WebBondageSelect", "ArmsWebSet", "ItemArmsWeb"), // TODO Action
+        WristShackles: AssetTypeInfoOptionTransform("ItemArmsWristShackles", "WristShacklesPose", "SelectBondagePosition", "WristShacklesRestrain", "ItemArmsWristShackles"),
+        Zipties: AssetTypeInfoOptionTransform("ItemArmsZipties", "ZipBondage", "SelectZipTie", "ZipArmsSet", "Zip"),
     }
 }
+
+/* TODO
+ *
+ * Expression
+ * Prerequisite
+ * Lock Type with locks (ItemArms Chains)
+ * 
+ * 
+ * ItemArmsWeb DynamicDictionary
+ * InventoryItemArmsDuctTapeValidate
+ * 
+ */
 
 function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNPC) {
     const Options = window["Inventory" + FullName + "Options"];
@@ -32,6 +63,15 @@ function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet,
             if (!O.Property.Type) Info.NoneTypeName = Name;
             Type.Property = O.Property;
             delete Type.Property.Type;
+        }
+        if (typeof O.RequiredBondageLevel === "number") {
+            Type.Skills = { Bondage: O.RequiredBondageLevel };
+        }
+        if (Array.isArray(O.Prerequisite)) {
+            Type.Prerequisite = O.Prerequisite;
+        }
+        if (Array.isArray(O.Expression)) {
+            Type.Expression = O.Expression;
         }
     });
     ["Options", "Load", "Draw", "Click", "PublishAction", "NpcDialog"].forEach(F => {
@@ -58,14 +98,22 @@ const AssetTypeXY = [
     [[1020, 400], [1265, 400], [1510, 400], [1755, 400], [1020, 700], [1265, 700], [1510, 700], [1755, 700]], //8 options per page
 ];
 
+const ATP = {
+    Extended: 0,
+    Converted: 0,
+    TypeInfo: 0,
+    Next: []
+}
+
 function AssetTypeLoad() {
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
 
         const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")] 
-        if (Group == null) return;
+        if (Group == null) return AssetTypeProgress(A);
         const Info = Group[A.Name];
-        if (Info == null) return;
+        if (typeof Info === 'string') return; 
+        if (Info == null) return AssetTypeProgress(A);
 
         if (Info.DynamicDictionary == null) Info.DynamicDictionary = function () { return []; };
         if (Info.DynamicAllowType == null) Info.DynamicAllowType = function () { return A.AllowType; };
@@ -75,8 +123,23 @@ function AssetTypeLoad() {
         A.TypeInfo = Info;
         A.ExtendedOrTypeInfo = true;
         A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
+
+        ATP.Extended++;
+        ATP.TypeInfo++;
     });
+    console.log("--- AssetTypeProgress ---");
+    console.log(ATP);
+    console.log("--- AssetTypeProgress ---");
 }
+
+function AssetTypeProgress(A) {
+    if (!A.Extended) return;
+    ATP.Extended++;
+    if (Array.isArray(window["Inventory" + A.Group.Name + A.Name + "Options"])) {
+        ATP.Converted++;
+        ATP.Next.push(A.Group.Name + A.Name);
+    } 
+} 
 
 function AssetTypeSetLoad(Item) {
     const C = CharacterGetCurrent();
@@ -238,7 +301,7 @@ function AssetTypeGetDialog(C, Item, Dialog, Type) {
 }
 
 function AssetTypeSkillCheck(Info, Type, Self) {
-    const Skills = Info.Skills && Info.Skills[Type || Info.NoneTypeName];
+    const Skills = Info[Type || Info.NoneTypeName].Skills;
     if (!Skills) return null;
     for (let key in Skills) {
         if (key == "Bondage" && Self) key = "Self" + key;

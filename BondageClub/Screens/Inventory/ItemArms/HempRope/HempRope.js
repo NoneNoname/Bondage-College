@@ -67,6 +67,8 @@ const HempRopeArmsOptions = [
 	}
 ];
 
+var InventoryItemArmsHempRopeOptions = HempRopeArmsOptions;
+
 var HempRopeArmsOptionOffset = 0;
 
 // Loads the item extension properties
