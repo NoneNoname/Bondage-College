@@ -331,6 +331,7 @@ ServerMessageOfferBeginEngagement,,,"SourceCharacter is asking you to become her
 ServerMessageBeginEngagement,,,The Bondage Club is pleased to announce that SourceCharacter and TargetCharacter are now engaged and are starting a 7 days minimum period as fiancées.,,
 ServerMessageOfferBeginWedding,,,"SourceCharacter is proposing you to become her wife.  Click on her and manage your relationship to accept, don't do anything to refuse.",,
 ServerMessageBeginWedding,,,The Bondage Club is proud to announce that SourceCharacter and TargetCharacter are now married. Long may it last.,,
+ServerMessageSpamFilterBlockedAction,,,TargetCharacter triggered your spam filter.,,
 ServerEnter,,,SourceCharacter entered.,,
 ServerLeave,,,SourceCharacter left.,,
 ServerDisconnect,,,SourceCharacter disconnected.,,

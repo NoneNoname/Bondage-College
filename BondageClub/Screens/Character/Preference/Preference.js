@@ -1188,7 +1188,7 @@ function PreferenceInitSpamFilter(SpamFilter) {
 			if (Array.isArray(E)) {
 				const Time = Date.now();
 				E = E.filter(T => T > Time - this.ActionBlockTimespan);
-				if (R.length < this.ActionBlockCount) {
+				if (E.length < this.ActionBlockCount) {
 					E.push(Time);
 					this.ActionBlockEntries.set(data.Sender, E);
 				} else {
