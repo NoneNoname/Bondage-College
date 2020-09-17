@@ -10,6 +10,8 @@ const SmallVentlessLockerDevicesOptions = [
     }
 ];
 
+var InventoryItemDevicesSmallVentlessLockerOptions = SmallVentlessLockerDevicesOptions;
+
 function InventoryItemDevicesSmallVentlessLockerLoad() {
 	ExtendedItemLoad(SmallVentlessLockerDevicesOptions, "SelectLockerState");
 }

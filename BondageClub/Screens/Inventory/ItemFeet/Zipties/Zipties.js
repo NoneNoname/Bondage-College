@@ -13,6 +13,8 @@ const ZiptiesFeetOptions = [
 	}
 ];
 
+var InventoryItemFeetZiptiesOptions = ZiptiesFeetOptions;
+
 function InventoryItemFeetZiptiesLoad() {
 	ExtendedItemLoad(ZiptiesFeetOptions, "SelectZipTie");
 }

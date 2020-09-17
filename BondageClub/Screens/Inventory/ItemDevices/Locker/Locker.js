@@ -10,6 +10,8 @@ const LockerDevicesOptions = [
     }
 ];
 
+var InventoryItemDevicesLockerOptions = LockerDevicesOptions;
+
 function InventoryItemDevicesLockerLoad() {
 	ExtendedItemLoad(LockerDevicesOptions, "SelectLockerState");
 }

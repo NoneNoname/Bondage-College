@@ -28,6 +28,8 @@ const HempRopeLegsOptions = [
 	}
 ];
 
+var InventoryItemLegsHempRopeOptions = HempRopeLegsOptions;
+
 function InventoryItemLegsHempRopeLoad() {
 	ExtendedItemLoad(HempRopeLegsOptions, "SelectRopeBondage");
 }

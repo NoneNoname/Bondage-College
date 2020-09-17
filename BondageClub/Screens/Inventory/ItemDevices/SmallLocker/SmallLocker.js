@@ -10,6 +10,8 @@ const SmallLockerDevicesOptions = [
     }
 ];
 
+var InventoryItemDevicesSmallLockerOptions = SmallLockerDevicesOptions;
+
 function InventoryItemDevicesSmallLockerLoad() {
 	ExtendedItemLoad(SmallLockerDevicesOptions, "SelectLockerState");
 }

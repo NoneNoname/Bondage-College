@@ -1,12 +1,6 @@
 "use strict"
 
 var AssetTypeInfo = {
-    ItemMouth: {
-        ClothGag: AssetTypeInfoOptionTransform("ItemMouthClothGag", "ClothGagType", "SelectGagType", "ClothGagSet", "ClothGag"),
-        DildoPlug: AssetTypeInfoOptionTransform("ItemMouthDildoPlugGag", "PlugGagMouthType", "SelectGagType", "DildoPlugGagMouthSet", "ItemMouthDildoPlugGag"),
-        MilkBottle: AssetTypeInfoOptionTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
-        PlugGag: AssetTypeInfoOptionTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
-    },
     ItemArms: {
         BitchSuit: AssetTypeInfoOptionTransform("ItemArmsBitchSuit", "BitchSuitType", "SelectBitchSuitType", "BitchSuitSet", "BitchSuitType"),
         Chains: AssetTypeInfoOptionTransform("ItemArmsChains", "ChainBondage", "SelectChainBondage", "ArmsChainSet", "ChainBondage"),
@@ -25,7 +19,34 @@ var AssetTypeInfo = {
         Web: AssetTypeInfoOptionTransform("ItemArmsWeb", "WebBondage", "WebBondageSelect", "ArmsWebSet", "ItemArmsWeb"), // TODO Action
         WristShackles: AssetTypeInfoOptionTransform("ItemArmsWristShackles", "WristShacklesPose", "SelectBondagePosition", "WristShacklesRestrain", "ItemArmsWristShackles"),
         Zipties: AssetTypeInfoOptionTransform("ItemArmsZipties", "ZipBondage", "SelectZipTie", "ZipArmsSet", "Zip"),
-    }
+    },
+    ItemDevices: {
+        Locker: AssetTypeInfoOptionTransform("ItemDevicesLocker", "LockerState", "SelectLockerState", "DevicesLockerSet", "ItemBootsToeTapeNPCReaction"),
+        SmallLocker: AssetTypeInfoOptionTransform("ItemDevicesSmallLocker", "LockerState", "SelectLockerState", "DevicesLockerSet", "ItemBootsToeTapeNPCReaction"),
+        VentlessLocker: AssetTypeInfoOptionTransform("ItemDevicesVentlessLocker", "LockerState", "SelectLockerState", "DevicesLockerSet", "ItemBootsToeTapeNPCReaction"),
+        SmallVentlessLocker: AssetTypeInfoOptionTransform("ItemDevicesSmallVentlessLocker", "LockerState", "SelectLockerState", "DevicesLockerSet", "ItemBootsToeTapeNPCReaction"),
+        Crib: AssetTypeInfoOptionTransform("ItemDevicesCrib", "Crib", "SelectCribState", "CribSet", "ItemBootsToeTapeNPCReaction"),
+    },
+    ItemFeet: {
+        HempRope: AssetTypeInfoOptionTransform("ItemFeetHempRope", "RopeBondage", "SelectRopeBondage", "LegRopeSet", "ItemBootsToeTapeNPCReaction"),
+        Zipties: AssetTypeInfoOptionTransform("ItemFeetZipties", "ZipBondage", "SelectZipTie", "ZipFeetSet", "ItemBootsToeTapeNPCReaction"),
+    },
+    ItemHead: {
+        DuctTape: AssetTypeInfoOptionTransform("ItemHeadDuctTape", "DuctTapeHeadType", "SelectBlindType", "DuctTapeHeadSet", "ItemBootsToeTapeNPCReaction"),
+        WebBlindfold: AssetTypeInfoOptionTransform("ItemHeadWebBlindfold", "WebBondage", "WebBondageSelect", "HeadWebSet", "ItemBootsToeTapeNPCReaction"),
+    },
+    ItemLegs: {
+        HempRope: AssetTypeInfoOptionTransform("ItemLegsHempRope", "RopeBondage", "SelectRopeBondage", "LegRopeSet", "ItemBootsToeTapeNPCReaction"),
+        DuctTape: AssetTypeInfoOptionTransform("ItemLegsDuctTape", "DuctTapePose", "SelectTapeWrapping", "DuctTapeRestrain", "ItemBootsToeTapeNPCReaction"),
+        SturdyLeatherBelts: AssetTypeInfoOptionTransform("ItemLegsSturdyLeatherBelts", "SturdyLeatherBeltsPose", "SturdyLeatherBeltsSelectTightness", "SturdyLeatherBeltsRestrain", "ItemBootsToeTapeNPCReaction"),
+        Zipties: AssetTypeInfoOptionTransform("ItemLegsZipties", "ZipBondage", "SelectZipTie", "ZipLegsSet", "ItemBootsToeTapeNPCReaction"),
+    },
+    ItemMouth: {
+        ClothGag: AssetTypeInfoOptionTransform("ItemMouthClothGag", "ClothGagType", "SelectGagType", "ClothGagSet", "ClothGag"),
+        DildoPlug: AssetTypeInfoOptionTransform("ItemMouthDildoPlugGag", "PlugGagMouthType", "SelectGagType", "DildoPlugGagMouthSet", "ItemMouthDildoPlugGag"),
+        MilkBottle: AssetTypeInfoOptionTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
+        PlugGag: AssetTypeInfoOptionTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
+    },
 }
 
 /* TODO
@@ -42,6 +63,9 @@ var AssetTypeInfo = {
 
 function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNPC) {
     const Options = window["Inventory" + FullName + "Options"];
+    if (!Options) {
+        console.log(FullName);
+    }
     const Info = {
         Dialog: Dialog,
         DialogSelect: DialogSelect,
@@ -111,14 +135,14 @@ function AssetTypeLoad() {
         .filter(fn => fn.startsWith("Inventory") && fn.endsWith("Load"))
         .filter(fn => window[fn]?.toString().includes("ExtendedItemLoad"))
         .length;
- 
+
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
 
-        const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")] 
+        const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")]
         if (Group == null) return;
         const Info = Group[A.Name];
-        if (typeof Info === 'string') return; 
+        if (typeof Info === 'string') return;
         if (Info == null) return;
 
         if (Info.DynamicDictionary == null) Info.DynamicDictionary = function () { return []; };
@@ -136,7 +160,7 @@ function AssetTypeLoad() {
         .keys(window)
         .filter(fn => fn.startsWith("Inventory") && fn.endsWith("Load"))
         .filter(fn => window[fn]?.toString().includes("ExtendedItemLoad"))
-        .map(fn => fn.replace("Inventory", "").replace("Load", "")); 
+        .map(fn => fn.replace("Inventory", "").replace("Load", ""));
     ATP.Auto = ATP.Next.map(AssetTypeAutoConvert);
     console.log("--- AssetTypeProgress ---");
     console.log(ATP);
@@ -188,10 +212,10 @@ function AssetTypeSetDraw() {
     }
 
     // Draw the header and item
-	DrawRect(1387, 55, 225, 275, "white");
-	DrawImageResize("Assets/" + Asset.Group.Family + "/" + Asset.Group.Name + "/Preview/" + Asset.Name + ".png", 1389, 57, 221, 221);
-	DrawTextFit(Asset.Description, 1500, 310, 221, "black");
-	DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
+    DrawRect(1387, 55, 225, 275, "white");
+    DrawImageResize("Assets/" + Asset.Group.Family + "/" + Asset.Group.Name + "/Preview/" + Asset.Name + ".png", 1389, 57, 221, 221);
+    DrawTextFit(Asset.Description, 1500, 310, 221, "black");
+    DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
 
     // Draw the possible variants and their requirements, arranged based on the number per page
     for (let I = Offset; (I < Types.length) && ((Info.ShowCount == 0) || (I < Info.ShowCount + Offset)); I++) {
@@ -208,25 +232,25 @@ function AssetTypeSetDraw() {
 function AssetTypeSetClick() {
     if (DialogFocusItem == null || DialogFocusItem.Asset.TypeInfo == null) return;
 
-    	// Exit button
-	if (MouseIn(1885, 25, 90, 85)) {
-		DialogFocusItem = null;
-		return;
+    // Exit button
+    if (MouseIn(1885, 25, 90, 85)) {
+        DialogFocusItem = null;
+        return;
     }
-    
+
     const C = CharacterGetCurrent();
     const Asset = DialogFocusItem.Asset;
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
 
-	// Pagination buttons
-	if (MouseIn(1665, 25, 90, 90) && Offset >= Info.ShowCount) {
-		ExtendedItemSetOffset(Offset - Info.ShowCount);
-	}
-	if (MouseIn(1775, 25, 90, 90) && Types.length > Info.ShowCount && Offset < Info.ShowCount * Math.floor(Types.length / Info.ShowCount)) {
-		ExtendedItemSetOffset(Offset + Info.ShowCount);
-	}
+    // Pagination buttons
+    if (MouseIn(1665, 25, 90, 90) && Offset >= Info.ShowCount) {
+        ExtendedItemSetOffset(Offset - Info.ShowCount);
+    }
+    if (MouseIn(1775, 25, 90, 90) && Types.length > Info.ShowCount && Offset < Info.ShowCount * Math.floor(Types.length / Info.ShowCount)) {
+        ExtendedItemSetOffset(Offset + Info.ShowCount);
+    }
 
     for (let I = Offset; (I < Types.length) && ((Info.ShowCount == 0) || (I < Info.ShowCount + Offset)); I++) {
 

@@ -17,6 +17,8 @@ const ZiptiesLegsOptions = [
 	}
 ];
 
+var InventoryItemLegsZiptiesOptions = ZiptiesLegsOptions;
+
 function InventoryItemLegsZiptiesLoad() {
 	ExtendedItemLoad(ZiptiesLegsOptions, "SelectZipTie");
 }
