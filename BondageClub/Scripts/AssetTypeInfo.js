@@ -99,21 +99,27 @@ const AssetTypeXY = [
 ];
 
 const ATP = {
-    Extended: 0,
+    Extended: Object.keys(window).filter(fn => fn.startsWith("Inventory") && fn.endsWith("Load")).length,
     Converted: 0,
     TypeInfo: 0,
     Next: []
 }
 
 function AssetTypeLoad() {
+    ATP.Converted = Object
+        .keys(window)
+        .filter(fn => fn.startsWith("Inventory") && fn.endsWith("Load"))
+        .filter(fn => window[fn]?.toString().includes("ExtendedItemLoad"))
+        .length;
+ 
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
 
         const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")] 
-        if (Group == null) return AssetTypeProgress(A);
+        if (Group == null) return;
         const Info = Group[A.Name];
         if (typeof Info === 'string') return; 
-        if (Info == null) return AssetTypeProgress(A);
+        if (Info == null) return;
 
         if (Info.DynamicDictionary == null) Info.DynamicDictionary = function () { return []; };
         if (Info.DynamicAllowType == null) Info.DynamicAllowType = function () { return A.AllowType; };
@@ -124,22 +130,30 @@ function AssetTypeLoad() {
         A.ExtendedOrTypeInfo = true;
         A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
 
-        ATP.Extended++;
         ATP.TypeInfo++;
     });
+    ATP.Next = Object
+        .keys(window)
+        .filter(fn => fn.startsWith("Inventory") && fn.endsWith("Load"))
+        .filter(fn => window[fn]?.toString().includes("ExtendedItemLoad"))
+        .map(fn => fn.replace("Inventory", "").replace("Load", "")); 
+    ATP.Auto = ATP.Next.map(AssetTypeAutoConvert);
     console.log("--- AssetTypeProgress ---");
     console.log(ATP);
     console.log("--- AssetTypeProgress ---");
 }
 
-function AssetTypeProgress(A) {
-    if (!A.Extended) return;
-    ATP.Extended++;
-    if (Array.isArray(window["Inventory" + A.Group.Name + A.Name + "Options"])) {
-        ATP.Converted++;
-        ATP.Next.push(A.Group.Name + A.Name);
-    } 
-} 
+function AssetTypeAutoConvert(Name) {
+    const Dialog = window["Inventory" + Name + "Draw"].toString().replace(/.*ExtendedItem.*\(.*,[ ]{0,}"(.*)"\).*/gis, (_, m) => m);
+    if (!Dialog || Dialog.includes("function")) return `Error: Dialog {${Name}}`;
+    const DialogSelect = window["Inventory" + Name + "Load"].toString().replace(/.*ExtendedItem.*\(.*,[ ]{0,}"(.*)"\).*/gis, (_, m) => m);
+    if (!DialogSelect || DialogSelect.includes("function")) return `Error: DialogSelect {${Name}}`;
+    const DialogSet = window["Inventory" + Name + "PublishAction"]?.toString().replace(/.*=[ ]{0,}"(\w*)".*/gis, (_, m) => m);
+    if (!DialogSet || DialogSet.includes("function")) return `Error: DialogSet {${Name}}`;
+    const DialogNpc = InventoryItemBootsToeTapeNpcDialog.toString().replace(/.*DialogFind\(.*"(.*)"[ ]{0,}\+.*/gis, (_, m) => m);
+    if (!DialogNpc || DialogNpc.includes("function")) return `Error: DialogNpc {${Name}}`;
+    return `AssetTypeInfoOptionTransform("${Name}", "${Dialog}", "${DialogSelect}", "${DialogSet}", "${DialogNpc}")`;
+}
 
 function AssetTypeSetLoad(Item) {
     const C = CharacterGetCurrent();
