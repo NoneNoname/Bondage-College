@@ -57,6 +57,8 @@ function MainHallLoad() {
 	CommonReadCSV("NoArravVar", "Room", "Prison", "Dialog_NPC_Prison_Police");
 	CommonReadCSV("NoArravVar", "Character", "Relog", "Text_Relog");
 
+	ShopVendorAllowItem = true;
+	MainHallWalk("Shop");
 }
 
 /**
