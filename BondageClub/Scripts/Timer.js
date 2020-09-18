@@ -70,7 +70,7 @@ function TimerInventoryRemove() {
 							var Dictionary = [
 								{Tag: "DestinationCharacterName", Text: Character[C].Name, MemberNumber: Character[C].MemberNumber},
 								{Tag: "FocusAssetGroup", AssetGroupName: Character[C].Appearance[A].Asset.Group.Name},
-								{Tag: "LockName", AssetName: LockName}
+								{Tag: "LockName", Asset: LockName, Group: "ItemMisc"}
 							];
 							ServerSend("ChatRoomChat", {Content: "TimerRelease", Type: "Action", Dictionary});
 						}

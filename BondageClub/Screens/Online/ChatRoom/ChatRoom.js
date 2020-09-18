@@ -759,8 +759,8 @@ function ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem
 		// Replaces the action tags to build the phrase
 		Dictionary.push({ Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber });
 		Dictionary.push({ Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber });
-		if (DialogProgressPrevItem != null) Dictionary.push({ Tag: "PrevAsset", AssetName: DialogProgressPrevItem.Asset.Name });
-		if (DialogProgressNextItem != null) Dictionary.push({ Tag: "NextAsset", AssetName: DialogProgressNextItem.Asset.Name });
+		if (DialogProgressPrevItem != null) Dictionary.push({ Tag: "PrevAsset", Asset: DialogProgressPrevItem.Asset.Name, Group: DialogProgressPrevItem.Asset.Group.Name, Type: InventoryItemGetType(DialogProgressPrevItem) });
+		if (DialogProgressNextItem != null) Dictionary.push({ Tag: "NextAsset", Asset: DialogProgressNextItem.Asset.Name, Group: DialogProgressNextItem.Asset.Group.Name, Type: InventoryItemGetType(DialogProgressNextItem) });
 		if (C.FocusGroup != null) Dictionary.push({ Tag: "FocusAssetGroup", AssetGroupName: C.FocusGroup.Name });
 
 		// Prepares the item packet to be sent to other players in the chatroom
@@ -888,7 +888,8 @@ function ChatRoomMessage(data) {
 			// Replace actions by the content of the dictionary
 			if (data.Type && ((data.Type == "Action") || (data.Type == "ServerMessage"))) {
 				if (data.Type == "ServerMessage") msg = "ServerMessage" + msg;
-				msg = DialogFind(Player, msg);
+				if (msg.startsWith("AssetType"))  msg = AssetTypeDialogFind(msg, data.Dictionary);
+				else msg = DialogFind(Player, msg);
 				if (data.Dictionary) {
 					var dictionary = data.Dictionary;
 					var SourceCharacter = null;
@@ -926,10 +927,10 @@ function ChatRoomMessage(data) {
 
 						}
 						else if (dictionary[D].TextToLookUp) msg = msg.replace(dictionary[D].Tag, DialogFind(Player, ChatRoomHTMLEntities(dictionary[D].TextToLookUp)).toLowerCase());
-						else if (dictionary[D].AssetName) {
+						else if (dictionary[D].Asset) {
 							for (let A = 0; A < Asset.length; A++)
-								if (Asset[A].Name == dictionary[D].AssetName) {
-									msg = msg.replace(dictionary[D].Tag, Asset[A].DynamicDescription(SourceCharacter || Player).toLowerCase());
+								if (Asset[A].Name == dictionary[D].Asset && Asset[A].Group.Name == dictionary[D].Group) {
+									msg = msg.replace(dictionary[D].Tag, AssetTypeGetDescription(SourceCharacter || Player, Asset[A], dictionary[D].Group.Type).toLowerCase());
 									ActivityName = Asset[A].DynamicActivity(SourceCharacter || Player);
 									break;
 								}

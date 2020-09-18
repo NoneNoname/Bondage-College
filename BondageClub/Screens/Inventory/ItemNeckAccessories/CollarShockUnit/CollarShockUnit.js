@@ -48,7 +48,7 @@ function InventoryItemNeckAccessoriesCollarShockUnitSetIntensity(Modifier) {
 		var Dictionary = [];
 		Dictionary.push({Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber});
 		Dictionary.push({Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber});
-		Dictionary.push({Tag: "AssetName", AssetName: DialogFocusItem.Asset.Name});
+		Dictionary.push({Tag: "AssetName", Asset: DialogFocusItem.Asset.Name, Group: DialogFocusItem.Asset.Group.Name, Type: InventoryItemGetType(DialogFocusItem)});
 		ChatRoomPublishCustomAction("ShockCollarSet" + DialogFocusItem.Property.Intensity, true, Dictionary);
 	}
 	else
@@ -69,11 +69,9 @@ function InventoryItemNeckAccessoriesCollarShockUnitTrigger() {
 	Dictionary.push({ Tag: "DestinationCharacterName", Text: C.Name, MemberNumber: C.MemberNumber });
 	Dictionary.push({ Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber });
 	Dictionary.push({ Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber });
-	Dictionary.push({Tag: "AssetName", AssetName: DialogFocusItem.Asset.Name});
+	Dictionary.push({ Tag: "AssetName", Asset: DialogFocusItem.Asset.Name, Group: DialogFocusItem.Asset.Group.Name, Type: InventoryItemGetType(DialogFocusItem)});
 	Dictionary.push({ Tag: "ActivityName", Text: "ShockItem" });
 	Dictionary.push({ Tag: "ActivityGroup", Text: DialogFocusItem.Asset.Group.Name });
-	Dictionary.push({ AssetName: DialogFocusItem.Asset.Name });
-	Dictionary.push({ AssetGroupName: DialogFocusItem.Asset.Group.Name });
 		
 	ChatRoomPublishCustomAction("TriggerShock" + DialogFocusItem.Property.Intensity, true, Dictionary);
 		

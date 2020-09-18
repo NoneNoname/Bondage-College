@@ -61,7 +61,7 @@ var AssetTypeInfo = {
  * 
  */
 
-function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNPC) {
+function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNpc) {
     const Options = window["Inventory" + FullName + "Options"];
     if (!Options) {
         console.log(FullName);
@@ -70,7 +70,7 @@ function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet,
         Dialog: Dialog,
         DialogSelect: DialogSelect,
         DialogSet: DialogSet,
-        DialogNPC: DialogNPC,
+        DialogNpc: DialogNpc,
         Unextend: true,
         ShowCount: Math.min(8, Options.length),
         SelectBeforeWear: true,
@@ -114,6 +114,12 @@ function AssetTypeTEMPDialogFind(G, A, D, T, I) {
     return [G, A, D || "Name", "", DialogFind(Player, I["Dialog" + D]).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"].join(",");
 }
 
+function AssetTypeGetDialog(key, obj) {
+    const { Group, Asset, Type } = obj;
+    if (!key || !Group || !Asset || !Type)
+    return CommonObjectTravel(obj, Group, Asset, key, Type) || "";
+}
+
 function AssetTypeTEMPPrintCsv() {
     const CSV = [];
     const Groups = Object.keys(AssetTypeInfo);
@@ -131,7 +137,6 @@ function AssetTypeTEMPPrintCsv() {
             CSV.push(AssetTypeTEMPDialogFind(G, A, "Select", undefined, Info));
             PrintAll("");
             PrintAll("Set");
-            PrintAll("NPC");
         });
     });
     
@@ -249,7 +254,7 @@ function AssetTypeSetLoad(Item) {
         }
     }
     ExtendedItemSetOffset(0);
-    DialogExtendedMessage = DialogFind(Player, AssetTypeGetDialog(C, Item, "Select", false));
+    DialogExtendedMessage = AssetTypeDescription[Item.Asset.Group.Name][Item.Asset.Name]["Select"]["Default"];
 
     AssetTypeDrawType = AssetTypeDrawTypeWithImage;
     AssetTypeClickType = AssetTypeClickTypeWithImage;
@@ -264,6 +269,7 @@ function AssetTypeSetDraw() {
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
     const ShowCount = Math.min(ShowCount, Types.length);
+    const Description = AssetTypeDescription[Asset.Group.Name][Asset.Name]["Name"];
 
     if (Offset >= ShowCount) {
         DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
@@ -280,18 +286,18 @@ function AssetTypeSetDraw() {
 
     // Draw the possible variants and their requirements, arranged based on the number per page
     for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
-        AssetTypeDrawType(C, Asset, Info, Types, ShowCount, Offset, I);
+        AssetTypeDrawType(C, Asset, Info, Types, ShowCount, Description, Offset, I);
     }
 }
 
-function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Offset, I) {
+function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Description, Offset, I) {
     const X = AssetTypeXY[ShowCount][I - Offset][0];
     const Y = AssetTypeXY[ShowCount][I - Offset][1];
-    const Type = ((Types[I] == null) ? Info.NoneTypeName : Types[I]).replace('_', '');
+    const Type = (Types[I] == null) ? Info.NoneTypeName : Types[I];
     const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
     DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info, Types[I], C.ID == 0) ? "Pink" : "White");
     DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
-    DrawText(DialogFind(Player, Info.Dialog + Type), X + 112, Y + 250, 225, "black");
+    DrawText(Description[Type], X + 112, Y + 250, 225, "black");
 }
 
 function AssetTypeSetClick() {
@@ -323,7 +329,15 @@ function AssetTypeSetClick() {
     }
 }
 
-
+/**
+ * 
+ * @param {Character} C 
+ * @param {TypeInfo} Info 
+ * @param {string[]} Types 
+ * @param {number} ShowCount 
+ * @param {number} Offset 
+ * @param {number} I 
+ */
 function AssetTypeClickTypeWithImage(C, Info, Types, ShowCount, Offset, I) {
     const X = AssetTypeXY[ShowCount][I - Offset][0];
     const Y = AssetTypeXY[ShowCount][I - Offset][1];
@@ -349,6 +363,12 @@ function AssetTypeClickTypeWithImage(C, Info, Types, ShowCount, Offset, I) {
     return false;
 }
 
+/**
+ * 
+ * @param {Character} C 
+ * @param {Item} Item 
+ * @param {string} NewType 
+ */
 function AssetTypeSet(C, Item, NewType) {
     if (CurrentScreen == "ChatRoom") {
         Item = InventoryGet(C, Item ? Item.Asset.Group.Name : C.FocusGroup.Name);
@@ -360,21 +380,46 @@ function AssetTypeSet(C, Item, NewType) {
 
     AssetTypeSetMofifiers(Item, NewType);
 
-    CharacterRefresh(C);
-    ChatRoomCharacterUpdate(C);
+    if (Item.Asset.Category == "Item") {
+        CharacterRefresh(C);
+        ChatRoomCharacterUpdate(C);
+        if (CurrentScreen === "ChatRoom") {
+            AssetTypePublish(C, Item);
+        } else {
+            DialogFocusItem = null;
+            if (C.ID != 0) {
+                C.CurrentDialog = DialogFind(C, Item.TypeInfo.Types[NewType || Item.TypeInfo.NoneTypeName].DialogNpc + NewType || Item.TypeInfo.NoneTypeName, "ItemArms");
+                C.FocusGroup = null;
+            }
+        }
+    
+    } else {
+        CharacterRefresh(C, false)
+    }
 
-    AssetTypePublish(C, Item);
 }
 
+/**
+ * 
+ * @param {Character} C 
+ * @param {Item} Item 
+ */
 function AssetTypePublish(C, Item) {
     const Info = Item.Asset.TypeInfo;
     const Dictionary = [
+        { Tag: "AssetTypeInfo", Group: Item.Asset.Group.Name, Asset: Item.Asset.Name, Type: InventoryItemGetType(Item) },
         { Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber },
         { Tag: "TargetCharacter", Text: C.Name, MemberNumber: C.MemberNumber },
         { Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber }];
-    ChatRoomPublishCustomAction(AssetTypeGetDialog(C, Item, "Set"), true, Dictionary.concat(Info.DynamicDictionary(C, Item)));
+    ChatRoomPublishCustomAction("AssetTypeSet", true, Dictionary.concat(Info.DynamicDictionary(C, Item)));
 }
 
+/**
+ * 
+ * @param {Character} C 
+ * @param {Item} Item 
+ * @param {string} NewType 
+ */
 function AssetTypePreSet(C, Item, NewType) {
     AssetTypeSetLoad(Item);
     Item.Property.Type = NewType;
@@ -383,6 +428,11 @@ function AssetTypePreSet(C, Item, NewType) {
     DialogProgressStart(C, InventoryGet(C, Item ? Item.Asset.Group.Name : C.FocusGroup.Name), Item);
 }
 
+/**
+ * 
+ * @param {Item} Item 
+ * @param {?string} NewType 
+ */
 function AssetTypeSetMofifiers(Item, NewType) {
     // if (NewType && NewType[0] == '_') Item.Property.Restrain = NewType[0].substr(1);
     // else if (Info.Restrain) Item.Property.Restrain = NewType[0];
@@ -405,10 +455,39 @@ function AssetTypeSetMofifiers(Item, NewType) {
     }
 }
 
-function AssetTypeGetDialog(C, Item, Dialog, Type) {
-    return Item.Asset.TypeInfo["Dialog" + Dialog] + (Type === false ? "" : Type || Item.Asset.TypeInfo.NoneTypeName);
+/**
+ * Finds a dialog for a typed item
+ * @param {string} msg 
+ * @param {Array} Dictionary 
+ */
+function AssetTypeDialogFind(msg, Dictionary) {
+    if (!Array.isArray(Dictionary)) return "";
+    const Info = Dictionary.find(D => D.Tag == "AssetTypeInfo");
+    if (!Info) return "";
+    return AssetTypeGetDialog(msg.replace("AssetType", ""), Info);
 }
 
+/**
+ * 
+ * @param {Character} C 
+ * @param {Asset} Asset 
+ * @param {string} Type 
+ */
+function AssetTypeGetDescription(C, Asset, Type) {
+    // MAYBE: find the item on C and get the type if it is null
+    if (Asset.TypeInfo && Asset.TypeInfo.TypedName) {
+        const D = AssetTypeGetDialog("Name", { Asset: Asset.Name, Group: Asset.Group.Name, Type: Type });
+        if (D) return D;
+    }
+    return Asset.DynamicDescription(C); // Can be removed after the
+}
+
+/**
+ * 
+ * @param {TypeInfo} Info 
+ * @param {string} Type 
+ * @param {boolean} Self 
+ */
 function AssetTypeSkillCheck(Info, Type, Self) {
     const Skills = Info[Type || Info.NoneTypeName].Skills;
     if (!Skills) return null;

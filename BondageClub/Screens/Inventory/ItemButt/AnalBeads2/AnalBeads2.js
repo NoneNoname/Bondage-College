@@ -63,7 +63,7 @@ function InventoryItemButtAnalBeads2SetBeads(Modifier) {
 	Dictionary.push({ Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber });
 	Dictionary.push({ Tag: "ActivityName", Text: "MasturbateItem" });
 	Dictionary.push({ Tag: "ActivityGroup", Text: "ItemButt" });
-	Dictionary.push({ AssetName: "AnalBeads2" });
+	Dictionary.push({ Asset: "AnalBeads2", Group: "ItemButt", Type: undefined });
 	Dictionary.push({ AssetGroupName: "ItemButt" });
 	Dictionary.push({ ActivityCounter: Math.max(beadsOld - beadsNum, 0) });
 

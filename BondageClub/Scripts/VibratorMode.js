@@ -258,7 +258,7 @@ function VibratorModeSetMode(Option) {
 	var Message;
 	var Dictionary = [
 		{ Tag: "DestinationCharacterName", Text: C.Name, MemberNumber: C.MemberNumber },
-		{ Tag: "AssetName", AssetName: DialogFocusItem.Asset.Name },
+		{ Tag: "AssetName", Asset: DialogFocusItem.Asset.Name, Group: DialogFocusItem.Asset.Group.Name, Type: InventoryItemGetType(DialogFocusItem)  },
 	];
 
 	if (Property.Intensity !== OldIntensity) {
@@ -543,7 +543,7 @@ function VibratorModePublish(C, Item, OldIntensity, Intensity) {
 	var Direction = Intensity > OldIntensity ? "Increase" : "Decrease";
 	var Dictionary = [
 		{ Tag: "DestinationCharacterName", Text: C.Name, MemberNumber: C.MemberNumber },
-		{ Tag: "AssetName", AssetName: Item.Asset.Name },
+		{ Tag: "AssetName", Asset: Item.Asset.Name, Group: Item.Asset.Group.Name, Type: InventoryItemGetType(Item) },
 		{ Automatic: true },
 	];
 	if (Item.Property.ItemMemberNumber) Dictionary.push({ Tag: "ItemMemberNumber", MemberNumber: Item.Property.ItemMemberNumber });

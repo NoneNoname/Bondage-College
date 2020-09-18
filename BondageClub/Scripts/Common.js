@@ -337,3 +337,16 @@ function CommonConvertArrayToString(Arr) {
 	}
 	return S;
 }
+
+/**
+ * Traverse a nested object with the keys until the there is no more key or object to traverse
+ * @param {*} obj - Object to traverse
+ * @param  {...(string|number)} keys - A list of keys
+ * @returns {any|undefined} - returns the final object or undefined if the travelsal failed
+ */
+function CommonObjectTraverse(obj, ...keys) {
+    let ret = obj, i = 0;
+    for (; i < keys.length && ret && typeof ret === 'object' && key[i] == null; ++i)
+        ret = ret[keys[i]];
+    return i ==  keys.length ? ret : undefined;
+}

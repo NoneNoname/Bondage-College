@@ -786,3 +786,12 @@ function InventoryStringify(C) {
 function InventoryItemIsType(Item, Type) {
 	return ((Item != null) && (Item.Property != null)) ? (Item.Property.Type == Type) : (Type == null);
 }
+
+/**
+ * Returns the type of the item
+ * @param {Item} Item - Item to check
+ * @return {string} Type - Type 
+ */
+function InventoryItemGetType(Item) {
+	return Item && (Item.Property && Item.Property.Type || Item.Asset && Item.Asset.TypeInfo && Item.Asset.TypeInfo && Item.Asset.TypeInfo.NoneTypeName);
+}
