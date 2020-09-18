@@ -17,48 +17,48 @@ var AssetTypeInfo = {
 			NoneTypeName: "BoxTie", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ChainBondage",
 			Types: {
 				AllFours: {
-					Property: { Effect: ["ForceKneel"], Block: ["ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["AllFours"], Difficulty: 3 },
+					Property: { Block: ["ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["ForceKneel"], SetPose: ["AllFours"] },
 					Skills: { Bondage: 6 },
-					Prerequisite: [NotMounted, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Prerequisite: ["NotMounted", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				BoxTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 				},
 				ChainCuffs: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackCuffs"], Difficulty: 1, OverridePriority: 29 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], OverridePriority: 29, SetPose: ["BackCuffs"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 				Hogtied: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["Hogtied"], Difficulty: 3 },
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Hogtied"] },
 					Skills: { Bondage: 4 },
-					Prerequisite: [NotMounted, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Prerequisite: ["NotMounted", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				KneelingHogtie: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["Kneel", "BackElbowTouch"], Difficulty: 3 },
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Kneel", "BackElbowTouch"] },
 					Skills: { Bondage: 4 },
-					Prerequisite: [NotMounted, NotSuspended],
+					Prerequisite: ["NotMounted", "NotSuspended"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				SuspensionHogtied: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], SetPose: ["Hogtied", "SuspensionHogtied"], Difficulty: 6 },
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], Difficulty: 6, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Hogtied", "SuspensionHogtied"] },
 					Skills: { Bondage: 8 },
-					Prerequisite: [NotMounted, NotChained, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Prerequisite: ["NotMounted", "NotChained", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				WristElbowHarnessTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Skills: { Bondage: 3 },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				WristElbowTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Skills: { Bondage: 2 },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				WristTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 			},
@@ -70,16 +70,16 @@ var AssetTypeInfo = {
 					Property: { Difficulty: 1 },
 				},
 				Bottom: {
-					Property: { SetPose: ["BackElbowTouch"], Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemVulvaPiercings"], Difficulty: 2 },
+					Property: { Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemVulvaPiercings"], Difficulty: 2, SetPose: ["BackElbowTouch"] },
 				},
 				Complete: {
-					Property: { SetPose: ["BackElbowTouch"], Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemTorso", "ItemBreast", "ItemNipples", "ItemVulvaPiercings", "ItemNipplesPiercings"], Difficulty: 7 },
+					Property: { Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemTorso", "ItemBreast", "ItemNipples", "ItemVulvaPiercings", "ItemNipplesPiercings"], Difficulty: 7, SetPose: ["BackElbowTouch"] },
 				},
 				Full: {
-					Property: { SetPose: ["BackElbowTouch"], Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemTorso", "ItemBreast", "ItemNipples", "ItemVulvaPiercings", "ItemNipplesPiercings"], Difficulty: 6 },
+					Property: { Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemTorso", "ItemBreast", "ItemNipples", "ItemVulvaPiercings", "ItemNipplesPiercings"], Difficulty: 6, SetPose: ["BackElbowTouch"] },
 				},
 				Top: {
-					Property: { SetPose: ["BackElbowTouch"], Block: ["ItemTorso", "ItemBreast", "ItemNipples", "ItemNipplesPiercings"], Difficulty: 4 },
+					Property: { Block: ["ItemTorso", "ItemBreast", "ItemNipples", "ItemNipplesPiercings"], Difficulty: 4, SetPose: ["BackElbowTouch"] },
 				},
 			},
 		},
@@ -87,62 +87,62 @@ var AssetTypeInfo = {
 			NoneTypeName: "BoxTie", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "RopeBondage",
 			Types: {
 				AllFours: {
-					Property: { Effect: ["ForceKneel"], Block: ["ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["AllFours"], Difficulty: 3 },
+					Property: { Block: ["ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["ForceKneel"], SetPose: ["AllFours"] },
 					Skills: { Bondage: 6 },
-					Prerequisite: [NotMounted, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Prerequisite: ["NotMounted", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				BoxTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 				},
 				CrossedBoxtie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 				Hogtied: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["Hogtied"], Difficulty: 3 },
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Hogtied"] },
 					Skills: { Bondage: 4 },
-					Prerequisite: [NotMounted, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Prerequisite: ["NotMounted", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				KneelingHogtie: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["Kneel", "BackElbowTouch"], Difficulty: 3 },
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Kneel", "BackElbowTouch"] },
 					Skills: { Bondage: 4 },
-					Prerequisite: [NotMounted, NotSuspended],
+					Prerequisite: ["NotMounted", "NotSuspended"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				RopeCuffs: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackCuffs"], Difficulty: 1, OverridePriority: 29 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], OverridePriority: 29, SetPose: ["BackCuffs"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 				SimpleHogtie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["Hogtied"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["Hogtied"] },
 					Skills: { Bondage: 2 },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				SuspensionHogtied: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], SetPose: ["Hogtied", "SuspensionHogtied"], Difficulty: 6 },
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], Difficulty: 6, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Hogtied", "SuspensionHogtied"] },
 					Skills: { Bondage: 8 },
-					Prerequisite: [NotMounted, NotChained, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Prerequisite: ["NotMounted", "NotChained", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				TightBoxtie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Skills: { Bondage: 3 },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				WristElbowHarnessTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Skills: { Bondage: 3 },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				WristElbowTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Skills: { Bondage: 2 },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				WristTie: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 			},
@@ -174,16 +174,16 @@ var AssetTypeInfo = {
 			NoneTypeName: "None", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsLeatherCuffs",
 			Types: {
 				Both: {
-					Property: { Difficulty: 6, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], SelfUnlock: false },
+					Property: { Difficulty: 6, Effect: ["Block", "Prone"], SelfUnlock: false, SetPose: ["BackElbowTouch"] },
 				},
 				Elbow: {
-					Property: { Difficulty: 4, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], SelfUnlock: false },
+					Property: { Difficulty: 4, Effect: ["Block", "Prone"], SelfUnlock: false, SetPose: ["BackElbowTouch"] },
 				},
 				None: {
 					Property: { Difficulty: 0, Effect: [], SelfUnlock: true },
 				},
 				Wrist: {
-					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], SelfUnlock: true },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SelfUnlock: true, SetPose: ["BackBoxTie"] },
 				},
 			},
 		},
@@ -211,7 +211,7 @@ var AssetTypeInfo = {
 					Property: { Block: [] },
 				},
 				Zipped: {
-					Property: { Difficulty: 0, Block: ["ItemBreast", "ItemNipples", "ItemNipplesPiercings", "ItemVulva", "ItemVulvaPiercings", "ItemButt"] },
+					Property: { Block: ["ItemBreast", "ItemNipples", "ItemNipplesPiercings", "ItemVulva", "ItemVulvaPiercings", "ItemButt"], Difficulty: 0 },
 				},
 			},
 		},
@@ -219,16 +219,16 @@ var AssetTypeInfo = {
 			NoneTypeName: "None", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsOrnateCuffsNPCReaction",
 			Types: {
 				Both: {
-					Property: { Difficulty: 6, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], SelfUnlock: false },
+					Property: { Difficulty: 6, Effect: ["Block", "Prone"], SelfUnlock: false, SetPose: ["BackElbowTouch"] },
 				},
 				Elbow: {
-					Property: { Difficulty: 4, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], SelfUnlock: false },
+					Property: { Difficulty: 4, Effect: ["Block", "Prone"], SelfUnlock: false, SetPose: ["BackElbowTouch"] },
 				},
 				None: {
 					Property: { Difficulty: 0, Effect: [], SelfUnlock: true },
 				},
 				Wrist: {
-					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], SelfUnlock: true },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SelfUnlock: true, SetPose: ["BackBoxTie"] },
 				},
 			},
 		},
@@ -266,28 +266,28 @@ var AssetTypeInfo = {
 			NoneTypeName: "Basic", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "JacketPrep",
 			Types: {
 				Basic: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				ExtraPadding: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				FullJacket: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 4 },
+					Property: { Difficulty: 4, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				LiningStraps: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PaddedLining: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PulledLining: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PulledPadding: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PulledStraps: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 			},
 		},
@@ -295,28 +295,28 @@ var AssetTypeInfo = {
 			NoneTypeName: "Basic", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "JacketPrep",
 			Types: {
 				Basic: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				ExtraPadding: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				FullJacket: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 4 },
+					Property: { Difficulty: 4, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				LiningStraps: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PaddedLining: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PulledLining: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PulledPadding: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				PulledStraps: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 			},
 		},
@@ -324,31 +324,31 @@ var AssetTypeInfo = {
 			NoneTypeName: "Tangled", ShowCount: 7, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsWeb",
 			Types: {
 				Cocooned: {
-					Property: { Difficulty: 4, Prerequisite: ["NoFeetSpreader"], AllowPose: ["Kneel"], SetPose: ["LegsClosed", "BackElbowTouch"], Effect: ["Block", "Freeze", "Prone"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"] },
-					Prerequisite: [NoFeetSpreader],
+					Property: { AllowPose: ["Kneel"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Difficulty: 4, Effect: ["Block", "Freeze", "Prone"], Prerequisite: ["NoFeetSpreader"], SetPose: ["LegsClosed", "BackElbowTouch"] },
+					Prerequisite: ["NoFeetSpreader"],
 				},
 				Hogtied: {
-					Property: { Difficulty: 4, SetPose: ["Hogtied"], Effect: ["Block", "Freeze", "Prone"], Hide: ["Cloth", "ClothLower", "ClothAccessory", "Necklace", "Shoes", "Socks"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast", "ItemDevices"] },
-					Prerequisite: [NotSuspended, NoFeetSpreader, CannotBeHogtiedWithAlphaHood],
+					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast", "ItemDevices"], Difficulty: 4, Effect: ["Block", "Freeze", "Prone"], Hide: ["Cloth", "ClothLower", "ClothAccessory", "Necklace", "Shoes", "Socks"], SetPose: ["Hogtied"] },
+					Prerequisite: ["NotSuspended", "NoFeetSpreader", "CannotBeHogtiedWithAlphaHood"],
 				},
 				KneelingSuspended: {
-					Property: { Difficulty: 8, SetPose: ["LegsClosed", "BackElbowTouch", "Suspension"], Effect: ["Block", "Freeze", "Prone"], Hide: ["BodyLower", "Cloth", "ClothLower", "Shoes", "SuitLower", "Panties", "Socks", "Pussy", "ItemFeet", "ItemLegs", "ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemBoots", "ItemHands", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"] },
-					Prerequisite: [NoFeetSpreader, NotChained, CannotBeHogtiedWithAlphaHood],
+					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Difficulty: 8, Effect: ["Block", "Freeze", "Prone"], Hide: ["BodyLower", "Cloth", "ClothLower", "Shoes", "SuitLower", "Panties", "Socks", "Pussy", "ItemFeet", "ItemLegs", "ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemBoots", "ItemHands", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], SetPose: ["LegsClosed", "BackElbowTouch", "Suspension"] },
+					Prerequisite: ["NoFeetSpreader", "NotChained", "CannotBeHogtiedWithAlphaHood"],
 				},
 				Suspended: {
-					Property: { Difficulty: 6, SetPose: ["LegsClosed", "BackElbowTouch", "Suspension"], Effect: ["Block", "Freeze", "Prone"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"] },
-					Prerequisite: [NoFeetSpreader, NotChained, CannotBeHogtiedWithAlphaHood],
+					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Difficulty: 6, Effect: ["Block", "Freeze", "Prone"], SetPose: ["LegsClosed", "BackElbowTouch", "Suspension"] },
+					Prerequisite: ["NoFeetSpreader", "NotChained", "CannotBeHogtiedWithAlphaHood"],
 				},
 				SuspensionHogtied: {
-					Property: { Difficulty: 11, SetPose: ["Hogtied", "SuspensionHogtied"], Effect: ["Block", "Freeze", "Prone"], Hide: ["Cloth", "ClothLower", "ClothAccessory", "Necklace", "Shoes", "Socks"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast", "ItemDevices"] },
-					Prerequisite: [NotSuspended, NoFeetSpreader, NotChained, CannotBeHogtiedWithAlphaHood],
+					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast", "ItemDevices"], Difficulty: 11, Effect: ["Block", "Freeze", "Prone"], Hide: ["Cloth", "ClothLower", "ClothAccessory", "Necklace", "Shoes", "Socks"], SetPose: ["Hogtied", "SuspensionHogtied"] },
+					Prerequisite: ["NotSuspended", "NoFeetSpreader", "NotChained", "CannotBeHogtiedWithAlphaHood"],
 				},
 				Tangled: {
 					Property: { Difficulty: 0 },
 				},
 				Wrapped: {
-					Property: { Difficulty: 2, Prerequisite: ["NoFeetSpreader"], AllowPose: ["Kneel"], SetPose: ["LegsClosed", "BackElbowTouch"], Effect: ["Block", "Freeze", "Prone"], Block: ["ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"] },
-					Prerequisite: [NoFeetSpreader],
+					Property: { AllowPose: ["Kneel"], Block: ["ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], Difficulty: 2, Effect: ["Block", "Freeze", "Prone"], Prerequisite: ["NoFeetSpreader"], SetPose: ["LegsClosed", "BackElbowTouch"] },
+					Prerequisite: ["NoFeetSpreader"],
 				},
 			},
 		},
@@ -356,7 +356,7 @@ var AssetTypeInfo = {
 			NoneTypeName: "InFront", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsWristShackles",
 			Types: {
 				Behind: {
-					Property: { SetPose: ["BackCuffs"], Effect: ["Block", "Prone"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackCuffs"] },
 				},
 				InFront: {
 				},
@@ -366,49 +366,49 @@ var AssetTypeInfo = {
 			NoneTypeName: "ZipLight", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "Zip",
 			Types: {
 				ZipAllFours: {
-					Property: { Effect: ["ForceKneel"], Block: ["ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["AllFours"], Difficulty: 3 },
-					Prerequisite: [NotMounted, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Property: { Block: ["ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["ForceKneel"], SetPose: ["AllFours"] },
+					Prerequisite: ["NotMounted", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				ZipElbowWrist: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				ZipFull: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 				ZipHogtie: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["Hogtied"], Difficulty: 3 },
-					Prerequisite: [NotMounted, NotSuspended, CannotBeHogtiedWithAlphaHood],
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Hogtied"] },
+					Prerequisite: ["NotMounted", "NotSuspended", "CannotBeHogtiedWithAlphaHood"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				ZipKneelingHogtie: {
-					Property: { Effect: ["Block", "Freeze", "Prone"], Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], SetPose: ["Kneel", "BackElbowTouch"], Difficulty: 3 },
-					Prerequisite: [NotMounted, NotSuspended],
+					Property: { Block: ["ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemDevices"], Difficulty: 3, Effect: ["Block", "Freeze", "Prone"], SetPose: ["Kneel", "BackElbowTouch"] },
+					Prerequisite: ["NotMounted", "NotSuspended"],
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "10" }],
 				},
 				ZipLight: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 				},
 				ZipMedium: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"], Difficulty: 2 },
+					Property: { Difficulty: 2, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
 					Expression: [{ Group: "Blush", Name: "Low", Timer: "5" }],
 				},
 				ZipWrist: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 1 },
+					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				ZipWristFull: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				ZipWristLight: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 				ZipWristMedium: {
-					Property: { Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"], Difficulty: 3 },
+					Property: { Difficulty: 3, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
 					Expression: [{ Group: "Blush", Name: "Medium", Timer: "5" }],
 				},
 			},
@@ -471,23 +471,23 @@ var AssetTypeInfo = {
 			NoneTypeName: "Basic", ShowCount: 6, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Basic: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 1 },
+					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
 				},
 				Diamond: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 4 },
+					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
 				},
 				FullBinding: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 				Link: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 				Mermaid: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 4 },
+					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
 				},
 				Suspension: {
-					Property: { SetPose: ["LegsClosed", "Suspension"], Difficulty: 6 },
-					Prerequisite: [NotKneeling, NotMounted, NotChained, NotHogtied],
+					Property: { Difficulty: 6, SetPose: ["LegsClosed", "Suspension"] },
+					Prerequisite: ["NotKneeling", "NotMounted", "NotChained", "NotHogtied"],
 					Expression: [{ Group: "Blush", Name: "High", Timer: "30" }],
 				},
 			},
@@ -496,13 +496,13 @@ var AssetTypeInfo = {
 			NoneTypeName: "ZipFeetLight", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				ZipFeetFull: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 				ZipFeetLight: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 1 },
+					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
 				},
 				ZipFeetMedium: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 			},
 		},
@@ -515,7 +515,7 @@ var AssetTypeInfo = {
 					Property: { Block: ["ItemNose"], Effect: ["BlindNormal", "Prone"] },
 				},
 				Mummy: {
-					Property: { Hide: ["ItemMouth", "ItemMouth2", "ItemMouth3", "HairFront", "HairBack"], Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemEars", "ItemHood", "ItemNose"], Effect: ["GagNormal", "BlindNormal", "Prone", "BlockMouth"] },
+					Property: { Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemEars", "ItemHood", "ItemNose"], Effect: ["GagNormal", "BlindNormal", "Prone", "BlockMouth"], Hide: ["ItemMouth", "ItemMouth2", "ItemMouth3", "HairFront", "HairBack"] },
 				},
 				Wrap: {
 					Property: { Block: ["ItemNose"], Effect: ["BlindNormal", "Prone"] },
@@ -529,7 +529,7 @@ var AssetTypeInfo = {
 					Property: { Difficulty: 0 },
 				},
 				Cocoon: {
-					Property: { Difficulty: 30, Hide: ["HairFront", "HairBack", "Glasses", "Hat", "ItemMouth", "ItemMouth2", "ItemMouth3"], Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemEars", "ItemHood", "ItemNose"], Effect: ["BlindHeavy", "Prone", "GagNormal", "BlockMouth"] },
+					Property: { Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemEars", "ItemHood", "ItemNose"], Difficulty: 30, Effect: ["BlindHeavy", "Prone", "GagNormal", "BlockMouth"], Hide: ["HairFront", "HairBack", "Glasses", "Hat", "ItemMouth", "ItemMouth2", "ItemMouth3"] },
 				},
 			},
 		},
@@ -539,16 +539,16 @@ var AssetTypeInfo = {
 			NoneTypeName: "Legs", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				CompleteLegs: {
-					Property: { Hide: ["ClothLower"], Difficulty: 6 },
+					Property: { Difficulty: 6, Hide: ["ClothLower"] },
 				},
 				HalfLegs: {
-					Property: { Hide: ["ClothLower"], Difficulty: 2 },
+					Property: { Difficulty: 2, Hide: ["ClothLower"] },
 				},
 				Legs: {
 					Property: { Difficulty: 0 },
 				},
 				MostLegs: {
-					Property: { Hide: ["ClothLower"], Difficulty: 4 },
+					Property: { Difficulty: 4, Hide: ["ClothLower"] },
 				},
 			},
 		},
@@ -556,23 +556,23 @@ var AssetTypeInfo = {
 			NoneTypeName: "Basic", ShowCount: 6, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Basic: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 1 },
+					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
 				},
 				Crossed: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 4 },
+					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
 				},
 				Frogtie: {
-					Property: { SetPose: ["Kneel"], Block: ["ItemFeet"], Effect: ["ForceKneel"], Difficulty: 3 },
-					Prerequisite: [NotSuspended, CanKneel],
+					Property: { Block: ["ItemFeet"], Difficulty: 3, Effect: ["ForceKneel"], SetPose: ["Kneel"] },
+					Prerequisite: ["NotSuspended", "CanKneel"],
 				},
 				FullBinding: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 				Link: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 				Mermaid: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 4 },
+					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
 				},
 			},
 		},
@@ -590,17 +590,17 @@ var AssetTypeInfo = {
 			NoneTypeName: "ZipLegLight", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				ZipFrogtie: {
-					Property: { SetPose: ["Kneel"], Block: ["ItemFeet"], Effect: ["ForceKneel"], Difficulty: 3 },
-					Prerequisite: [NotSuspended, CanKneel],
+					Property: { Block: ["ItemFeet"], Difficulty: 3, Effect: ["ForceKneel"], SetPose: ["Kneel"] },
+					Prerequisite: ["NotSuspended", "CanKneel"],
 				},
 				ZipLegFull: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 				ZipLegLight: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 1 },
+					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
 				},
 				ZipLegMedium: {
-					Property: { SetPose: ["LegsClosed"], Difficulty: 2 },
+					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
 				},
 			},
 		},

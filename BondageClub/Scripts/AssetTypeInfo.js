@@ -183,13 +183,15 @@ function AssetTypeTEMPStringify() {
                 const Type = Info.Types[T];
                 write(`${T}: {`, 1);
                 if (Type.Property && Object.keys(Type.Property).length > 0) {
-                    write(`Property: { ${Object.keys(Type.Property).filter(P => Type.Property[P] != null).map(P => P + ": " + stringifyProperty(Type.Property[P], P)).join(', ')} }`)
+                    const PS = Object.keys(Type.Property).filter(P => Type.Property[P] != null);
+                    PS.sort();
+                    write(`Property: { ${PS.map(P => P + ": " + stringifyProperty(Type.Property[P], P)).join(', ')} }`)
                 }
                 if (Type.Skills) {
                     write(`Skills: { ${Object.keys(Type.Skills).map(S => S + ": " + Type.Skills[S]).join(', ')} }`)
                 }
                 if (Type.Prerequisite) {
-                    write(`Prerequisite: [${Type.Prerequisite.join(", ")}]`)
+                    write(`Prerequisite: [${Type.Prerequisite.map(s => `"${s}"`).join(", ")}]`)
                 }
                 if (Type.Expression) {
                     write(`Expression: [${Type.Expression.map(stringifyExperssion).join(", ")}]`)
