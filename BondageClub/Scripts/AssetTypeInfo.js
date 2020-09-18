@@ -139,14 +139,15 @@ function AssetTypeTEMPPrintCsv() {
             PrintAll("Set");
         });
     });
-    
+    console.log(CSV);
+    /*
     const blob = new Blob([CSV.join("\n")], {type: 'text/csv'});
     const elem = window.document.createElement('a');
     elem.href = window.URL.createObjectURL(blob);
     elem.download = "Female3DCG_Type.csv";        
     document.body.appendChild(elem);
     elem.click();        
-    document.body.removeChild(elem);
+    document.body.removeChild(elem);*/
 }
 
 async function AssetTypeLoadDescription() {
@@ -268,7 +269,7 @@ function AssetTypeSetDraw() {
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
-    const ShowCount = Math.min(ShowCount, Types.length);
+    const ShowCount = Math.min(Info.ShowCount, Types.length);
     const Description = AssetTypeDescription[Asset.Group.Name][Asset.Name]["Name"];
 
     if (Offset >= ShowCount) {
@@ -314,7 +315,7 @@ function AssetTypeSetClick() {
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
-    const ShowCount = Math.min(ShowCount, Types.length);
+    const ShowCount = Math.min(Info.ShowCount, Types.length);
 
     // Pagination buttons
     if (MouseIn(1665, 25, 90, 90) && Offset >= ShowCount) {
@@ -489,7 +490,7 @@ function AssetTypeGetDescription(C, Asset, Type) {
  * @param {boolean} Self 
  */
 function AssetTypeSkillCheck(Info, Type, Self) {
-    const Skills = Info[Type || Info.NoneTypeName].Skills;
+    const Skills = Info.Types[Type || Info.NoneTypeName].Skills;
     if (!Skills) return null;
     for (let key in Skills) {
         if (key == "Bondage" && Self) key = "Self" + key;
