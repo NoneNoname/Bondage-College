@@ -263,11 +263,12 @@ function AssetTypeSetDraw() {
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
+    const ShowCount = Math.min(ShowCount, Types.length);
 
-    if (Offset >= Info.ShowCount) {
+    if (Offset >= ShowCount) {
         DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
     }
-    if (Types.length > Info.ShowCount && Offset < Info.ShowCount * Math.floor(Types.length / Info.ShowCount)) {
+    if (Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
         DrawButton(1775, 25, 90, 90, "", "White", "Icons/Next.png");
     }
 
@@ -278,14 +279,14 @@ function AssetTypeSetDraw() {
     DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
 
     // Draw the possible variants and their requirements, arranged based on the number per page
-    for (let I = Offset; (I < Types.length) && ((Info.ShowCount == 0) || (I < Info.ShowCount + Offset)); I++) {
-        AssetTypeDrawType(C, Asset, Info, Types, Offset, I);
+    for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
+        AssetTypeDrawType(C, Asset, Info, Types, ShowCount, Offset, I);
     }
 }
 
-function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, Offset, I) {
-    const X = AssetTypeXY[Info.ShowCount][I - Offset][0];
-    const Y = AssetTypeXY[Info.ShowCount][I - Offset][1];
+function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Offset, I) {
+    const X = AssetTypeXY[ShowCount][I - Offset][0];
+    const Y = AssetTypeXY[ShowCount][I - Offset][1];
     const Type = ((Types[I] == null) ? Info.NoneTypeName : Types[I]).replace('_', '');
     const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
     DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info, Types[I], C.ID == 0) ? "Pink" : "White");
@@ -307,24 +308,25 @@ function AssetTypeSetClick() {
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
+    const ShowCount = Math.min(ShowCount, Types.length);
 
     // Pagination buttons
-    if (MouseIn(1665, 25, 90, 90) && Offset >= Info.ShowCount) {
-        ExtendedItemSetOffset(Offset - Info.ShowCount);
+    if (MouseIn(1665, 25, 90, 90) && Offset >= ShowCount) {
+        ExtendedItemSetOffset(Offset - ShowCount);
     }
-    if (MouseIn(1775, 25, 90, 90) && Types.length > Info.ShowCount && Offset < Info.ShowCount * Math.floor(Types.length / Info.ShowCount)) {
-        ExtendedItemSetOffset(Offset + Info.ShowCount);
+    if (MouseIn(1775, 25, 90, 90) && Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
+        ExtendedItemSetOffset(Offset + ShowCount);
     }
 
-    for (let I = Offset; (I < Types.length) && ((Info.ShowCount == 0) || (I < Info.ShowCount + Offset)); I++) {
-        if (AssetTypeClickType(C, Info, Types, Offset, I)) return;
+    for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
+        if (AssetTypeClickType(C, Info, Types, ShowCount, Offset, I)) return;
     }
 }
 
 
-function AssetTypeClickTypeWithImage(C, Info, Types, Offset, I) {
-    const X = AssetTypeXY[Info.ShowCount][I - Offset][0];
-    const Y = AssetTypeXY[Info.ShowCount][I - Offset][1];
+function AssetTypeClickTypeWithImage(C, Info, Types, ShowCount, Offset, I) {
+    const X = AssetTypeXY[ShowCount][I - Offset][0];
+    const Y = AssetTypeXY[ShowCount][I - Offset][1];
 
     if (MouseIn(X, Y, 225, 275) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
         const R = AssetTypeSkillCheck(Info, Types[I], C.ID == 0);

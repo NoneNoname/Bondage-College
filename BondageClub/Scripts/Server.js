@@ -353,6 +353,8 @@ function ServerValidateProperties(C, Item) {
 	// Remove impossible combinations
 	if ((Item.Property != null) && (Item.Property.Type == null) && (Item.Property.Restrain == null))
 		["SetPose", "Difficulty", "SelfUnlock", "Hide"].forEach(P => delete Item.Property[P]);
+
+	if (Item.Asset.TypeInfo) AssetTypeSetMofifiers(Item, Item.Property && Item.Property.Type);
 }
 
 /**
