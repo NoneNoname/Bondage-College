@@ -139,15 +139,79 @@ function AssetTypeTEMPPrintCsv() {
             PrintAll("Set");
         });
     });
-    console.log(CSV);
-    /*
+    
     const blob = new Blob([CSV.join("\n")], {type: 'text/csv'});
     const elem = window.document.createElement('a');
     elem.href = window.URL.createObjectURL(blob);
     elem.download = "Female3DCG_Type.csv";        
     document.body.appendChild(elem);
     elem.click();        
-    document.body.removeChild(elem);*/
+    document.body.removeChild(elem);
+}
+
+function AssetTypeTEMPStringify() {
+    let File = '"use strict"\n\nvar AssetTypeInfo = {\n';
+    let indent = 1;
+    const write = (str, i) => {
+        File += '\t'.repeat(str == "}" ? indent - 1 : indent) + str + (i != 1 ? ',\n' : "\n");
+        indent += i ?? 0;
+    };
+    const stringifyProperty = (P, N) => {
+        if (Array.isArray(P)) return `[${P.map(s => `"${s}"`).join(', ')}]`;
+        if (typeof P == 'boolean' || typeof P == 'number') return P.toString();
+        if (typeof P == 'string') return `"${P}"`;
+        throw new Error(`Invalid Property Type, ${typeof P} ${N} ${JSON.stringify(P)}`);
+    }
+    const stringifyExperssion = E => {
+        if (typeof E.Timer == 'number') return `{ Group: "${E.Group}", Name: "${E.Name}", Timer: "${E.Timer}" }`;
+        return `{ Group: "${E.Group}", Name: "${E.Name}" }`;
+    }
+    const Groups = Object.keys(AssetTypeInfo);
+    Groups.sort();
+    Groups.forEach(G => {
+        write(`${G}: {`, 1);
+        const Assets = Object.keys(AssetTypeInfo[G]);
+        Assets.sort();
+        Assets.forEach(A => {
+            const Info = AssetTypeInfo[G][A];
+            write(`${A}: {`, 1);
+            write(`NoneTypeName: "${Info.NoneTypeName}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, SelectBeforeWear: ${Info.SelectBeforeWear}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
+            write(`Types: {`, 1);
+            const Types = Object.keys(Info.Types);
+            Types.sort();
+            Types.forEach(T => {
+                const Type = Info.Types[T];
+                write(`${T}: {`, 1);
+                if (Type.Property && Object.keys(Type.Property).length > 0) {
+                    write(`Property: { ${Object.keys(Type.Property).filter(P => Type.Property[P] != null).map(P => P + ": " + stringifyProperty(Type.Property[P], P)).join(', ')} }`)
+                }
+                if (Type.Skills) {
+                    write(`Skills: { ${Object.keys(Type.Skills).map(S => S + ": " + Type.Skills[S]).join(', ')} }`)
+                }
+                if (Type.Prerequisite) {
+                    write(`Prerequisite: [${Type.Prerequisite.join(", ")}]`)
+                }
+                if (Type.Expression) {
+                    write(`Expression: [${Type.Expression.map(stringifyExperssion).join(", ")}]`)
+                }
+                write('}', -1);
+            });
+            write('}', -1);
+            write('}', -1);
+        });
+        write('}', -1);
+    });
+
+    File += "}\n\n";
+
+    const blob = new Blob([File], {type: 'text/javascript'});
+    const elem = window.document.createElement('a');
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = "AssetTypeInfo_Final.js";        
+    document.body.appendChild(elem);
+    elem.click();        
+    document.body.removeChild(elem);
+
 }
 
 async function AssetTypeLoadDescription() {
@@ -282,6 +346,7 @@ function AssetTypeSetDraw() {
     // Draw the header and item
     DrawRect(1387, 55, 225, 275, "white");
     DrawImageResize("Assets/" + Asset.Group.Family + "/" + Asset.Group.Name + "/Preview/" + Asset.Name + ".png", 1389, 57, 221, 221);
+    // TODO Dynamic Description
     DrawTextFit(Asset.Description, 1500, 310, 221, "black");
     DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
 
