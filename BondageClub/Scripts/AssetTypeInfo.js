@@ -4,12 +4,12 @@ var AssetTypeInfo = {
     ItemArms: {
         BitchSuit: AssetTypeInfoOptionTransform("ItemArmsBitchSuit", "BitchSuitType", "SelectBitchSuitType", "BitchSuitSet", "BitchSuitType"),
         Chains: AssetTypeInfoOptionTransform("ItemArmsChains", "ChainBondage", "SelectChainBondage", "ArmsChainSet", "ChainBondage"),
-        DuctTape: AssetTypeInfoOptionTransform("ItemArmsDuctTape", "DuctTapePose", "SelectTapeWrapping", "ItemArmsDuctTape", "ItemArmsDuctTape"),
+        DuctTape: AssetTypeInfoOptionTransform("ItemArmsDuctTape", "DuctTapePose", "SelectTapeWrapping", "DuctTapeRestrain", "ItemArmsDuctTape"),
         HempRope: AssetTypeInfoOptionTransform("ItemArmsHempRope", "RopeBondage", "SelectRopeBondage", "ArmsRopeSet", "RopeBondage"),
         LatexButterflyLeotard: AssetTypeInfoOptionTransform("ItemArmsLatexButterflyLeotard", "ItemArmsLatexLeotard", "ItemArmsLatexLeotardSelect", "ItemArmsLatexLeotardSet", "ItemArmsLatexButterflyLeotard"),
         LeatherArmbinder: AssetTypeInfoOptionTransform("ItemArmsLeatherArmbinder", "LeatherArmbinderType", "SelectStrapType", "LeatherArmbinderSet", "LeatherArmbinderSet"),
         LeatherCuffs: AssetTypeInfoOptionTransform("ItemArmsLeatherCuffs", "LeatherCuffsPose", "SelectBondagePosition", "LeatherCuffsRestrain", "ItemArmsLeatherCuffs"),
-        LeatherStraitJacket: AssetTypeInfoOptionTransform("ItemArmsLeatherStraitJacket", "LeatherStraitJacketSelectTightness", "LeatherStraitJacketPose", "LeatherStraitJacketRestrain", "LeatherStraitJacketNPCReaction"),
+        LeatherStraitJacket: AssetTypeInfoOptionTransform("ItemArmsLeatherStraitJacket", "LeatherStraitJacketPose", "LeatherStraitJacketSelectTightness", "LeatherStraitJacketRestrain", "LeatherStraitJacketNPCReaction"),
         MermaidSuit: AssetTypeInfoOptionTransform("ItemArmsMermaidSuit", "MermaidSuitType", "MermaidSuitSelect", "MermaidSuitSet", "MermaidSuitNPCReaction"),
         OrnateCuffs: AssetTypeInfoOptionTransform("ItemArmsOrnateCuffs", "OrnateCuffsPose", "SelectBondagePosition", "OrnateCuffsRestrain", "ItemArmsOrnateCuffsNPCReaction"),
         StraitJacket: AssetTypeInfoOptionTransform("ItemArmsStraitJacket", "StraitJacketPose", "StraitJacketSelectTightness", "StraitJacketRestrain", "ItemArmStraitJacketNPCReaction"),
@@ -104,10 +104,66 @@ function AssetTypeInfoOptionTransform(FullName, Dialog, DialogSelect, DialogSet,
     return Info;
 }
 
+function AssetTypeTEMPDialogFind(G, A, D, T, I) {
+    const Desc = AssetTypeDescription[G] && AssetTypeDescription[G][A] && AssetTypeDescription[G][A][D || "Name"];
+    const Text = Desc && Desc[T === undefined ? "Default" : (T || I.NoneTypeName)];
+    if (Text) return Text;
+
+    if (T !== undefined)
+        return [G, A, D || "Name", T, DialogFind(Player, I["Dialog" + D] + T || I.NoneTypeName, G).replaceAll(",", '","').replaceAll("\n", '"\n"')  || "###MISSING###"].join(",");
+    return [G, A, D || "Name", "", DialogFind(Player, I["Dialog" + D]).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"].join(",");
+}
+
+function AssetTypeTEMPPrintCsv() {
+    const CSV = [];
+    const Groups = Object.keys(AssetTypeInfo);
+    Groups.sort();
+    Groups.forEach(G => {
+        const Assets = Object.keys(AssetTypeInfo[G]);
+        Assets.sort();
+        Assets.forEach(A => {
+            const Info = AssetTypeInfo[G][A];
+            const PrintAll = D => {
+                var Types = Object.keys(Info.Types);
+                Types.sort();
+                Types.forEach(T => CSV.push(AssetTypeTEMPDialogFind(G, A, D, T, Info)));
+            };
+            CSV.push(AssetTypeTEMPDialogFind(G, A, "Select", undefined, Info));
+            PrintAll("");
+            PrintAll("Set");
+            PrintAll("NPC");
+        });
+    });
+    
+    const blob = new Blob([CSV.join("\n")], {type: 'text/csv'});
+    const elem = window.document.createElement('a');
+    elem.href = window.URL.createObjectURL(blob);
+    elem.download = "Female3DCG_Type.csv";        
+    document.body.appendChild(elem);
+    elem.click();        
+    document.body.removeChild(elem);
+}
+
+async function AssetTypeLoadDescription() {
+    const Data = await fetch('Assets/Female3DCG/Female3DCG_Type.csv').then(r => r.text());
+    const CSV = CommonParseCSV(Data);
+    CSV.forEach(value => {
+        const [G, A, N, T, D] = value;
+        if (!AssetTypeDescription[G]) AssetTypeDescription[G] = {};
+        if (!AssetTypeDescription[G][A]) AssetTypeDescription[G][A] = {};
+        if (!AssetTypeDescription[G][A]) AssetTypeDescription[G][A] = {};
+        if (!AssetTypeDescription[G][A][N]) AssetTypeDescription[G][A][N] = {};
+        AssetTypeDescription[G][A][N][T || "Default"] = D;
+    });
+}
+
 var AssetTypeOffset = 0;
 var AssetTypeSelectBefore = false;
 
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
+const AssetTypeDescription = {};
+let AssetTypeDrawType = AssetTypeDrawTypeWithImage;
+let AssetTypeClickType = AssetTypeClickTypeWithImage;
 
 /** The X & Y co-ordinates of each option's button, based on the number to be displayed per page. */
 const AssetTypeXY = [
@@ -156,6 +212,7 @@ function AssetTypeLoad() {
 
         ATP.TypeInfo++;
     });
+    AssetTypeLoadDescription();
     ATP.Next = Object
         .keys(window)
         .filter(fn => fn.startsWith("Inventory") && fn.endsWith("Load"))
@@ -193,6 +250,9 @@ function AssetTypeSetLoad(Item) {
     }
     ExtendedItemSetOffset(0);
     DialogExtendedMessage = DialogFind(Player, AssetTypeGetDialog(C, Item, "Select", false));
+
+    AssetTypeDrawType = AssetTypeDrawTypeWithImage;
+    AssetTypeClickType = AssetTypeClickTypeWithImage;
 }
 
 function AssetTypeSetDraw() {
@@ -219,14 +279,18 @@ function AssetTypeSetDraw() {
 
     // Draw the possible variants and their requirements, arranged based on the number per page
     for (let I = Offset; (I < Types.length) && ((Info.ShowCount == 0) || (I < Info.ShowCount + Offset)); I++) {
-        const X = AssetTypeXY[Info.ShowCount][I - Offset][0];
-        const Y = AssetTypeXY[Info.ShowCount][I - Offset][1];
-        const Type = ((Types[I] == null) ? Info.NoneTypeName : Types[I]).replace('_', '');
-        const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
-        DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info, Types[I], C.ID == 0) ? "Pink" : "White");
-        DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
-        DrawText(DialogFind(Player, Info.Dialog + Type), X + 112, Y + 250, 225, "black");
+        AssetTypeDrawType(C, Asset, Info, Types, Offset, I);
     }
+}
+
+function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, Offset, I) {
+    const X = AssetTypeXY[Info.ShowCount][I - Offset][0];
+    const Y = AssetTypeXY[Info.ShowCount][I - Offset][1];
+    const Type = ((Types[I] == null) ? Info.NoneTypeName : Types[I]).replace('_', '');
+    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
+    DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info, Types[I], C.ID == 0) ? "Pink" : "White");
+    DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
+    DrawText(DialogFind(Player, Info.Dialog + Type), X + 112, Y + 250, 225, "black");
 }
 
 function AssetTypeSetClick() {
@@ -253,29 +317,34 @@ function AssetTypeSetClick() {
     }
 
     for (let I = Offset; (I < Types.length) && ((Info.ShowCount == 0) || (I < Info.ShowCount + Offset)); I++) {
-
-        const X = AssetTypeXY[Info.ShowCount][I - Offset][0];
-        const Y = AssetTypeXY[Info.ShowCount][I - Offset][1];
-
-        if (MouseIn(X, Y, 225, 275) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
-            const R = AssetTypeSkillCheck(Info, Types[I], C.ID == 0);
-            if (R == null) {
-                if (AssetTypeSelectBefore) {
-                    AssetTypeSelectBefore = false;
-                    AssetTypePreSet(C, DialogFocusItem, Types[I]);
-                } else {
-                    AssetTypeSet(C, DialogFocusItem, Types[I]);
-                }
-            } else {
-                DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
-            }
-            if (DialogInventory != null) {
-                DialogFocusItem = null;
-                DialogMenuButtonBuild(C);
-            }
-            return;
-        }
+        if (AssetTypeClickType(C, Info, Types, Offset, I)) return;
     }
+}
+
+
+function AssetTypeClickTypeWithImage(C, Info, Types, Offset, I) {
+    const X = AssetTypeXY[Info.ShowCount][I - Offset][0];
+    const Y = AssetTypeXY[Info.ShowCount][I - Offset][1];
+
+    if (MouseIn(X, Y, 225, 275) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
+        const R = AssetTypeSkillCheck(Info, Types[I], C.ID == 0);
+        if (R == null) {
+            if (AssetTypeSelectBefore) {
+                AssetTypeSelectBefore = false;
+                AssetTypePreSet(C, DialogFocusItem, Types[I]);
+            } else {
+                AssetTypeSet(C, DialogFocusItem, Types[I]);
+            }
+        } else {
+            DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
+        }
+        if (DialogInventory != null) {
+            DialogFocusItem = null;
+            DialogMenuButtonBuild(C);
+        }
+        return true;
+    }
+    return false;
 }
 
 function AssetTypeSet(C, Item, NewType) {
