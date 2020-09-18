@@ -117,7 +117,7 @@ function AssetTypeTEMPDialogFind(G, A, D, T, I) {
 function AssetTypeGetDialog(key, obj) {
     const { Group, Asset, Type } = obj;
     if (!key || !Group || !Asset || !Type)
-    return CommonObjectTravel(obj, Group, Asset, key, Type) || "";
+    return CommonObjectTraverse(obj, Group, Asset, key, Type) || "";
 }
 
 function AssetTypeTEMPPrintCsv() {
@@ -163,7 +163,7 @@ function AssetTypeTEMPStringify() {
         throw new Error(`Invalid Property Type, ${typeof P} ${N} ${JSON.stringify(P)}`);
     }
     const stringifyExperssion = E => {
-        if (typeof E.Timer == 'number') return `{ Group: "${E.Group}", Name: "${E.Name}", Timer: "${E.Timer}" }`;
+        if (typeof E.Timer == 'number') return `{ Group: "${E.Group}", Name: "${E.Name}", Timer: ${E.Timer} }`;
         return `{ Group: "${E.Group}", Name: "${E.Name}" }`;
     }
     const Groups = Object.keys(AssetTypeInfo);
@@ -361,9 +361,9 @@ function AssetTypeSetDraw() {
 function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Description, Offset, I) {
     const X = AssetTypeXY[ShowCount][I - Offset][0];
     const Y = AssetTypeXY[ShowCount][I - Offset][1];
-    const Type = (Types[I] == null) ? Info.NoneTypeName : Types[I];
+    const Type = Types[I] || Info.NoneTypeName;
     const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
-    DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info, Types[I], C.ID == 0) ? "Pink" : "White");
+    DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info.Types[Type], C.ID == 0) ? "Pink" : "White");
     DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
     DrawText(Description[Type], X + 112, Y + 250, 225, "black");
 }
@@ -411,16 +411,21 @@ function AssetTypeClickTypeWithImage(C, Info, Types, ShowCount, Offset, I) {
     const Y = AssetTypeXY[ShowCount][I - Offset][1];
 
     if (MouseIn(X, Y, 225, 275) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
-        const R = AssetTypeSkillCheck(Info, Types[I], C.ID == 0);
-        if (R == null) {
-            if (AssetTypeSelectBefore) {
-                AssetTypeSelectBefore = false;
-                AssetTypePreSet(C, DialogFocusItem, Types[I]);
-            } else {
-                AssetTypeSet(C, DialogFocusItem, Types[I]);
-            }
-        } else {
+        const Type = Info[Types[I] || Info.NoneTypeName];
+        const R = AssetTypeSkillCheck(Type, C.ID == 0);
+        if (R) {
             DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
+            return true;
+        } 
+        if (Type.Prerequisite && !InventoryAllow(C, Type.Prerequisite, true)) {
+            DialogExtendedMessage = DialogText;
+            return;
+        }
+        if (AssetTypeSelectBefore) {
+            AssetTypeSelectBefore = false;
+            AssetTypePreSet(C, DialogFocusItem, Types[I]);
+        } else {
+            AssetTypeSet(C, DialogFocusItem, Types[I]);
         }
         if (DialogInventory != null) {
             DialogFocusItem = null;
@@ -552,12 +557,11 @@ function AssetTypeGetDescription(C, Asset, Type) {
 
 /**
  * 
- * @param {TypeInfo} Info 
- * @param {string} Type 
+ * @param {TypeInfoType} Type 
  * @param {boolean} Self 
  */
-function AssetTypeSkillCheck(Info, Type, Self) {
-    const Skills = Info.Types[Type || Info.NoneTypeName].Skills;
+function AssetTypeSkillCheck(Type, Self) {
+    const Skills = Type.Skills;
     if (!Skills) return null;
     for (let key in Skills) {
         if (key == "Bondage" && Self) key = "Self" + key;
