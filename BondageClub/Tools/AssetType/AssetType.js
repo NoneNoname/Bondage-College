@@ -1,6 +1,8 @@
 "use strict"
 
-function Tools_AssetTypePrintCsv() {
+// <script src="Tools/AssetType/AssetType.js"></script>
+
+function Tools_AssetTypeSaveCsv() {
     const CSV = [];
     const Groups = Object.keys(AssetTypeInfo);
     Groups.sort();
@@ -29,11 +31,12 @@ function Tools_AssetTypePrintCsv() {
     document.body.removeChild(elem);
 }
 
-function Tools_AssetTypePrintJs() {
+function Tools_AssetTypeSaveJs() {
     let File = '"use strict"\n\nvar AssetTypeInfo = {\n';
+    let setBuffer = str => File += str;
     let indent = 1;
     const write = (str, i) => {
-        File += '\t'.repeat(str == "}" ? indent - 1 : indent) + str + (i != 1 ? ',\n' : "\n");
+        setBuffer('\t'.repeat(str == "}" ? indent - 1 : indent) + str + (i != 1 ? ',\n' : "\n"));
         indent += i ?? 0;
     };
     const stringifyProperty = (P, N) => {
@@ -60,11 +63,11 @@ function Tools_AssetTypePrintJs() {
             const Types = Object.keys(Info.Types);
             Types.forEach(T => {
                 const Type = Info.Types[T];
-                if (Object.keys(Type.length == 0)) {
-                    write(`${T}: {}`);
-                    return;
-                }
+                let open = "";
+                setBuffer = str => open += str;
                 write(`${T}: {`, 1);
+                let data = "";
+                setBuffer = str => data += str;
                 if (Type.Property && Object.keys(Type.Property).length > 0) {
                     const PS = Object.keys(Type.Property).filter(P => Type.Property[P] != null);
                     PS.sort();
@@ -79,7 +82,14 @@ function Tools_AssetTypePrintJs() {
                 if (Type.Expression) {
                     write(`Expression: [${Type.Expression.map(stringifyExperssion).join(", ")}]`)
                 }
-                write('}', -1);
+                setBuffer = str => File += str;
+                if (data.trim().length == 0) {
+                    indent -= 1;
+                    write(`${T}: {}`);
+                } else {
+                    File += open + data;
+                    write('}', -1);
+                }
             });
             write('}', -1);
             write('}', -1);
@@ -128,7 +138,7 @@ function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, Dia
     Options.forEach(O => {
         const Name = O.Name;
         if (O.Property && O.Property.Type && O.Property.Type != Name) {
-            console.log("AssetTypeInfoOptionTransform() - Error");
+            console.log("Tools_AssetTypeTransform() - Error");
         }
         const Type = Info.Types[Name] = {}
         if (O.Property) {
