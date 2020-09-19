@@ -141,6 +141,9 @@ VisibilityResetDescription,This will reset all items to be visible. Click again 
 LeaveSave,Accept changes
 LeaveNoSave,Cancel changes
 SpamFilterPreferences,Spam Filter Settings
+SpamFilterDetails,When a character spams action messages in chat:
+SpamFilterHelp,Use '/unblock MemberNumber' to unblock a player who triggered the spam filter
+SpamFilterEnabled,Enabled
 OnBlockAddToGhostList,Ghost the character
 OnBlockAddToBlackList,Block the character
 OnBlockAdminKick,Kick the character from your room

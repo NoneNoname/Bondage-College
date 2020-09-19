@@ -579,13 +579,17 @@ function PreferenceSubscreenOnlineRun() {
 
 function PreferenceSubscreenSpamFilterRun() {
 	MainCanvas.textAlign = "left";
-	DrawText(TextGet("SpamFilterPreferences"), 500, 125, "Black", "Gray");
-	DrawCheckbox(500, 225, 64, 64, TextGet("OnBlockAddToGhostList"), Player.SpamFilter.OnBlockAddToGhostList);
-	DrawCheckbox(500, 305, 64, 64, TextGet("OnBlockAddToBlackList"), Player.SpamFilter.OnBlockAddToBlackList);
-	DrawCheckbox(500, 385, 64, 64, TextGet("OnBlockAdminKick"), Player.SpamFilter.OnBlockAdminKick);
-	DrawCheckbox(500, 465, 64, 64, TextGet("OnBlockAdminBan"), Player.SpamFilter.OnBlockAdminBan);
-	DrawCheckbox(500, 545, 64, 64, TextGet("IgnoreFriendList"), Player.SpamFilter.IgnoreFriendList);
-	DrawCheckbox(500, 625, 64, 64, TextGet("IgnoreWhiteList"), Player.SpamFilter.IgnoreWhiteList);
+	let T = 125;
+	DrawText(TextGet("SpamFilterPreferences"), 500, T, "Black", "Gray");
+	DrawText(TextGet("SpamFilterDetails"), 500, T += 70, "Black", "Gray");
+	DrawCheckbox(500, T += 70, 64, 64, TextGet("SpamFilterEnabled"), Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAddToGhostList"), Player.SpamFilter.OnBlockAddToGhostList, !Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAddToBlackList"), Player.SpamFilter.OnBlockAddToBlackList, !Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAdminKick"), Player.SpamFilter.OnBlockAdminKick, !Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAdminBan"), Player.SpamFilter.OnBlockAdminBan, !Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 80, 64, 64, TextGet("IgnoreFriendList"), Player.SpamFilter.IgnoreFriendList, !Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 80, 64, 64, TextGet("IgnoreWhiteList"), Player.SpamFilter.IgnoreWhiteList, !Player.SpamFilter.Enabled);
+	DrawText(TextGet("SpamFilterHelp"), 500, T += 120, "Black", "Gray");
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 	DrawButton(1815, 190, 90, 90, "", "White", "Icons/Online.png");
 	DrawCharacter(Player, 50, 50, 0.9);
@@ -804,6 +808,7 @@ function PreferenceSubscreenOnlineClick() {
 }
 
 function PreferenceSubscreenSpamFilterClick() {
+	let T = 195;
 	if (MouseIn(1815, 75, 90, 90) && PreferenceColorPick == "") {
 		Player.SpamFilter.Save();
 		PreferenceSubscreen = "";
@@ -812,19 +817,21 @@ function PreferenceSubscreenSpamFilterClick() {
 	else if (MouseIn(1815, 190, 90, 90) && PreferenceColorPick == "") {
 		Player.SpamFilter.Save();
 		PreferenceSubscreen = "Online";
-	}
-	else if (MouseIn(500, 225, 64, 64)) Player.SpamFilter.OnBlockAddToGhostList = !Player.SpamFilter.OnBlockAddToGhostList;
-	else if (MouseIn(500, 305, 64, 64)) Player.SpamFilter.OnBlockAddToBlackList = !Player.SpamFilter.OnBlockAddToBlackList;
-	else if (MouseIn(500, 385, 64, 64)) {
+	}	
+	else if (MouseIn(500, T += 70, 64, 64)) Player.SpamFilter.Enabled = !Player.SpamFilter.Enabled;
+	else if (!Player.SpamFilter.Enabled) return;
+	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.OnBlockAddToGhostList = !Player.SpamFilter.OnBlockAddToGhostList;
+	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.OnBlockAddToBlackList = !Player.SpamFilter.OnBlockAddToBlackList;
+	else if (MouseIn(500, T += 80, 64, 64)) {
 		Player.SpamFilter.OnBlockAdminKick = !Player.SpamFilter.OnBlockAdminKick;
 		if (Player.SpamFilter.OnBlockAdminKick) Player.SpamFilter.OnBlockAdminBan = false;
 	}
-	else if (MouseIn(500, 465, 64, 64)) {
+	else if (MouseIn(500, T += 80, 64, 64)) {
 		Player.SpamFilter.OnBlockAdminBan = !Player.SpamFilter.OnBlockAdminBan;
 		if (Player.SpamFilter.OnBlockAdminBan) Player.SpamFilter.OnBlockAdminKick = false;
 	}
-	else if (MouseIn(500, 545, 64, 64)) Player.SpamFilter.IgnoreFriendList = !Player.SpamFilter.IgnoreFriendList;
-	else if (MouseIn(500, 625, 64, 64)) Player.SpamFilter.IgnoreWhiteList = !Player.SpamFilter.IgnoreWhiteList;
+	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.IgnoreFriendList = !Player.SpamFilter.IgnoreFriendList;
+	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.IgnoreWhiteList = !Player.SpamFilter.IgnoreWhiteList;
 }
 
 /**
@@ -1155,6 +1162,7 @@ function PreferenceIsPlayerInSensDep() {
 /**
  * Initialize the Player's SpamFiler
  * @param {Object} SpamFilter - Object containing information how the filter should work for the Player
+ * @param {boolean} SpamFilter.Enabled - Indicates that the SpamFilter is enabled
  * @param {boolean} SpamFilter.OnBlockAddToGhostList - Add to GhostList on block
  * @param {boolean} SpamFilter.OnBlockAddToBlackList - Add to BlackList on block
  * @param {boolean} SpamFilter.OnBlockAdminKick - Kick the sender form the room on block
@@ -1169,6 +1177,7 @@ function PreferenceInitSpamFilter(SpamFilter) {
 		BlockedActions: new Set(["KneelDown", "StandUp", "ServerLeave", "ServerEnter"]),
 		ActionBlockTimespan: 5000,
 		ActionBlockCount: 7,
+		Enabled: typeof SpamFilter.Enabled == "boolean" ? SpamFilter.Enabled : true,
 		OnBlockAddToGhostList: typeof SpamFilter.OnBlockAddToGhostList == "boolean" ? SpamFilter.OnBlockAddToGhostList : false,
 		OnBlockAddToBlackList: typeof SpamFilter.OnBlockAddToBlackList == "boolean" ? SpamFilter.OnBlockAddToBlackList : false,
 		OnBlockAdminKick: typeof SpamFilter.OnBlockAdminKick == "boolean" ? SpamFilter.OnBlockAdminKick : false,
@@ -1176,6 +1185,7 @@ function PreferenceInitSpamFilter(SpamFilter) {
 		IgnoreFriendList: typeof SpamFilter.IgnoreFriendList == "boolean" ? SpamFilter.IgnoreFriendList : true,
 		IgnoreWhiteList: typeof SpamFilter.IgnoreWhiteList == "boolean" ? SpamFilter.IgnoreWhiteList : true,
 		Check: function(data) {
+			if (!this.Enabled) return true;
 			if (data.Type == "Action") return this.CheckAction(data);
 			return true;
 		},
@@ -1211,26 +1221,33 @@ function PreferenceInitSpamFilter(SpamFilter) {
 		BlockMemberNumber: function(MemberNumber, Type) {
 			if (this.OnBlockAddToGhostList && !Player.GhostList.includes(MemberNumber)) {
 				Player.GhostList.push(MemberNumber);
-				ServerSend("AccoountUpdate", { GhostList: Player.GhostList });
+				ServerSend("AccountUpdate", { GhostList: Player.GhostList });
 			}
 			if (this.OnBlockAddToBlackList && !Player.BlackList.includes(MemberNumber)) {
 				Player.BlackList.push(MemberNumber);
-				ServerSend("AccoountUpdate", { BlackList: Player.BlackList });
+				ServerSend("AccountUpdate", { BlackList: Player.BlackList });
 			}
 			if (ChatRoomPlayerIsAdmin()) {
-				if (this.OnBlockAdminKick) ServerSend("ChatRoomAdmin", { Action: 'Kick', MemberNumber: MemberNumber });
-				else if (this.OnBlockAdminBan) ServerSend("ChatRoomAdmin", { Action: 'Ban', MemberNumber: MemberNumber });
+				if (this.OnBlockAdminKick) {
+					ServerSend("ChatRoomAdmin", { Action: 'Kick', MemberNumber: MemberNumber });
+					this.ActionBlockEntries.delete(MemberNumber);
+				} else if (this.OnBlockAdminBan) {
+					ServerSend("ChatRoomAdmin", { Action: 'Ban', MemberNumber: MemberNumber });
+					this.ActionBlockEntries.delete(MemberNumber);
+				}
 			}
 			const C = ChatRoomCharacter.find(C => C.MemberNumber == MemberNumber);
 			ChatRoomMessage({
 				Content: "SpamFilterBlocked" + Type,
 				Sender: Player.MemberNumber,
-				Dictionary: [{ Tag: "TargetCharacter", Type: "ServerMessage", MemberNumber: MemberNumber, Text: (C && C.Name) || ("#" + MemberNumber) }],
+				Type: "ServerMessage",
+				Dictionary: [{ Tag: "TargetCharacter", MemberNumber: MemberNumber, Text: (C && C.Name) || ("#" + MemberNumber) }],
 			});
 		},
 		Save: function() {
 			ServerSend("AccountUpdate", {
 				SpamFilter: {
+					Enabled: this.Enabled,
 					OnBlockAddToGhostList: this.OnBlockAddToGhostList,
 					OnBlockAddToBlackList: this.OnBlockAddToBlackList,
 					OnBlockAdminKick: this.OnBlockAdminKick,
