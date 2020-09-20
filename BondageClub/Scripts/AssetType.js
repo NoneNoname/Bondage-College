@@ -16,7 +16,9 @@ var AssetTypeSelectBefore = false;
 
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
 const AssetTypeDescription = {};
+/** @type AssetTypeDraw */
 let AssetTypeDrawType = AssetTypeDrawTypeWithImage;
+/** @type AssetTypeClick */
 let AssetTypeClickType = AssetTypeClickTypeWithImage;
 
 /** The X & Y co-ordinates of each option's button, based on the number to be displayed per page. */
@@ -32,6 +34,18 @@ const AssetTypeXY = [
     [[1020, 400], [1265, 400], [1510, 400], [1755, 400], [1020, 700], [1265, 700], [1510, 700], [1755, 700]], //8 options per page
 ];
 
+/** The X & Y co-ordinates of each option's button, based on the number to be displayed per page. */
+const AssetTypeXYWithoutImages = [
+    [], //0 placeholder
+    [[1400, 450]], //1 option per page
+    [[1175, 450], [1425, 450]], //2 options per page
+    [[1175, 450], [1425, 450], [1675, 450]], //3 options per page
+    [[1175, 450], [1425, 450], [1175, 525], [1425, 525]], //4 options per page
+    [[1175, 450], [1425, 450], [1675, 450], [1175, 525], [1425, 525]], //5 options per page
+    [[1175, 450], [1425, 450], [1675, 450], [1175, 525], [1425, 525], [1675, 525]], //6 options per page
+    [[1050, 450], [1200, 450], [1450, 450], [1700, 450], [1050, 525], [1200, 525], [1425, 525]], //7 options per page
+    [[1050, 450], [1200, 450], [1450, 450], [1700, 450], [1050, 525], [1200, 525], [1425, 525], [1675, 525]], //8 options per page
+];
 
 function AssetTypeLoad() {
     let Tools_Count = 0;
@@ -90,8 +104,13 @@ function AssetTypeSetLoad(Item) {
     ExtendedItemSetOffset(0);
     DialogExtendedMessage = AssetTypeDescription[Item.Asset.Group.Name][Item.Asset.Name]["Select"]["Default"];
 
-    AssetTypeDrawType = AssetTypeDrawTypeWithImage;
-    AssetTypeClickType = AssetTypeClickTypeWithImage;
+    if (Item.Asset.TypeInfo.DrawType == "Images") {
+        AssetTypeDrawType = AssetTypeDrawTypeWithImage;
+        AssetTypeClickType = AssetTypeClickTypeWithImage;
+    } else if (Item.Asset.TypeInfo.DrawType == "TextOnly") {
+        AssetTypeDrawType = AssetTypeDrawTypeWithoutImage;
+        AssetTypeClickType = AssetTypeClickTypeWithoutImage;
+    }
 }
 
 function AssetTypeSetDraw() {
@@ -102,8 +121,8 @@ function AssetTypeSetDraw() {
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
-    const ShowCount = Math.min(Info.ShowCount, Types.length);
-    const Description = AssetTypeDescription[Asset.Group.Name][Asset.Name]["Name"];
+    const ShowCount = Info.ShowCount > 8 ? Info.ShowCoun : Math.min(Info.ShowCount, Types.length);
+    const Description = AssetTypeDescription[Asset.Group.Name][Asset.Name];
 
     if (Offset >= ShowCount) {
         DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
@@ -119,20 +138,40 @@ function AssetTypeSetDraw() {
     DrawTextFit(Asset.Description, 1500, 310, 221, "black");
     DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
 
-    // Draw the possible variants and their requirements, arranged based on the number per page
-    for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
-        AssetTypeDrawType(C, Asset, Info, Types, ShowCount, Description, Offset, I);
+    if (!Info.TypeLocking || !InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
+        // Draw the possible variants and their requirements, arranged based on the number per page
+        for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
+            AssetTypeDrawType(C, Asset, Info, Types, ShowCount, Description["Name"], Offset, I);
+        }
+    } else {
+        DrawText(Description["TypeLocked"]["Default"], 1500, 500, "white", "gray");
     }
+
 }
 
+/**
+ * @type AssetTypeDraw
+ */
 function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Description, Offset, I) {
     const X = AssetTypeXY[ShowCount][I - Offset][0];
     const Y = AssetTypeXY[ShowCount][I - Offset][1];
     const Type = Types[I] || Info.NoneTypeName;
     const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
-    DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info.Types[Type], C.ID == 0) ? "Pink" : "White");
+    DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info.Types[Type], C.ID == 0) ? "Pink" : "White", null, null, IsSelected);
     DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
-    DrawText(Description[Type], X + 112, Y + 250, 225, "black");
+    DrawTextFit(Description[Type], X + 112, Y + 250, 225, "black");
+}
+
+/**
+ * @type AssetTypeDraw
+ */
+function AssetTypeDrawTypeWithoutImage(C, _, Info, Types, ShowCount, Description, Offset, I) {
+    const X = AssetTypeXYWithoutImages[ShowCount][I - Offset][0];
+    const Y = AssetTypeXYWithoutImages[ShowCount][I - Offset][1];
+    const Type = Types[I] || Info.NoneTypeName;
+    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
+    DrawButton(X, Y, 225, 55, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info.Types[Type], C.ID == 0) ? "Pink" : "White", null, null, IsSelected);
+    DrawTextFit(Description[Type], X + 112, Y + 30, 225, "black");
 }
 
 function AssetTypeSetClick() {
@@ -159,48 +198,66 @@ function AssetTypeSetClick() {
         ExtendedItemSetOffset(Offset + ShowCount);
     }
 
-    for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
-        if (AssetTypeClickType(C, Info, Types, ShowCount, Offset, I)) return;
+    if (!Info.TypeLocking || !InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
+        for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
+            if (AssetTypeClickType(C, Info, Types, ShowCount, Offset, I)) return;
+        }
     }
+}
+
+/**
+ * @type AssetTypeClick
+ */
+function AssetTypeClickTypeWithImage(C, Info, Types, ShowCount, Offset, I) {
+    const X = AssetTypeXY[ShowCount][I - Offset][0];
+    const Y = AssetTypeXY[ShowCount][I - Offset][1];
+    if (MouseIn(X, Y, 225, 275) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
+        AssetTypeClicked(C, Info, Types[I]);
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @type AssetTypeClick
+ */
+function AssetTypeClickTypeWithoutImage(C, Info, Types, ShowCount, Offset, I) {
+    const X = AssetTypeXYWithoutImages[ShowCount][I - Offset][0];
+    const Y = AssetTypeXYWithoutImages[ShowCount][I - Offset][1];
+    if (MouseIn(X, Y, 225, 55) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
+        AssetTypeClicked(C, Info, Types[I]);
+        return true;
+    }
+    return false;
 }
 
 /**
  * 
  * @param {Character} C 
  * @param {TypeInfo} Info 
- * @param {string[]} Types 
- * @param {number} ShowCount 
- * @param {number} Offset 
- * @param {number} I 
+ * @param {string|null} TypeName 
  */
-function AssetTypeClickTypeWithImage(C, Info, Types, ShowCount, Offset, I) {
-    const X = AssetTypeXY[ShowCount][I - Offset][0];
-    const Y = AssetTypeXY[ShowCount][I - Offset][1];
-
-    if (MouseIn(X, Y, 225, 275) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
-        const Type = Info[Types[I] || Info.NoneTypeName];
-        const R = AssetTypeSkillCheck(Type, C.ID == 0);
-        if (R) {
-            DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
-            return true;
-        } 
-        if (Type.Prerequisite && !InventoryAllow(C, Type.Prerequisite, true)) {
-            DialogExtendedMessage = DialogText;
-            return;
-        }
-        if (AssetTypeSelectBefore) {
-            AssetTypeSelectBefore = false;
-            AssetTypePreSet(C, DialogFocusItem, Types[I]);
-        } else {
-            AssetTypeSet(C, DialogFocusItem, Types[I]);
-        }
-        if (DialogInventory != null) {
-            DialogFocusItem = null;
-            DialogMenuButtonBuild(C);
-        }
+function AssetTypeClicked(C, Info, TypeName) {
+    const Type = Info[TypeName || Info.NoneTypeName];
+    const R = AssetTypeSkillCheck(Type, C.ID == 0);
+    if (R) {
+        DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
         return true;
     }
-    return false;
+    if (Type.Prerequisite && !InventoryAllow(C, Type.Prerequisite, true)) {
+        DialogExtendedMessage = DialogText;
+        return;
+    }
+    if (AssetTypeSelectBefore) {
+        AssetTypeSelectBefore = false;
+        AssetTypePreSet(C, DialogFocusItem, TypeName);
+    } else {
+        AssetTypeSet(C, DialogFocusItem, TypeName);
+    }
+    if (DialogInventory != null) {
+        DialogFocusItem = null;
+        DialogMenuButtonBuild(C);
+    }
 }
 
 /**
@@ -232,7 +289,7 @@ function AssetTypeSet(C, Item, NewType) {
                 C.FocusGroup = null;
             }
         }
-    
+
     } else {
         CharacterRefresh(C, false)
     }
@@ -336,3 +393,25 @@ function AssetTypeSkillCheck(Type, Self) {
     }
     return null;
 }
+
+/**
+ * @callback AssetTypeDraw
+ * @param {Character} C
+ * @param {Asset} Asset
+ * @param {TypeInfo} Info
+ * @param {string[]} Types
+ * @param {number} ShowCount
+ * @param {Object<string, string>} Description
+ * @param {number} Offset
+ * @param {number} I
+ */
+
+/**
+ * @callback AssetTypeClick
+ * @param {Character} C
+ * @param {TypeInfo} Info
+ * @param {string[]} Types
+ * @param {number} ShowCount
+ * @param {number} Offset
+ * @param {number} I
+ */

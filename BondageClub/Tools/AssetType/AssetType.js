@@ -58,7 +58,7 @@ function Tools_AssetTypeSaveJs() {
         Assets.forEach(A => {
             const Info = AssetTypeInfo[G][A];
             write(`${A}: {`, 1);
-            write(`NoneTypeName: "${Info.NoneTypeName}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, SelectBeforeWear: ${Info.SelectBeforeWear}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
+            write(`NoneTypeName: "${Info.NoneTypeName}", DrawType: "${Info.DrawType}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, TypeLocking: ${Info.TypeLocking}, SelectBeforeWear: ${Info.SelectBeforeWear}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
             write(`Types: {`, 1);
             const Types = Object.keys(Info.Types);
             Types.forEach(T => {
@@ -119,7 +119,7 @@ function Tools_AssetTypeDialogFind(G, A, D, T, I) {
     return [G, A, D || "Name", "", DialogFind(Player, I["Dialog" + D]).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"].join(",");
 }
 
-function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNpc) {
+function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNpc, DrawType) {
     const Options = window["Inventory" + FullName + "Options"];
     if (!Options) {
         console.log(FullName);
@@ -133,6 +133,8 @@ function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, Dia
         ShowCount: Math.min(8, Options.length),
         SelectBeforeWear: true,
         ExtraPublish: true,
+        DrawType: DrawType || "Images",
+        TypeLocking: false,
         Types: {},
     }
     Options.forEach(O => {
