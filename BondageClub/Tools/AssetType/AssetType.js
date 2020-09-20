@@ -131,11 +131,11 @@ function Tools_AssetTypeSaveJs() {
 function Tools_AssetTypeDialogFind(G, A, D, T, I) {
     const Desc = AssetTypeDescription[G] && AssetTypeDescription[G][A] && AssetTypeDescription[G][A][D || "Name"];
     const Text = Desc && Desc[T === undefined ? "Default" : (T || I.NoneTypeName)];
-    if (Text) return Text;
+    if (Text) return [G,A,D || "Name", T === undefined ? "Default" : (T || I.NoneTypeName), Text];
 
     if (T !== undefined)
-        return [G, A, D || "Name", T, DialogFind(Player, I["Dialog" + D] + T || I.NoneTypeName, G).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"].join(",");
-    return [G, A, D || "Name", "", DialogFind(Player, I["Dialog" + D]).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"].join(",");
+        return [G, A, D || "Name", T || I.NoneTypeName, DialogFind(Player, I["Dialog" + D] + T || I.NoneTypeName, G).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"];
+    return [G, A, D || "Name", "Default", DialogFind(Player, I["Dialog" + D]).replaceAll(",", '","').replaceAll("\n", '"\n"') || "###MISSING###"];
 }
 
 function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, DialogNpc, DrawType) {
@@ -226,19 +226,19 @@ function Tools_AssetTypeAutoConvert(Name) {
 }
 
 function Tools_AssetTypeInfoPreload() {
-    AssetTypeInfo.ItemArms.Web.DynamicDictionary = function (_, Item, OldType) {
-        const keys = Object.keys(AssetTypeInfo.ItemArms.Web.Types);
-        const NewIndex = keys.indexOf(InventoryItemGetType(Item));
-        const PreviousIndex = keys.indexOf(OldType);
-        const ActionDialog = DialogFind(Player, NewIndex > PreviousIndex ? "tightens" : "loosens", "ItemArms");
-        return [{ Tag: "Action", Text: ActionDialog }];
-    }
-    AssetTypeInfo.ItemArms.Chains.TypeLocking = true;
-    AssetTypeInfo.ItemArms.DuctTape.DynamicAllowSetType = function (C, Item, Type) {
-        if (InventoryGet(C, "Cloth") || InventoryGet(C, "ClothLower")) {
-            DialogExtendedMessage = DialogFind(Player, "RemoveClothesForItem", "ItemArms");
-            return false;
-        }
-        return true;
-    }
+    // AssetTypeInfo.ItemArms.Web.DynamicDictionary = function (_, Item, OldType) {
+    //     const keys = Object.keys(AssetTypeInfo.ItemArms.Web.Types);
+    //     const NewIndex = keys.indexOf(InventoryItemGetType(Item));
+    //     const PreviousIndex = keys.indexOf(OldType);
+    //     const ActionDialog = DialogFind(Player, NewIndex > PreviousIndex ? "tightens" : "loosens", "ItemArms");
+    //     return [{ Tag: "Action", Text: ActionDialog }];
+    // }
+    // AssetTypeInfo.ItemArms.Chains.TypeLocking = true;
+    // AssetTypeInfo.ItemArms.DuctTape.DynamicAllowSetType = function (C, Item, Type) {
+    //     if (InventoryGet(C, "Cloth") || InventoryGet(C, "ClothLower")) {
+    //         DialogExtendedMessage = DialogFind(Player, "RemoveClothesForItem", "ItemArms");
+    //         return false;
+    //     }
+    //     return true;
+    // }
 }

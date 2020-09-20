@@ -4,8 +4,6 @@
  *
  * Expression
  * 
- * InventoryItemArmsDuctTapeValidate
- * 
  */
 
 var AssetTypeSelectBefore = false;
@@ -47,9 +45,8 @@ const AssetTypeXYWithoutImages = [
 ];
 
 function AssetTypeLoad() {
-    Tools_AssetTypeInfoPreload();
-
-    let Tools_Count = 0;
+    // Tools_AssetTypeInfoPreload();
+    // let Tools_Count = 0;
 
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
@@ -61,7 +58,7 @@ function AssetTypeLoad() {
         if (Info == null) return;
 
         if (Array.isArray(Info.Types)) Info.Types = Info.Types.reduce((acc, value) => { acc[value] = {}; return acc; }, {});
-        
+
         if (Info.DynamicDictionary == null) { Info.DynamicDictionary = function () { return []; }; Info.DynamicDictionary.Default = true; }
         if (Info.DynamicAllowType == null) { Info.DynamicAllowType = function () { return A.AllowType; }; Info.DynamicAllowType.Default = true; }
         if (Info.DynamicAllowSetType == null) { Info.DynamicAllowSetType = function () { return true; }; Info.DynamicAllowSetType.Default = true;}
@@ -72,11 +69,11 @@ function AssetTypeLoad() {
         A.ExtendedOrTypeInfo = true;
         A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
 
-        Tools_Count++;
+        // Tools_Count++;
     });
     AssetTypeLoadDescription();
 
-    Tools_AssetTypeReport(Tools_Count);
+    // Tools_AssetTypeReport(Tools_Count);
 }
 
 async function AssetTypeLoadDescription() {
