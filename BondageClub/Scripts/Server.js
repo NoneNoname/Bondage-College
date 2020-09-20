@@ -26,14 +26,14 @@ var ServerDidDisconnect = false;
 function ServerInit() {
 	ServerSocket = io(ServerURL);
 	ServerSocket.on("connect", ServerConnect);
-	ServerSocket.on("reconnecting", ServerReconnecting);
+	//ServerSocket.on("reconnecting", ServerReconnecting);
 	ServerSocket.on("event", function (data) { console.log(data); });
 	ServerSocket.on("ServerMessage", function (data) { console.log(data); });
 	ServerSocket.on("ServerInfo", function (data) { ServerInfo(data); });
 	ServerSocket.on("CreationResponse", function (data) { CreationResponse(data); });
 	ServerSocket.on("LoginResponse", function (data) { LoginResponse(data); });
-	ServerSocket.on("disconnect", function (data) { ServerDisconnect(); });
-	ServerSocket.on("ForceDisconnect", function (data) { ServerDisconnect(data); });
+	//ServerSocket.on("disconnect", function (data) { ServerDisconnect(); });
+	//ServerSocket.on("ForceDisconnect", function (data) { ServerDisconnect(data); });
 	ServerSocket.on("ChatRoomSearchResult", function (data) { ChatSearchResultResponse(data); });
 	ServerSocket.on("ChatRoomSearchResponse", function (data) { ChatSearchResponse(data); });
 	ServerSocket.on("ChatRoomCreateResponse", function (data) { ChatCreateResponse(data); });
