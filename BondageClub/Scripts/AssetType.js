@@ -135,15 +135,15 @@ function AssetTypeSetDraw() {
     if (Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
         DrawButton(1775, 25, 90, 90, "", "White", "Icons/Next.png");
     }
-    if (Asset.AllowLock) {
+    if (!AssetTypeSelectBefore && Asset.AllowLock) {
         const IsGroupBlocked = InventoryGroupIsBlocked(C);
-        const Prerequisite = InventoryAllow(C, Item.Asset.Prerequisite);
+        const Prerequisite = InventoryAllow(C, DialogFocusItem.Asset.Prerequisite);
         if (InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
-            let inspect = false;
-            if (!Player.IsBlind() && Item.Property && Item.Property.LockedBy) { inspect = true; DrawButton(1555, 25, 90, 90, "", "White", "Icons/InspectLock.png"); }
-            if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, Item)) DrawButton(inspect ? 1445 : 1555, 25, 90, 90, "", "White", "Icons/Unlock.png");
+            let unlock = false;
+            if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, DialogFocusItem)) { unlock = true; DrawButton(1015, 25, 90, 90, "", "White", "Icons/Unlock.png"); }
+            if (!Player.IsBlind() && DialogFocusItem.Property && DialogFocusItem.Property.LockedBy) DrawButton(unlock ? 1125 : 1015, 25, 90, 90, "", "White", "Icons/InspectLock.png");
         } else if (Player.CanInteract() && Prerequisite && !IsGroupBlocked) {
-            DrawButton(1555, 25, 90, 90, "", "White", "Icons/Lock.png");
+            DrawButton(1015, 25, 90, 90, "", "White", "Icons/Lock.png");
         }
     }
 
@@ -215,15 +215,20 @@ function AssetTypeSetClick() {
         return;
     }
 
-    if (Asset.AllowLock && MouseIn(1445, 25, 190, 90)) {
+    if (!AssetTypeSelectBefore && Asset.AllowLock && MouseIn(1015, 25, 190, 90)) {
+        const Item = DialogFocusItem;
         const IsGroupBlocked = InventoryGroupIsBlocked(C);
         const Prerequisite = InventoryAllow(C, Item.Asset.Prerequisite);
-        if (InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
-            let inspect = false;
-            if (!Player.IsBlind() && Item.Property && Item.Property.LockedBy) { inspect = true; if (MouseIn(1555, 25, 90, 90)) { DialogDialogMenuButtonClickInspectLock(Item); return; } }
-            if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, Item)) { if (MouseIn(inspect ? 1445 : 1555, 25, 90, 90)) { DialogDialogMenuButtonClickUnlock(C, Item); return; } }
+        if (InventoryItemHasEffect(Item, "Lock", true)) {
+            let unlock = false;
+            if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, Item)) { unlock = true; if (MouseIn(1015, 25, 90, 90)) { DialogDialogMenuButtonClickUnlock(C, Item); return; } }
+            if (!Player.IsBlind() && Item.Property && Item.Property.LockedBy) { if (MouseIn(unlock ? 1125 : 1015, 25, 90, 90)) { DialogDialogMenuButtonClickInspectLock(Item); return; } }
         } else if (Player.CanInteract() && Prerequisite && !IsGroupBlocked) {
-            if (MouseIn(1555, 25, 90, 90)) { DialogDialogMenuButtonClickLock(C, Item); return; }
+            if (MouseIn(1015, 25, 90, 90)) {                
+                DialogFocusItem = null;
+                DialogDialogMenuButtonClickLock(C, Item);
+                return;
+            }
         }
     }
 
@@ -267,7 +272,7 @@ function AssetTypeClickTypeWithoutImage(C, Info, Types, ShowCount, Offset, I) {
  * @param {string|null} TypeName 
  */
 function AssetTypeClicked(C, Info, TypeName) {
-    const Type = Info[TypeName || Info.NoneTypeName];
+    const Type = Info.Types[TypeName || Info.NoneTypeName];
     const R = AssetTypeSkillCheck(Type, C.ID == 0);
     if (R) {
         DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
