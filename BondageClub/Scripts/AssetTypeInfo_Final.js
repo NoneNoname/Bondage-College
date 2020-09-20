@@ -3,7 +3,7 @@
 var AssetTypeInfo = {
 	ItemArms: {
 		BitchSuit: {
-			NoneTypeName: "Latex", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "BitchSuitType",
+			NoneTypeName: "Latex", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "BitchSuitType",
 			Types: {
 				Latex: {
 					Property: { Block: ["ItemBreast", "ItemNipples", "ItemNipplesPiercings", "ItemVulva", "ItemVulvaPiercings", "ItemButt"] },
@@ -14,7 +14,7 @@ var AssetTypeInfo = {
 			},
 		},
 		Chains: {
-			NoneTypeName: "BoxTie", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ChainBondage",
+			NoneTypeName: "BoxTie", DrawType: "Images", ShowCount: 8, Unextend: true, TypeLocking: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ChainBondage",
 			Types: {
 				BoxTie: {
 					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
@@ -64,13 +64,14 @@ var AssetTypeInfo = {
 			},
 		},
 		DuctTape: {
-			NoneTypeName: "Arms", ShowCount: 5, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsDuctTape",
+			NoneTypeName: "Arms", DrawType: "Images", ShowCount: 5, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsDuctTape",
 			Types: {
 				Arms: {
 					Property: { Difficulty: 1 },
 				},
 				Bottom: {
 					Property: { Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemVulvaPiercings"], Difficulty: 2, SetPose: ["BackElbowTouch"] },
+					Skills: { SelfBondage: 4 },
 				},
 				Top: {
 					Property: { Block: ["ItemTorso", "ItemBreast", "ItemNipples", "ItemNipplesPiercings"], Difficulty: 4, SetPose: ["BackElbowTouch"] },
@@ -82,9 +83,10 @@ var AssetTypeInfo = {
 					Property: { Block: ["ItemVulva", "ItemButt", "ItemPelvis", "ItemTorso", "ItemBreast", "ItemNipples", "ItemVulvaPiercings", "ItemNipplesPiercings"], Difficulty: 7, SetPose: ["BackElbowTouch"] },
 				},
 			},
+			DynamicAllowSetType: function (C, Item, Type) { if (InventoryGet(C, "Cloth") || InventoryGet(C, "ClothLower")) { DialogExtendedMessage = DialogFind(Player, "RemoveClothesForItem", "ItemArms"); return false; } return true; },
 		},
 		HempRope: {
-			NoneTypeName: "BoxTie", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "RopeBondage",
+			NoneTypeName: "BoxTie", DrawType: "Images", ShowCount: 8, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "RopeBondage",
 			Types: {
 				BoxTie: {
 					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackBoxTie"] },
@@ -148,14 +150,14 @@ var AssetTypeInfo = {
 			},
 		},
 		LatexButterflyLeotard: {
-			NoneTypeName: "Unpolished", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsLatexButterflyLeotard",
+			NoneTypeName: "Unpolished", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsLatexButterflyLeotard",
 			Types: {
 				Unpolished: {},
 				Polished: {},
 			},
 		},
 		LeatherArmbinder: {
-			NoneTypeName: "None", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "LeatherArmbinderSet",
+			NoneTypeName: "None", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "LeatherArmbinderSet",
 			Types: {
 				None: {
 					Property: { Difficulty: 0 },
@@ -169,7 +171,7 @@ var AssetTypeInfo = {
 			},
 		},
 		LeatherCuffs: {
-			NoneTypeName: "None", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsLeatherCuffs",
+			NoneTypeName: "None", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsLeatherCuffs",
 			Types: {
 				None: {
 					Property: { Difficulty: 0, Effect: [], SelfUnlock: true },
@@ -186,7 +188,7 @@ var AssetTypeInfo = {
 			},
 		},
 		LeatherStraitJacket: {
-			NoneTypeName: "Loose", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "LeatherStraitJacketNPCReaction",
+			NoneTypeName: "Loose", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "LeatherStraitJacketNPCReaction",
 			Types: {
 				Loose: {
 					Property: { Difficulty: 0 },
@@ -203,7 +205,7 @@ var AssetTypeInfo = {
 			},
 		},
 		MermaidSuit: {
-			NoneTypeName: "Zipped", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "MermaidSuitNPCReaction",
+			NoneTypeName: "Zipped", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "MermaidSuitNPCReaction",
 			Types: {
 				Zipped: {
 					Property: { Block: ["ItemBreast", "ItemNipples", "ItemNipplesPiercings", "ItemVulva", "ItemVulvaPiercings", "ItemButt"], Difficulty: 0 },
@@ -214,7 +216,7 @@ var AssetTypeInfo = {
 			},
 		},
 		OrnateCuffs: {
-			NoneTypeName: "None", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsOrnateCuffsNPCReaction",
+			NoneTypeName: "None", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsOrnateCuffsNPCReaction",
 			Types: {
 				None: {
 					Property: { Difficulty: 0, Effect: [], SelfUnlock: true },
@@ -231,7 +233,7 @@ var AssetTypeInfo = {
 			},
 		},
 		StraitJacket: {
-			NoneTypeName: "Loose", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmStraitJacketNPCReaction",
+			NoneTypeName: "Loose", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmStraitJacketNPCReaction",
 			Types: {
 				Loose: {
 					Property: { Difficulty: 0 },
@@ -248,7 +250,7 @@ var AssetTypeInfo = {
 			},
 		},
 		SturdyLeatherBelts: {
-			NoneTypeName: "One", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsSturdyLeatherBelts",
+			NoneTypeName: "One", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsSturdyLeatherBelts",
 			Types: {
 				One: {},
 				Two: {
@@ -260,7 +262,7 @@ var AssetTypeInfo = {
 			},
 		},
 		TightJacket: {
-			NoneTypeName: "Basic", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "JacketPrep",
+			NoneTypeName: "Basic", DrawType: "Images", ShowCount: 8, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "JacketPrep",
 			Types: {
 				Basic: {
 					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
@@ -289,7 +291,7 @@ var AssetTypeInfo = {
 			},
 		},
 		TightJacketCrotch: {
-			NoneTypeName: "Basic", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "JacketPrep",
+			NoneTypeName: "Basic", DrawType: "Images", ShowCount: 8, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "JacketPrep",
 			Types: {
 				Basic: {
 					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
@@ -318,39 +320,46 @@ var AssetTypeInfo = {
 			},
 		},
 		Web: {
-			NoneTypeName: "Tangled", ShowCount: 7, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsWeb",
+			NoneTypeName: "Tangled", DrawType: "Images", ShowCount: 7, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsWeb",
 			Types: {
 				Tangled: {
 					Property: { Difficulty: 0 },
 				},
 				Wrapped: {
 					Property: { AllowPose: ["Kneel"], Block: ["ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots"], Difficulty: 2, Effect: ["Block", "Freeze", "Prone"], Prerequisite: ["NoFeetSpreader"], SetPose: ["LegsClosed", "BackElbowTouch"] },
+					Skills: { Bondage: 0, SelfBondage: 4 },
 					Prerequisite: ["NoFeetSpreader"],
 				},
 				Cocooned: {
 					Property: { AllowPose: ["Kneel"], Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Difficulty: 4, Effect: ["Block", "Freeze", "Prone"], Prerequisite: ["NoFeetSpreader"], SetPose: ["LegsClosed", "BackElbowTouch"] },
+					Skills: { Bondage: 1, SelfBondage: 5 },
 					Prerequisite: ["NoFeetSpreader"],
 				},
 				Hogtied: {
 					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast", "ItemDevices"], Difficulty: 4, Effect: ["Block", "Freeze", "Prone"], Hide: ["Cloth", "ClothLower", "ClothAccessory", "Necklace", "Shoes", "Socks"], SetPose: ["Hogtied"] },
+					Skills: { Bondage: 3, SelfBondage: 6 },
 					Prerequisite: ["NotSuspended", "NoFeetSpreader", "CannotBeHogtiedWithAlphaHood"],
 				},
 				Suspended: {
 					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Difficulty: 6, Effect: ["Block", "Freeze", "Prone"], SetPose: ["LegsClosed", "BackElbowTouch", "Suspension"] },
+					Skills: { Bondage: 4, SelfBondage: 8 },
 					Prerequisite: ["NoFeetSpreader", "NotChained", "CannotBeHogtiedWithAlphaHood"],
 				},
 				KneelingSuspended: {
 					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], Difficulty: 8, Effect: ["Block", "Freeze", "Prone"], Hide: ["BodyLower", "Cloth", "ClothLower", "Shoes", "SuitLower", "Panties", "Socks", "Pussy", "ItemFeet", "ItemLegs", "ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemBoots", "ItemHands", "ItemNipples", "ItemNipplesPiercings", "ItemBreast"], SetPose: ["LegsClosed", "BackElbowTouch", "Suspension"] },
+					Skills: { Bondage: 5, SelfBondage: 8 },
 					Prerequisite: ["NoFeetSpreader", "NotChained", "CannotBeHogtiedWithAlphaHood"],
 				},
 				SuspensionHogtied: {
 					Property: { Block: ["ItemVulva", "ItemVulvaPiercings", "ItemButt", "ItemPelvis", "ItemTorso", "ItemHands", "ItemLegs", "ItemFeet", "ItemBoots", "ItemNipples", "ItemNipplesPiercings", "ItemBreast", "ItemDevices"], Difficulty: 11, Effect: ["Block", "Freeze", "Prone"], Hide: ["Cloth", "ClothLower", "ClothAccessory", "Necklace", "Shoes", "Socks"], SetPose: ["Hogtied", "SuspensionHogtied"] },
+					Skills: { Bondage: 5, SelfBondage: 9 },
 					Prerequisite: ["NotSuspended", "NoFeetSpreader", "NotChained", "CannotBeHogtiedWithAlphaHood"],
 				},
 			},
+			DynamicDictionary: function (_, Item, OldType) { const keys = Object.keys(AssetTypeInfo.ItemArms.Web.Types); const NewIndex = keys.indexOf(InventoryItemGetType(Item)); const PreviousIndex = keys.indexOf(OldType); const ActionDialog = DialogFind(Player, NewIndex > PreviousIndex ? "tightens" : "loosens", "ItemArms"); return [{ Tag: "Action", Text: ActionDialog }]; },
 		},
 		WristShackles: {
-			NoneTypeName: "InFront", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsWristShackles",
+			NoneTypeName: "InFront", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemArmsWristShackles",
 			Types: {
 				InFront: {},
 				Behind: {
@@ -359,7 +368,7 @@ var AssetTypeInfo = {
 			},
 		},
 		Zipties: {
-			NoneTypeName: "ZipLight", ShowCount: 8, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "Zip",
+			NoneTypeName: "ZipLight", DrawType: "Images", ShowCount: 8, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "Zip",
 			Types: {
 				ZipLight: {
 					Property: { Difficulty: 1, Effect: ["Block", "Prone"], SetPose: ["BackElbowTouch"] },
@@ -412,7 +421,7 @@ var AssetTypeInfo = {
 	},
 	ItemDevices: {
 		Crib: {
-			NoneTypeName: "Open", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Open", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Open: {
 					Property: { Difficulty: 0 },
@@ -426,28 +435,28 @@ var AssetTypeInfo = {
 			},
 		},
 		Locker: {
-			NoneTypeName: "Seethrough", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Seethrough", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Seethrough: {},
 				Opaque: {},
 			},
 		},
 		SmallLocker: {
-			NoneTypeName: "Seethrough", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Seethrough", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Seethrough: {},
 				Opaque: {},
 			},
 		},
 		SmallVentlessLocker: {
-			NoneTypeName: "Seethrough", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Seethrough", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Seethrough: {},
 				Opaque: {},
 			},
 		},
 		VentlessLocker: {
-			NoneTypeName: "Seethrough", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Seethrough", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Seethrough: {},
 				Opaque: {},
@@ -456,32 +465,37 @@ var AssetTypeInfo = {
 	},
 	ItemFeet: {
 		HempRope: {
-			NoneTypeName: "Basic", ShowCount: 6, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Basic", DrawType: "Images", ShowCount: 6, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Basic: {
 					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
 				},
 				FullBinding: {
 					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 2 },
 				},
 				Link: {
 					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 2 },
 				},
 				Diamond: {
 					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 4 },
 				},
 				Mermaid: {
 					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 4 },
 				},
 				Suspension: {
 					Property: { Difficulty: 6, SetPose: ["LegsClosed", "Suspension"] },
+					Skills: { Bondage: 6 },
 					Prerequisite: ["NotKneeling", "NotMounted", "NotChained", "NotHogtied"],
 					Expression: [{ Group: "Blush", Name: "High", Timer: 30 }],
 				},
 			},
 		},
 		Zipties: {
-			NoneTypeName: "ZipFeetLight", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "ZipFeetLight", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				ZipFeetLight: {
 					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
@@ -497,7 +511,7 @@ var AssetTypeInfo = {
 	},
 	ItemHead: {
 		DuctTape: {
-			NoneTypeName: "Double", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Double", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Double: {
 					Property: { Block: ["ItemNose"], Effect: ["BlindNormal", "Prone"] },
@@ -511,7 +525,7 @@ var AssetTypeInfo = {
 			},
 		},
 		WebBlindfold: {
-			NoneTypeName: "Blindfold", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Blindfold", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Blindfold: {
 					Property: { Difficulty: 0 },
@@ -524,7 +538,7 @@ var AssetTypeInfo = {
 	},
 	ItemLegs: {
 		DuctTape: {
-			NoneTypeName: "Legs", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Legs", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Legs: {
 					Property: { Difficulty: 0 },
@@ -541,31 +555,36 @@ var AssetTypeInfo = {
 			},
 		},
 		HempRope: {
-			NoneTypeName: "Basic", ShowCount: 6, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "Basic", DrawType: "Images", ShowCount: 6, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				Basic: {
 					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
 				},
 				FullBinding: {
 					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 2 },
 				},
 				Link: {
 					Property: { Difficulty: 2, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 2 },
 				},
 				Frogtie: {
 					Property: { Block: ["ItemFeet"], Difficulty: 3, Effect: ["ForceKneel"], SetPose: ["Kneel"] },
+					Skills: { Bondage: 3 },
 					Prerequisite: ["NotSuspended", "CanKneel"],
 				},
 				Crossed: {
 					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 4 },
 				},
 				Mermaid: {
 					Property: { Difficulty: 4, SetPose: ["LegsClosed"] },
+					Skills: { Bondage: 4 },
 				},
 			},
 		},
 		SturdyLeatherBelts: {
-			NoneTypeName: "One", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "One", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				One: {},
 				Two: {
@@ -574,7 +593,7 @@ var AssetTypeInfo = {
 			},
 		},
 		Zipties: {
-			NoneTypeName: "ZipLegLight", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			NoneTypeName: "ZipLegLight", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
 			Types: {
 				ZipLegLight: {
 					Property: { Difficulty: 1, SetPose: ["LegsClosed"] },
@@ -594,7 +613,7 @@ var AssetTypeInfo = {
 	},
 	ItemMouth: {
 		ClothGag: {
-			NoneTypeName: "Small", ShowCount: 4, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ClothGag",
+			NoneTypeName: "Small", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ClothGag",
 			Types: {
 				Small: {
 					Property: { Effect: ["BlockMouth", "GagVeryLight"] },
@@ -610,8 +629,8 @@ var AssetTypeInfo = {
 				},
 			},
 		},
-		DildoPlug: {
-			NoneTypeName: "Open", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemMouthDildoPlugGag",
+		DildoPlugGag: {
+			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemMouthDildoPlugGag",
 			Types: {
 				Open: {
 					Property: { Effect: ["GagEasy", "OpenMouth"] },
@@ -622,7 +641,7 @@ var AssetTypeInfo = {
 			},
 		},
 		MilkBottle: {
-			NoneTypeName: "Rest", ShowCount: 3, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "MilkBottle",
+			NoneTypeName: "Rest", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "MilkBottle",
 			Types: {
 				Rest: {},
 				Raised: {},
@@ -630,7 +649,7 @@ var AssetTypeInfo = {
 			},
 		},
 		PlugGag: {
-			NoneTypeName: "Open", ShowCount: 2, Unextend: true, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemMouthPlugGag",
+			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemMouthPlugGag",
 			Types: {
 				Open: {
 					Property: { Effect: ["GagMedium", "OpenMouth"] },
@@ -642,4 +661,3 @@ var AssetTypeInfo = {
 		},
 	},
 }
-

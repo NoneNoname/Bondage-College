@@ -4,8 +4,6 @@
  *
  * Expression
  * 
- * 
- * ItemArmsWeb DynamicDictionary
  * InventoryItemArmsDuctTapeValidate
  * 
  */
@@ -49,6 +47,8 @@ const AssetTypeXYWithoutImages = [
 ];
 
 function AssetTypeLoad() {
+    Tools_AssetTypeInfoPreload();
+
     let Tools_Count = 0;
 
     Asset.forEach(A => {
@@ -60,8 +60,11 @@ function AssetTypeLoad() {
         if (typeof Info === 'string') return;
         if (Info == null) return;
 
-        if (Info.DynamicDictionary == null) Info.DynamicDictionary = function () { return []; };
-        if (Info.DynamicAllowType == null) Info.DynamicAllowType = function () { return A.AllowType; };
+        if (Array.isArray(Info.Types)) Info.Types = Info.Types.reduce((acc, value) => { acc[value] = {}; return acc; }, {});
+        
+        if (Info.DynamicDictionary == null) { Info.DynamicDictionary = function () { return []; }; Info.DynamicDictionary.Default = true; }
+        if (Info.DynamicAllowType == null) { Info.DynamicAllowType = function () { return A.AllowType; }; Info.DynamicAllowType.Default = true; }
+        if (Info.DynamicAllowSetType == null) { Info.DynamicAllowSetType = function () { return true; }; Info.DynamicAllowSetType.Default = true;}
 
         if (A.Extended && Info.Unextend) A.Extended = false;
 
@@ -282,6 +285,8 @@ function AssetTypeClicked(C, Info, TypeName) {
         DialogExtendedMessage = DialogText;
         return;
     }
+    if (!Info.DynamicAllowSetType(C, DialogFocusItem, Type))
+        return;
     if (AssetTypeSelectBefore) {
         AssetTypeSelectBefore = false;
         AssetTypePreSet(C, DialogFocusItem, TypeName);
@@ -306,6 +311,7 @@ function AssetTypeSet(C, Item, NewType) {
         if (Item.Asset.Extended) window["Inventory" + Item.Asset.Group.Name + Item.Asset.Name + "Load"]();
     }
 
+    const OldType = InventoryItemGetType(Item);
     if (Item.Property) Item.Property.Type = NewType;
     else Item.Property = { Type: NewType };
 
@@ -315,11 +321,11 @@ function AssetTypeSet(C, Item, NewType) {
         CharacterRefresh(C);
         ChatRoomCharacterUpdate(C);
         if (CurrentScreen === "ChatRoom") {
-            AssetTypePublish(C, Item);
+            AssetTypePublish(C, Item, OldType);
         } else {
             DialogFocusItem = null;
             if (C.ID != 0) {
-                C.CurrentDialog = DialogFind(C, Item.TypeInfo.Types[NewType || Item.TypeInfo.NoneTypeName].DialogNpc + NewType || Item.TypeInfo.NoneTypeName, "ItemArms");
+                C.CurrentDialog = DialogFind(C, Item.Asset.TypeInfo.Types[NewType || Item.Asset.TypeInfo.NoneTypeName].DialogNpc + NewType || Item.Asset.TypeInfo.NoneTypeName, "ItemArms");
                 C.FocusGroup = null;
             }
         }
@@ -333,15 +339,16 @@ function AssetTypeSet(C, Item, NewType) {
  * 
  * @param {Character} C 
  * @param {Item} Item 
+ * @param {string} OldType
  */
-function AssetTypePublish(C, Item) {
+function AssetTypePublish(C, Item, OldType) {
     const Info = Item.Asset.TypeInfo;
     const Dictionary = [
         { Tag: "AssetTypeInfo", Group: Item.Asset.Group.Name, Asset: Item.Asset.Name, Type: InventoryItemGetType(Item) },
         { Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber },
         { Tag: "TargetCharacter", Text: C.Name, MemberNumber: C.MemberNumber },
         { Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber }];
-    ChatRoomPublishCustomAction("AssetTypeSet", true, Dictionary.concat(Info.DynamicDictionary(C, Item)));
+    ChatRoomPublishCustomAction("AssetTypeSet", true, Dictionary.concat(Info.DynamicDictionary(C, Item, OldType)));
 }
 
 /**

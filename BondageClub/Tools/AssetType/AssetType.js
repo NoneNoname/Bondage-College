@@ -33,10 +33,10 @@ function Tools_AssetTypeSaveCsv() {
 
 function Tools_AssetTypeSaveJs() {
     let File = '"use strict"\n\nvar AssetTypeInfo = {\n';
-    let setBuffer = str => File += str;
+    let getBuffer = str => File += str;
     let indent = 1;
     const write = (str, i) => {
-        setBuffer('\t'.repeat(str == "}" ? indent - 1 : indent) + str + (i != 1 ? ',\n' : "\n"));
+        getBuffer('\t'.repeat(str == "}" ? indent - 1 : indent) + str + (i != 1 ? ',\n' : "\n"));
         indent += i ?? 0;
     };
     const stringifyProperty = (P, N) => {
@@ -59,15 +59,18 @@ function Tools_AssetTypeSaveJs() {
             const Info = AssetTypeInfo[G][A];
             write(`${A}: {`, 1);
             write(`NoneTypeName: "${Info.NoneTypeName}", DrawType: "${Info.DrawType}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, TypeLocking: ${Info.TypeLocking}, SelectBeforeWear: ${Info.SelectBeforeWear}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
+            let types = "";
+            let emptyCount = 0;
+            getBuffer = str => types += str;
             write(`Types: {`, 1);
             const Types = Object.keys(Info.Types);
             Types.forEach(T => {
                 const Type = Info.Types[T];
                 let open = "";
-                setBuffer = str => open += str;
+                getBuffer = str => open += str;
                 write(`${T}: {`, 1);
                 let data = "";
-                setBuffer = str => data += str;
+                getBuffer = str => data += str;
                 if (Type.Property && Object.keys(Type.Property).length > 0) {
                     const PS = Object.keys(Type.Property).filter(P => Type.Property[P] != null);
                     PS.sort();
@@ -82,16 +85,32 @@ function Tools_AssetTypeSaveJs() {
                 if (Type.Expression) {
                     write(`Expression: [${Type.Expression.map(stringifyExperssion).join(", ")}]`)
                 }
-                setBuffer = str => File += str;
+                getBuffer = str => types += str;
                 if (data.trim().length == 0) {
-                    indent -= 1;
+                    --indent;
+                    ++emptyCount;
                     write(`${T}: {}`);
                 } else {
-                    File += open + data;
+                    types += open + data;
                     write('}', -1);
                 }
             });
             write('}', -1);
+            getBuffer = str => File += str;
+            if (emptyCount == Types.length) {
+                write(`Types: [${Types.map(s => `"${s}"`).join(", ")}]`);
+            } else {
+                File += types;
+            }        
+            if (!Info.DynamicDictionary.Default) {
+                write(`DynamicDictionary: ${Info.DynamicDictionary.toString().replace(/\s+/gs, ' ')}`)
+            }
+            if (!Info.DynamicAllowType.Default) {
+                write(`DynamicAllowType: ${Info.DynamicAllowType.toString().replace(/\s+/gs, ' ')}`)
+            }
+            if (!Info.DynamicAllowSetType.Default) {
+                write(`DynamicAllowSetType: ${Info.DynamicAllowSetType.toString().replace(/\s+/gs, ' ')}`)
+            }
             write('}', -1);
         });
         write('}', -1);
@@ -151,6 +170,12 @@ function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, Dia
         if (typeof O.RequiredBondageLevel === "number") {
             Type.Skills = { Bondage: O.RequiredBondageLevel };
         }
+        if (typeof O.BondageLevel === "number") {
+            Type.Skills = { Bondage: O.BondageLevel };
+        }
+        if (typeof O.SelfBondageLevel === "number") {
+            Type.Skills = Object.assign({}, Type.Skills, { SelfBondage: O.SelfBondageLevel });
+        }
         if (Array.isArray(O.Prerequisite)) {
             Type.Prerequisite = O.Prerequisite;
         }
@@ -198,4 +223,22 @@ function Tools_AssetTypeAutoConvert(Name) {
     const DialogNpc = InventoryItemBootsToeTapeNpcDialog.toString().replace(/.*DialogFind\(.*"(.*)"[ ]{0,}\+.*/gis, (_, m) => m);
     if (!DialogNpc || DialogNpc.includes("function")) return `Error: DialogNpc {${Name}}`;
     return `Tools_AssetTypeTransform("${Name}", "${Dialog}", "${DialogSelect}", "${DialogSet}", "${DialogNpc}")`;
+}
+
+function Tools_AssetTypeInfoPreload() {
+    AssetTypeInfo.ItemArms.Web.DynamicDictionary = function (_, Item, OldType) {
+        const keys = Object.keys(AssetTypeInfo.ItemArms.Web.Types);
+        const NewIndex = keys.indexOf(InventoryItemGetType(Item));
+        const PreviousIndex = keys.indexOf(OldType);
+        const ActionDialog = DialogFind(Player, NewIndex > PreviousIndex ? "tightens" : "loosens", "ItemArms");
+        return [{ Tag: "Action", Text: ActionDialog }];
+    }
+    AssetTypeInfo.ItemArms.Chains.TypeLocking = true;
+    AssetTypeInfo.ItemArms.DuctTape.DynamicAllowSetType = function (C, Item, Type) {
+        if (InventoryGet(C, "Cloth") || InventoryGet(C, "ClothLower")) {
+            DialogExtendedMessage = DialogFind(Player, "RemoveClothesForItem", "ItemArms");
+            return false;
+        }
+        return true;
+    }
 }
