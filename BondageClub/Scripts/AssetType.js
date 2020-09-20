@@ -6,13 +6,14 @@
  * 
  */
 
+ /** Type selection before item add */
 var AssetTypeSelectBefore = false;
 
 /**
  * @type {string[]}
  */
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
-const AssetTypeDescription = {};
+const AssetTypeDialog = {};
 /** @type AssetTypeDraw */
 let AssetTypeDrawType = AssetTypeDrawTypeWithImage;
 /** @type AssetTypeClick */
@@ -44,6 +45,9 @@ const AssetTypeXYWithoutImages = [
     [[1050, 450], [1200, 450], [1450, 450], [1700, 450], [1050, 525], [1200, 525], [1425, 525], [1675, 525]], //8 options per page
 ];
 
+/**
+ * Loads the type info
+ */
 function AssetTypeLoad() {
     // Tools_AssetTypeInfoPreload();
     // let Tools_Count = 0;
@@ -71,27 +75,43 @@ function AssetTypeLoad() {
 
         // Tools_Count++;
     });
-    AssetTypeLoadDescription();
+    AssetTypeLoadDialog();
 
     // Tools_AssetTypeReport(Tools_Count);
 }
 
-async function AssetTypeLoadDescription() {
-    const Data = await fetch('Assets/Female3DCG/Female3DCG_Type.csv').then(r => r.text());
+/**
+ * Loads the dialogs from the csv for asset types
+ */
+async function AssetTypeLoadDialog() {
+    const Data = await fetch("Assets/Female3DCG/Female3DCG_Type.csv").then(r => r.text());
     const CSV = CommonParseCSV(Data);
     CSV.forEach(value => {
-        const [G, A, N, T, D] = value;
-        if (!AssetTypeDescription[G]) AssetTypeDescription[G] = {};
-        if (!AssetTypeDescription[G][A]) AssetTypeDescription[G][A] = {};
-        if (!AssetTypeDescription[G][A]) AssetTypeDescription[G][A] = {};
-        if (!AssetTypeDescription[G][A][N]) AssetTypeDescription[G][A][N] = {};
-        AssetTypeDescription[G][A][N][T || "Default"] = D;
+        const [G, A, K, T, D] = value;
+        if (!AssetTypeDialog[G]) AssetTypeDialog[G] = {};
+        if (!AssetTypeDialog[G][A]) AssetTypeDialog[G][A] = {};
+        if (!AssetTypeDialog[G][A]) AssetTypeDialog[G][A] = {};
+        if (!AssetTypeDialog[G][A][K]) AssetTypeDialog[G][A][K] = {};
+        AssetTypeDialog[G][A][K][T || "Default"] = D;
     });
+    await AssetTypeDialogTranslate();
 }
 
 /**
- * 
- * @param {Item} [Item=DialogFocusItem] 
+ * Translates the Dialogs for the Asset Types
+ */
+async function AssetTypeDialogTranslate() {
+    if (TranslationLanguage == "EN") return;
+    const Data = TranslationParseTXT(await fetch(`Assets/Female3DCG/Female3DCG_Type_${TranslationLanguage}.txt`).then(r => r.text()));
+    for (let Group of Object.keys(AssetTypeDialog)) for (let Asset of Object.keys(AssetTypeDialog[Group])) for (let Key of Object.keys(AssetTypeDialog[Group][Asset])) for (let Dialog of Object.keys(AssetTypeDialog[Group][Asset][Key])) {
+        AssetTypeDialog[Group][Asset][Key][Dialog] = TranslationString(AssetTypeDialog[Group][Asset][Key][Dialog], Data);
+    }
+}
+
+/**
+ * Prepares the UI for the item
+ * @param {Item} [Item=DialogFocusItem] - Item to load
+ * @returns {void} - Nothing
  */
 function AssetTypeSetLoad(Item) {
     const C = CharacterGetCurrent();
@@ -106,7 +126,7 @@ function AssetTypeSetLoad(Item) {
         }
     }
     ExtendedItemSetOffset(0);
-    DialogExtendedMessage = AssetTypeDescription[Item.Asset.Group.Name][Item.Asset.Name]["Select"]["Default"];
+    DialogExtendedMessage = AssetTypeDialog[Item.Asset.Group.Name][Item.Asset.Name]["Select"]["Default"];
 
     if (Item.Asset.TypeInfo.DrawType == "Images") {
         AssetTypeDrawType = AssetTypeDrawTypeWithImage;
@@ -118,7 +138,7 @@ function AssetTypeSetLoad(Item) {
 }
 
 /**
- * 
+ * Draw handler for FocusItem with TypeInfo
  */
 function AssetTypeSetDraw() {
     if (DialogFocusItem == null || DialogFocusItem.Asset.TypeInfo == null) return;
@@ -129,7 +149,7 @@ function AssetTypeSetDraw() {
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
     const ShowCount = Info.ShowCount > 8 ? Info.ShowCount : Math.min(Info.ShowCount, Types.length);
-    const Description = AssetTypeDescription[Asset.Group.Name][Asset.Name];
+    const Description = AssetTypeDialog[Asset.Group.Name][Asset.Name];
 
     if (Offset >= ShowCount) {
         DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
@@ -192,7 +212,7 @@ function AssetTypeDrawTypeWithoutImage(C, _, Info, Types, ShowCount, Description
 }
 
 /**
- * 
+ * Click handler for FocusItem with TypeInfo
  */
 function AssetTypeSetClick() {
     if (DialogFocusItem == null || DialogFocusItem.Asset.TypeInfo == null) return;
@@ -271,10 +291,10 @@ function AssetTypeClickTypeWithoutImage(C, Info, Types, ShowCount, Offset, I) {
 }
 
 /**
- * 
- * @param {Character} C 
- * @param {TypeInfo} Info 
- * @param {string|null} TypeName 
+ * Checks the Skill/Prerequisite/DynamicAllowSetType then sets the type on the DialogFocusItem 
+ * @param {Character} C - Current character
+ * @param {TypeInfo} Info - Type info
+ * @param {string|null} TypeName - Name of the type
  */
 function AssetTypeClicked(C, Info, TypeName) {
     const Type = Info.Types[TypeName || Info.NoneTypeName];
@@ -302,8 +322,8 @@ function AssetTypeClicked(C, Info, TypeName) {
 }
 
 /**
- * 
- * @param {Character} C 
+ * Sets the item type on a character
+ * @param {Character} C - Current character
  * @param {Item} Item 
  * @param {string} NewType 
  */
@@ -338,10 +358,11 @@ function AssetTypeSet(C, Item, NewType) {
 }
 
 /**
- * 
- * @param {Character} C 
- * @param {Item} Item 
- * @param {string} OldType
+ * Publish a Type change to the chat room
+ * @param {Character} C - Current Character
+ * @param {Item} Item - 
+ * @param {string} OldType - Previous type of the item
+ * @returns {void} - Nothing
  */
 function AssetTypePublish(C, Item, OldType) {
     const Info = Item.Asset.TypeInfo;
@@ -354,10 +375,11 @@ function AssetTypePublish(C, Item, OldType) {
 }
 
 /**
- * 
- * @param {Character} C 
- * @param {Item} Item 
- * @param {string} NewType 
+ * Sets a type on an item that has yet to be added
+ * @param {Character} C - Current character
+ * @param {Item} Item - Item to set
+ * @param {string} NewType - New type
+ * @returns {void} - Nothing
  */
 function AssetTypePreSet(C, Item, NewType) {
     AssetTypeSetLoad(Item);
@@ -368,9 +390,10 @@ function AssetTypePreSet(C, Item, NewType) {
 }
 
 /**
- * 
- * @param {Item} Item 
- * @param {?string} NewType 
+ * Sets the modifiers on an Item based on TypeInfo
+ * @param {Item} Item - Item to work with
+ * @param {?string} NewType - New Type for the item
+ * @returns {void} - Nothing
  */
 function AssetTypeSetMofifiers(Item, NewType) {
     // if (NewType && NewType[0] == '_') Item.Property.Restrain = NewType[0].substr(1);
@@ -394,15 +417,25 @@ function AssetTypeSetMofifiers(Item, NewType) {
     }
 }
 
+/**
+ * Finds a dialog from AssetTypeDialog
+ * @param {"Name"|"Set"|"Select"} key - Key for the Dialog
+ * @param {Object} obj
+ * @param {string} obj.Group - Group name
+ * @param {string} obj.Asset - Asset name
+ * @param {string} obj.Type  - Type name
+ * @returns {string} - Dialog
+ */
 function AssetTypeGetDialog(key, obj) {
     const { Group, Asset, Type } = obj;
-    return CommonObjectTraverse(AssetTypeDescription, Group, Asset, key, Type) || "";
+    return CommonObjectTraverse(AssetTypeDialog, Group, Asset, key, Type) || "";
 }
 
 /**
  * Finds a dialog for a typed item
  * @param {string} msg 
  * @param {Array} Dictionary 
+ * @returns {string} - Dialog
  */
 function AssetTypeDialogFind(msg, Dictionary) {
     if (!Array.isArray(Dictionary)) return "";
@@ -412,24 +445,26 @@ function AssetTypeDialogFind(msg, Dictionary) {
 }
 
 /**
- * 
- * @param {Character} C 
- * @param {Asset} Asset 
- * @param {string} Type 
+ * Gets the Asset dynamic description
+ * @param {Character} C - Character the assets is on
+ * @param {Asset} Asset - The asset 
+ * @param {string|null} Type - Type of the asset
+ * @returns {string} - Description of the asset
  */
 function AssetTypeGetDescription(C, Asset, Type) {
     // MAYBE: find the item on C and get the type if it is null
     if (Asset.TypeInfo && Asset.TypeInfo.TypedName) {
-        const D = AssetTypeGetDialog("Name", { Asset: Asset.Name, Group: Asset.Group.Name, Type: Type });
+        const D = AssetTypeGetDialog("Name", { Asset: Asset.Name, Group: Asset.Group.Name, Type: Type || Asset.TypeInfo.NoneTypeName });
         if (D) return D;
     }
-    return Asset.DynamicDescription(C); // Can be removed after the
+    return Asset.DynamicDescription(C); // Can be removed after all items are added
 }
 
 /**
- * 
- * @param {TypeInfoType} Type 
- * @param {boolean} Self 
+ * Checks the skill requirements on a type
+ * @param {TypeInfoType} Type - Type information
+ * @param {boolean} Self - the character is the player
+ * @returns {{Skill: string, Level: number}|null} - Missing skill or null
  */
 function AssetTypeSkillCheck(Type, Self) {
     const Skills = Type.Skills;
@@ -440,6 +475,7 @@ function AssetTypeSkillCheck(Type, Self) {
     }
     return null;
 }
+
 
 /**
  * @callback AssetTypeDraw
@@ -465,6 +501,13 @@ function AssetTypeSkillCheck(Type, Self) {
  * @returns {boolean}
  */
 
+ /**
+ * @typedef {Object} TypeInfo
+ * @property {Object<string, TypeInfoType>|string[]} Types
+ */
+
 /**
- * @tyedef {Object} TypeInfo
+ * @typedef {Object} TypeInfoType
+ * @property {Property} Property
+ * @property {Object<string, number>} Skills
  */
