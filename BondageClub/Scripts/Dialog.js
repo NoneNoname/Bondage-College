@@ -913,31 +913,13 @@ function DialogMenuButtonClick() {
 
 			// Lock Icon - Rebuilds the inventory list with locking items
 			else if ((DialogMenuButton[I] == "Lock") && (Item != null)) {
-				if (DialogItemToLock == null) {
-					if ((Item != null) && (Item.Asset.AllowLock != null)) {
-						DialogInventoryOffset = 0;
-						DialogInventory = [];
-						DialogItemToLock = Item;
-						for (let A = 0; A < Player.Inventory.length; A++)
-							if ((Player.Inventory[A].Asset != null) && Player.Inventory[A].Asset.IsLock)
-								DialogInventoryAdd(C, Player.Inventory[A], false, DialogSortOrderUsable);
-						DialogInventorySort();
-						DialogMenuButtonBuild(C);
-					}
-				} else {
-					DialogItemToLock = null;
-					DialogInventoryBuild(C);
-				}
+				DialogDialogMenuButtonClickLock(C, Item);
 				return;
 			}
 
 			// Unlock Icon - If the item is padlocked, we immediately unlock.  If not, we start the struggle progress.
 			else if ((DialogMenuButton[I] == "Unlock") && (Item != null)) {
-				if (!InventoryItemHasEffect(Item, "Lock", false) && InventoryItemHasEffect(Item, "Lock", true) && ((C.ID != 0) || C.CanInteract())) {
-					InventoryUnlock(C, C.FocusGroup.Name);
-					if (CurrentScreen == "ChatRoom") ChatRoomPublishAction(C, Item, null, true, "ActionUnlock");
-					else DialogInventoryBuild(C);
-				} else DialogProgressStart(C, Item, null);
+				DialogDialogMenuButtonClickUnlock(C, Item)
 				return;
 			}
 
@@ -949,8 +931,7 @@ function DialogMenuButtonClick() {
 
 			// When the player inspects a lock
 			else if ((DialogMenuButton[I] == "InspectLock") && (Item != null)) {
-				var Lock = InventoryGetLock(Item);
-				if (Lock != null) DialogExtendItem(Lock, Item);
+				DialogDialogMenuButtonClickInspectLock(Item);
 				return;
 			}
 
@@ -1942,7 +1923,55 @@ function DialogChatRoomSafewordRevert() {
  * Leave the dialog and release the player of all restraints before returning them to the Main Lobby
  * @returns {void} - Nothing
  */
- function DialogChatRoomSafewordRelease() {
- 	DialogLeave();
- 	ChatRoomSafewordRelease();
- }
+function DialogChatRoomSafewordRelease() {
+	DialogLeave();
+	ChatRoomSafewordRelease();
+}
+
+/**
+ * Opens the lock selection UI for an item
+ * @param {C} - Current character
+ * @param {Item} - Item to lock
+ * @returns {void} - Nothing
+ */
+function DialogDialogMenuButtonClickLock(C, Item) {
+	if (DialogItemToLock == null) {
+		if ((Item != null) && (Item.Asset.AllowLock != null)) {
+			DialogInventoryOffset = 0;
+			DialogInventory = [];
+			DialogItemToLock = Item;
+			for (let A = 0; A < Player.Inventory.length; A++)
+				if ((Player.Inventory[A].Asset != null) && Player.Inventory[A].Asset.IsLock)
+					DialogInventoryAdd(C, Player.Inventory[A], false, DialogSortOrderUsable);
+			DialogInventorySort();
+			DialogMenuButtonBuild(C);
+		}
+	} else {
+		DialogItemToLock = null;
+		DialogInventoryBuild(C);
+	}
+}
+
+/**
+ * Starts the unlocking process 
+ * @param {C} - Current character
+ * @param {Item} - Item to unlock
+ * @returns {void} - Nothing
+ */
+function DialogDialogMenuButtonClickUnlock(C, Item) {
+	if (!InventoryItemHasEffect(Item, "Lock", false) && InventoryItemHasEffect(Item, "Lock", true) && ((C.ID != 0) || C.CanInteract())) {
+		InventoryUnlock(C, C.FocusGroup.Name);
+		if (CurrentScreen == "ChatRoom") ChatRoomPublishAction(C, Item, null, true, "ActionUnlock");
+		else DialogInventoryBuild(C);
+	} else DialogProgressStart(C, Item, null);
+}
+
+/**
+ * Changes to the Lock's UI
+ * @param {Item} - Item with the lock
+ * @returns {void} - Nothing
+ */
+function DialogDialogMenuButtonClickInspectLock(Item) {
+	var Lock = InventoryGetLock(Item);
+	if (Lock != null) DialogExtendItem(Lock, Item);
+}

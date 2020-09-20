@@ -3,8 +3,6 @@
 /* TODO
  *
  * Expression
- * Prerequisite
- * Lock Type with locks (ItemArms Chains)
  * 
  * 
  * ItemArmsWeb DynamicDictionary
@@ -14,6 +12,9 @@
 
 var AssetTypeSelectBefore = false;
 
+/**
+ * @type {string[]}
+ */
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
 const AssetTypeDescription = {};
 /** @type AssetTypeDraw */
@@ -75,7 +76,6 @@ function AssetTypeLoad() {
     Tools_AssetTypeReport(Tools_Count);
 }
 
-
 async function AssetTypeLoadDescription() {
     const Data = await fetch('Assets/Female3DCG/Female3DCG_Type.csv').then(r => r.text());
     const CSV = CommonParseCSV(Data);
@@ -89,6 +89,10 @@ async function AssetTypeLoadDescription() {
     });
 }
 
+/**
+ * 
+ * @param {Item} [Item=DialogFocusItem] 
+ */
 function AssetTypeSetLoad(Item) {
     const C = CharacterGetCurrent();
 
@@ -113,6 +117,7 @@ function AssetTypeSetLoad(Item) {
     }
 }
 
+
 function AssetTypeSetDraw() {
     if (DialogFocusItem == null || DialogFocusItem.Asset.TypeInfo == null) return;
 
@@ -121,7 +126,7 @@ function AssetTypeSetDraw() {
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
-    const ShowCount = Info.ShowCount > 8 ? Info.ShowCoun : Math.min(Info.ShowCount, Types.length);
+    const ShowCount = Info.ShowCount > 8 ? Info.ShowCount : Math.min(Info.ShowCount, Types.length);
     const Description = AssetTypeDescription[Asset.Group.Name][Asset.Name];
 
     if (Offset >= ShowCount) {
@@ -129,6 +134,17 @@ function AssetTypeSetDraw() {
     }
     if (Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
         DrawButton(1775, 25, 90, 90, "", "White", "Icons/Next.png");
+    }
+    if (Asset.AllowLock) {
+        const IsGroupBlocked = InventoryGroupIsBlocked(C);
+        const Prerequisite = InventoryAllow(C, Item.Asset.Prerequisite);
+        if (InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
+            let inspect = false;
+            if (!Player.IsBlind() && Item.Property && Item.Property.LockedBy) { inspect = true; DrawButton(1555, 25, 90, 90, "", "White", "Icons/InspectLock.png"); }
+            if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, Item)) DrawButton(inspect ? 1445 : 1555, 25, 90, 90, "", "White", "Icons/Unlock.png");
+        } else if (Player.CanInteract() && Prerequisite && !IsGroupBlocked) {
+            DrawButton(1555, 25, 90, 90, "", "White", "Icons/Lock.png");
+        }
     }
 
     // Draw the header and item
@@ -146,7 +162,6 @@ function AssetTypeSetDraw() {
     } else {
         DrawText(Description["TypeLocked"]["Default"], 1500, 500, "white", "gray");
     }
-
 }
 
 /**
@@ -193,9 +208,23 @@ function AssetTypeSetClick() {
     // Pagination buttons
     if (MouseIn(1665, 25, 90, 90) && Offset >= ShowCount) {
         ExtendedItemSetOffset(Offset - ShowCount);
+        return;
     }
     if (MouseIn(1775, 25, 90, 90) && Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
         ExtendedItemSetOffset(Offset + ShowCount);
+        return;
+    }
+
+    if (Asset.AllowLock && MouseIn(1445, 25, 190, 90)) {
+        const IsGroupBlocked = InventoryGroupIsBlocked(C);
+        const Prerequisite = InventoryAllow(C, Item.Asset.Prerequisite);
+        if (InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
+            let inspect = false;
+            if (!Player.IsBlind() && Item.Property && Item.Property.LockedBy) { inspect = true; if (MouseIn(1555, 25, 90, 90)) { DialogDialogMenuButtonClickInspectLock(Item); return; } }
+            if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, Item)) { if (MouseIn(inspect ? 1445 : 1555, 25, 90, 90)) { DialogDialogMenuButtonClickUnlock(C, Item); return; } }
+        } else if (Player.CanInteract() && Prerequisite && !IsGroupBlocked) {
+            if (MouseIn(1555, 25, 90, 90)) { DialogDialogMenuButtonClickLock(C, Item); return; }
+        }
     }
 
     if (!Info.TypeLocking || !InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
@@ -293,7 +322,6 @@ function AssetTypeSet(C, Item, NewType) {
     } else {
         CharacterRefresh(C, false)
     }
-
 }
 
 /**
@@ -414,4 +442,8 @@ function AssetTypeSkillCheck(Type, Self) {
  * @param {number} ShowCount
  * @param {number} Offset
  * @param {number} I
+ */
+
+/**
+ * @tyedef {Object} TypeInfo
  */
