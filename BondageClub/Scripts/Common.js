@@ -405,7 +405,7 @@ function CommonDebounce(func, wait) {
  */
 function CommonObjectTraverse(obj, ...keys) {
    let ret = obj, i = 0;
-   for (; i < keys.length && ret && typeof ret === 'object' && key[i] == null; ++i)
+   for (; i < keys.length && ret && typeof ret === 'object' && keys[i] != null; ++i)
 	   ret = ret[keys[i]];
    return i ==  keys.length ? ret : undefined;
 }

@@ -117,7 +117,9 @@ function AssetTypeSetLoad(Item) {
     }
 }
 
-
+/**
+ * 
+ */
 function AssetTypeSetDraw() {
     if (DialogFocusItem == null || DialogFocusItem.Asset.TypeInfo == null) return;
 
@@ -189,6 +191,9 @@ function AssetTypeDrawTypeWithoutImage(C, _, Info, Types, ShowCount, Description
     DrawTextFit(Description[Type], X + 112, Y + 30, 225, "black");
 }
 
+/**
+ * 
+ */
 function AssetTypeSetClick() {
     if (DialogFocusItem == null || DialogFocusItem.Asset.TypeInfo == null) return;
 
@@ -314,12 +319,12 @@ function AssetTypeSet(C, Item, NewType) {
 
     AssetTypeSetMofifiers(Item, NewType);
 
-    if (Item.Asset.Category == "Item") {
-        CharacterRefresh(C);
-        ChatRoomCharacterUpdate(C);
+    if (Item.Asset.Group.Category == "Item") {        
         if (CurrentScreen === "ChatRoom") {
+            ChatRoomCharacterUpdate(C);
             AssetTypePublish(C, Item, OldType);
         } else {
+            CharacterRefresh(C);
             DialogFocusItem = null;
             if (C.ID != 0) {
                 C.CurrentDialog = DialogFind(C, Item.Asset.TypeInfo.Types[NewType || Item.Asset.TypeInfo.NoneTypeName].DialogNpc + NewType || Item.Asset.TypeInfo.NoneTypeName, "ItemArms");
@@ -389,6 +394,11 @@ function AssetTypeSetMofifiers(Item, NewType) {
     }
 }
 
+function AssetTypeGetDialog(key, obj) {
+    const { Group, Asset, Type } = obj;
+    return CommonObjectTraverse(AssetTypeDescription, Group, Asset, key, Type) || "";
+}
+
 /**
  * Finds a dialog for a typed item
  * @param {string} msg 
@@ -441,6 +451,7 @@ function AssetTypeSkillCheck(Type, Self) {
  * @param {Object<string, string>} Description
  * @param {number} Offset
  * @param {number} I
+ * @returns {void} - Nothing
  */
 
 /**
@@ -451,6 +462,7 @@ function AssetTypeSkillCheck(Type, Self) {
  * @param {number} ShowCount
  * @param {number} Offset
  * @param {number} I
+ * @returns {boolean}
  */
 
 /**

@@ -3,7 +3,7 @@
 var AssetTypeInfo = {
 	ItemMouth: {
 		ClothGag: {
-			NoneTypeName: "Small", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ClothGag",
+			NoneTypeName: "Small", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ClothGag",
 			Types: {
 				Small: {
 					Property: { Effect: ["BlockMouth", "GagVeryLight"] },
@@ -20,7 +20,7 @@ var AssetTypeInfo = {
 			},
 		},
 		DildoPlugGag: {
-			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemMouthDildoPlugGag",
+			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemMouthDildoPlugGag",
 			Types: {
 				Open: {
 					Property: { Effect: ["GagEasy", "OpenMouth"] },
@@ -31,11 +31,11 @@ var AssetTypeInfo = {
 			},
 		},
 		MilkBottle: {
-			NoneTypeName: "Rest", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "MilkBottle",
+			NoneTypeName: "Rest", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "MilkBottle",
 			Types: ["Rest", "Raised", "Chug"],
 		},
 		PlugGag: {
-			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, ExtraPublish: true, DialogNpc: "ItemMouthPlugGag",
+			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemMouthPlugGag",
 			Types: {
 				Open: {
 					Property: { Effect: ["GagMedium", "OpenMouth"] },

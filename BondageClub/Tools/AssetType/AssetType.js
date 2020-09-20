@@ -58,7 +58,7 @@ function Tools_AssetTypeSaveJs() {
         Assets.forEach(A => {
             const Info = AssetTypeInfo[G][A];
             write(`${A}: {`, 1);
-            write(`NoneTypeName: "${Info.NoneTypeName}", DrawType: "${Info.DrawType}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, TypeLocking: ${Info.TypeLocking}, SelectBeforeWear: ${Info.SelectBeforeWear}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
+            write(`NoneTypeName: "${Info.NoneTypeName}", DrawType: "${Info.DrawType}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, TypeLocking: ${Info.TypeLocking}, SelectBeforeWear: ${Info.SelectBeforeWear}, TypedName: ${Info.TypedName}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
             let types = "";
             let emptyCount = 0;
             getBuffer = str => types += str;
@@ -154,6 +154,7 @@ function Tools_AssetTypeTransform(FullName, Dialog, DialogSelect, DialogSet, Dia
         ExtraPublish: true,
         DrawType: DrawType || "Images",
         TypeLocking: false,
+        TypedName: false,
         Types: {},
     }
     Options.forEach(O => {
