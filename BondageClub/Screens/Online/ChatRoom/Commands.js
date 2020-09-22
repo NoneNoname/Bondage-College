@@ -15,7 +15,7 @@ function CommandsLoad() {
  */
 async function CommandsTranslate() {
     if (TranslationLanguage == "EN") return;
-    const Data = TranslationParseTXT(await fetch(`Screens/Online/Tect_Commands_${TranslationLanguage}.txt`).then(r => r.text()));
+    const Data = TranslationParseTXT(await fetch(`Screens/Online/Text_Commands_${TranslationLanguage}.txt`).then(r => r.text()));
     for (let C = 0; C < Commands.length; ++C) {
         Commands[C] = TranslationString(Commands[C], Data);
     }

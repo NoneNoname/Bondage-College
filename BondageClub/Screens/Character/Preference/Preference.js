@@ -76,7 +76,7 @@ function PreferenceGetFetishFactor(C, Type) {
 }
 
 /**
- * Sets the love factor of a sexual activity for the character 
+ * Sets the love factor of a sexual activity for the character
  * @param {Character} C - The character for whom the activity factor should be set
  * @param {string} Type - The type of the activity that is performed
  * @param {boolean} Self - Determines, if the current player is giving (false) or receiving (true)
@@ -107,7 +107,7 @@ function PreferenceGetZoneFactor(C, Zone) {
 }
 
 /**
- * Sets the love factor for a specific body zone on the player 
+ * Sets the love factor for a specific body zone on the player
  * @param {Character} C - The character, for whom the love factor of a particular zone should be set
  * @param {string} Zone - The name of the zone, the factor should be set for
  * @param {number} Factor - The factor of the zone (0 is horrible, 2 is normal, 4 is great)
@@ -230,7 +230,7 @@ function PreferenceInit(C) {
 	if (typeof C.GameplaySettings.BlindDisableExamine !== "boolean") C.GameplaySettings.BlindDisableExamine = false;
 	if (typeof C.GameplaySettings.DisableAutoRemoveLogin !== "boolean") C.GameplaySettings.DisableAutoRemoveLogin = false;
 	if (typeof C.GameplaySettings.EnableSafeword !== "boolean") C.GameplaySettings.EnableSafeword = true;
-	
+
 	if (!C.OnlineSettings) C.OnlineSettings = {};
 	if (!C.OnlineSharedSettings) C.OnlineSharedSettings = {};
 	if (C.OnlineSharedSettings.AllowFullWardrobeAccess == null) C.OnlineSharedSettings.AllowFullWardrobeAccess = false;
@@ -243,7 +243,7 @@ function PreferenceInit(C) {
 	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "SearchFriendsFirst", false);
 	PreferenceMigrate(C.GameplaySettings, C.OnlineSettings, "EnableAfkTimer", true);
 	PreferenceMigrate(C.GameplaySettings, C.OnlineSettings, "EnableWardrobeIcon", false);
-	
+
 	// Validates the player preference, they must match with the assets activities & zones, default factor is 2 (normal love)
 	if (Player.AssetFamily == "Female3DCG") {
 
@@ -550,7 +550,7 @@ function PreferenceSubscreenChatRun() {
 	DrawCheckbox(500, 732, 64, 64, TextGet("ColorEmotes"), Player.ChatSettings.ColorEmotes);
 	DrawCheckbox(500, 812, 64, 64, TextGet("ShowActivities"), Player.ChatSettings.ShowActivities);
 	DrawCheckbox(1200, 492, 64, 64, TextGet("ShowAutomaticMessages"), Player.ChatSettings.ShowAutomaticMessages);
-	DrawCheckbox(1200, 572, 64, 64, TextGet("ShowChatRoomHelp"), Player.ChatSettings.ShowChatHelp);	
+	DrawCheckbox(1200, 572, 64, 64, TextGet("ShowChatRoomHelp"), Player.ChatSettings.ShowChatHelp);
 	MainCanvas.textAlign = "center";
 	DrawBackNextButton(1000, 190, 350, 70, TextGet(PreferenceChatColorThemeSelected), "White", "",
 		() => TextGet((PreferenceChatColorThemeIndex == 0) ? PreferenceChatColorThemeList[PreferenceChatColorThemeList.length - 1] : PreferenceChatColorThemeList[PreferenceChatColorThemeIndex - 1]),
@@ -693,7 +693,7 @@ function PreferenceSubscreenVisibilityRun() {
 	DrawBackNextButton(650, 193, 500, 64, PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Group.Description, "White", "", () => "", () => "");
 	DrawBackNextButton(650, 272, 500, 64, PreferenceVisibilityGroupList[PreferenceVisibilityGroupIndex].Assets[PreferenceVisibilityAssetIndex].Asset.Description, "White", "", () => "", () => "");
 	DrawButton(500, PreferenceVisibilityResetClicked ? 780 : 700, 300, 64, TextGet("VisibilityReset"), "White", "");
-	
+
 	// Preview icon
 	DrawEmptyRect(1200, 193, 225, 225, "Black");
 	if (PreferenceVisibilityPreviewImg == null) DrawRect(1203, 196, 219, 219, "LightGray");
@@ -701,7 +701,7 @@ function PreferenceSubscreenVisibilityRun() {
 }
 
 /**
- * Handles click events for the audio preference settings. 
+ * Handles click events for the audio preference settings.
  * Redirected to from the main Click function if the player is in the audio settings subscreen
  * @returns {void} - Nothing
  */
@@ -864,7 +864,7 @@ function PreferenceSubscreenArousalClick() {
 			else PreferenceArousalActivityIndex = (PreferenceArousalActivityIndex + 1) % PreferenceArousalActivityList.length;
 			PreferenceLoadActivityFactor();
 		}
-		
+
 		// Arousal activity love on self control
 		if ((MouseX >= 900) && (MouseX < 1200) && (MouseY >= 633) && (MouseY <= 697)) {
 			if (MouseX <= 1050) PreferenceArousalActivityFactorSelf = (5 + PreferenceArousalActivityFactorSelf - 1) % 5;
