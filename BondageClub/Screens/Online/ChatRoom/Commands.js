@@ -1,6 +1,7 @@
 
 var Commands = [];
 var CommandsKey = "/";
+let CommandText = null;
 
 /**
  * Loads the commands for the Player
@@ -11,14 +12,17 @@ function CommandsLoad() {
 }
 
 /**
- * Translates the Dialogs for the Asset Types
+ * Translates the help for commands
  */
-async function CommandsTranslate() {
-    if (TranslationLanguage == "EN") return;
-    const Data = TranslationParseTXT(await fetch(`Screens/Online/Text_Commands_${TranslationLanguage}.txt`).then(r => r.text()));
-    for (let C = 0; C < Commands.length; ++C) {
-        Commands[C] = TranslationString(Commands[C], Data);
+function CommandsTranslate() {
+    if (!CommandText) {
+        CommandText = new TextCache();
+        CommandText.fetchCsv = async () => {
+            return Promise.resolve(Commands.map(C => [C.Tag, C.Description]));
+        }
+        CommandText.path = "Screens/Online/ChatRoom/Commands.csv";
     }
+    else CommandText.buildCache();
 }
 
 /**
@@ -91,7 +95,7 @@ function CommandHelp(low) {
     Commands
         .filter(C => low == null || low == "" || C.Tag.includes(low))
         .filter(C => C.Prerequisite == null || C.Prerequisite())
-        .forEach(C => ChatRoomSendLocal("<strong onclick='window.CommandSet(\"" + C.Tag + "\")'>" + CommandsKey + C.Tag + "</strong>" + C.Description));
+        .forEach(C => ChatRoomSendLocal("<strong onclick='window.CommandSet(\"" + C.Tag + "\")'>" + CommandsKey + C.Tag + "</strong>" + CommandText.get(C.Description)));
 }
 
 /**
@@ -109,7 +113,7 @@ function CommandExecute(msg) {
         return;
     }
     if (C.Prerequisite && !C.Prerequisite()) {
-        ElementValue("InputChat", CommandsKey +"invalid command: prerequisite did not met");
+        ElementValue("InputChat", CommandsKey + "invalid command: prerequisite did not met");
         return;
     }
     C.Action(low.substring(C.Tag.length + 2), msg);
@@ -288,7 +292,7 @@ const CommonCommands = [
         Action: () => { }
     },
     {
-        Tag: CommandsKey,
+        Tag: "CommandsKey",
         Description: '[Message], send "/Message"',
         Action: (_, msg) => { ServerSend("ChatRoomChat", { Content: msg.substring(1), Type: "Chat" }); }
     },
