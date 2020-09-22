@@ -201,6 +201,7 @@ function PreferenceInit(C) {
 	if (C.ChatSettings.ColorEmotes == null) C.ChatSettings.ColorEmotes = true;
 	if (C.ChatSettings.ShowActivities == null) C.ChatSettings.ShowActivities = true;
 	if (C.ChatSettings.ShowAutomaticMessages == null) C.ChatSettings.ShowAutomaticMessages = false;
+	if (C.ChatSettings.ShowChatHelp == null) C.ChatSettings.ShowChatHelp = true;
 	if (!C.VisualSettings) C.VisualSettings = { ForceFullHeight: false };
 
 	// Sets the default audio settings
@@ -229,7 +230,7 @@ function PreferenceInit(C) {
 	if (typeof C.GameplaySettings.BlindDisableExamine !== "boolean") C.GameplaySettings.BlindDisableExamine = false;
 	if (typeof C.GameplaySettings.DisableAutoRemoveLogin !== "boolean") C.GameplaySettings.DisableAutoRemoveLogin = false;
 	if (typeof C.GameplaySettings.EnableSafeword !== "boolean") C.GameplaySettings.EnableSafeword = true;
-
+	
 	if (!C.OnlineSettings) C.OnlineSettings = {};
 	if (!C.OnlineSharedSettings) C.OnlineSharedSettings = {};
 	if (C.OnlineSharedSettings.AllowFullWardrobeAccess == null) C.OnlineSharedSettings.AllowFullWardrobeAccess = false;
@@ -549,6 +550,7 @@ function PreferenceSubscreenChatRun() {
 	DrawCheckbox(500, 732, 64, 64, TextGet("ColorEmotes"), Player.ChatSettings.ColorEmotes);
 	DrawCheckbox(500, 812, 64, 64, TextGet("ShowActivities"), Player.ChatSettings.ShowActivities);
 	DrawCheckbox(1200, 492, 64, 64, TextGet("ShowAutomaticMessages"), Player.ChatSettings.ShowAutomaticMessages);
+	DrawCheckbox(1200, 572, 64, 64, TextGet("ShowChatRoomHelp"), Player.ChatSettings.ShowChatHelp);	
 	MainCanvas.textAlign = "center";
 	DrawBackNextButton(1000, 190, 350, 70, TextGet(PreferenceChatColorThemeSelected), "White", "",
 		() => TextGet((PreferenceChatColorThemeIndex == 0) ? PreferenceChatColorThemeList[PreferenceChatColorThemeList.length - 1] : PreferenceChatColorThemeList[PreferenceChatColorThemeIndex - 1]),
@@ -743,6 +745,7 @@ function PreferenceSubscreenChatClick() {
 	}
 
 	if (MouseIn(1200, 492, 64, 64)) Player.ChatSettings.ShowAutomaticMessages = !Player.ChatSettings.ShowAutomaticMessages;
+	if (MouseIn(1200, 572, 64, 64)) Player.ChatSettings.ShowChatHelp = !Player.ChatSettings.ShowChatHelp;
 
 	// If the user used one of the BackNextButtons
 	if ((MouseX >= 1000) && (MouseX < 1350) && (MouseY >= 190) && (MouseY < 270)) {

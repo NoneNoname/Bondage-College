@@ -140,11 +140,13 @@ function FriendListDelete(MemberNumber) {
 }
 
 /**
- * Beeps a given member by sending the name and the current room of the beepee. Also adds an entry to the beep log of the player
+ * Beeps a given member by sending the name and the current room of the beepee. 
+ * Also adds an entry to the beep log of the player and to the chat log
  * @param {number} MemberNumber - The ID of the player to beep
  * @param {string} MemberName - The name of the player to beep
  */
 function FriendListBeep(MemberNumber, MemberName) {
 	ServerSend("AccountBeep", { MemberNumber: MemberNumber });
 	FriendListBeepLog.push({ MemberNumber: MemberNumber, MemberName: MemberName, ChatRoomName: ((ChatRoomData == null) ? null : ChatRoomData.Name), Sent: true, Time: new Date() });
+	ChatRoomSendLocal("Beep Sent: #" + MemberNumber.toString() + " " + MemberName);
 }
