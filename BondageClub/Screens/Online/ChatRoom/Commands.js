@@ -95,7 +95,7 @@ function CommandHelp(low) {
     Commands
         .filter(C => low == null || low == "" || C.Tag.includes(low))
         .filter(C => C.Prerequisite == null || C.Prerequisite())
-        .forEach(C => ChatRoomSendLocal("<strong onclick='window.CommandSet(\"" + C.Tag + "\")'>" + CommandsKey + C.Tag + "</strong>" + CommandText.get(C.Description)));
+        .forEach(C => ChatRoomSendLocal("<strong onclick='window.CommandSet(\"" + C.Tag + "\")'>" + CommandsKey + C.Tag + "</strong>" + CommandText.get(C.Tag)));
 }
 
 /**
