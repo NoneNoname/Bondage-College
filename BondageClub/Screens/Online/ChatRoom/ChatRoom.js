@@ -21,23 +21,23 @@ var ChatRoomSlowtimer = 0;
 var ChatRoomSlowStop = false;
 
 /**
- * Checks if the player can add the current character to her whitelist. 
- * @returns {boolean} - TRUE if the current character is not in the player's whitelist nor blacklist. 
+ * Checks if the player can add the current character to her whitelist.
+ * @returns {boolean} - TRUE if the current character is not in the player's whitelist nor blacklist.
  */
 function ChatRoomCanAddWhiteList() { return ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && (Player.WhiteList.indexOf(CurrentCharacter.MemberNumber) < 0) && (Player.BlackList.indexOf(CurrentCharacter.MemberNumber) < 0)) }
 /**
- * Checks if the player can add the current character to her blacklist. 
- * @returns {boolean} - TRUE if the current character is not in the player's whitelist nor blacklist. 
+ * Checks if the player can add the current character to her blacklist.
+ * @returns {boolean} - TRUE if the current character is not in the player's whitelist nor blacklist.
  */
 function ChatRoomCanAddBlackList() { return ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && (Player.WhiteList.indexOf(CurrentCharacter.MemberNumber) < 0) && (Player.BlackList.indexOf(CurrentCharacter.MemberNumber) < 0)) }
 /**
- * Checks if the player can remove the current character from her whitelist. 
- * @returns {boolean} - TRUE if the current character is in the player's whitelist, but not her blacklist. 
+ * Checks if the player can remove the current character from her whitelist.
+ * @returns {boolean} - TRUE if the current character is in the player's whitelist, but not her blacklist.
  */
 function ChatRoomCanRemoveWhiteList() { return ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && (Player.WhiteList.indexOf(CurrentCharacter.MemberNumber) >= 0)) }
 /**
- * Checks if the player can remove the current character from her blacklist. 
- * @returns {boolean} - TRUE if the current character is in the player's blacklist, but not her whitelist. 
+ * Checks if the player can remove the current character from her blacklist.
+ * @returns {boolean} - TRUE if the current character is in the player's blacklist, but not her whitelist.
  */
 function ChatRoomCanRemoveBlackList() { return ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && (Player.BlackList.indexOf(CurrentCharacter.MemberNumber) >= 0)) }
 /**
@@ -425,8 +425,8 @@ function ChatRoomRun() {
 	if (!Player.IsSlow() || (ChatRoomSlowtimer == 0 && !ChatRoomCanLeave())){
 		if (ChatRoomSlowtimer != 0) ChatRoomSlowtimer = 0;
 		DrawButton(1005, 2, 120, 60, "", (ChatRoomCanLeave()) ? "White" : "Pink", "Icons/Rectangle/Exit.png", TextGet("MenuLeave"));
-	}	
-	
+	}
+
 	if (OnlineGameName == "") DrawButton(1179, 2, 120, 60, "", "White", "Icons/Rectangle/Cut.png", TextGet("MenuCut"));
 	else DrawButton(1179, 2, 120, 60, "", "White", "Icons/Rectangle/GameOption.png", TextGet("MenuGameOption"));
 	DrawButton(1353, 2, 120, 60, "", (Player.CanKneel()) ? "White" : "Pink", "Icons/Rectangle/Kneel.png", TextGet("MenuKneel"));
@@ -881,14 +881,14 @@ function ChatRoomMessage(data) {
 				else if (msg == "SlowStop"){
 					ChatRoomSlowtimer = CurrentTime + 45000;
 					ChatRoomSlowStop = true;
-				} 
+				}
 				else if (msg.startsWith("MaidDrinkPick")){
 					var A = parseInt(msg.substr("MaidDrinkPick".length));
 					if ((A == 0) || (A == 5) || (A == 10)) MaidQuartersOnlineDrinkPick(data.Sender, A);
-				} 
-				else if (msg.substring(0, 8) == "PayQuest") ChatRoomPayQuest(data);
-				else if (msg.substring(0, 9) == "OwnerRule") data = ChatRoomSetRule(data);
-				else if (msg.substring(0, 9) == "LoverRule") data = ChatRoomSetRule(data);
+				}
+				else if (msg.startsWith("PayQuest")) ChatRoomPayQuest(data);
+				else if (msg.startsWith("OwnerRule")) data = ChatRoomSetRule(data);
+				else if (msg.startsWith("LoverRule")) data = ChatRoomSetRule(data);
 				if (data.Type == "Hidden") return;
 			}
 
@@ -1251,7 +1251,7 @@ function ChatRoomSyncItem(data) {
 						ServerItemCopyPropery(C, OldItem, data.Item.Property)
 					}
 					return;
-				}			
+				}
 			}
 
 			// If there's no name in the item packet, we remove the item instead of wearing it
@@ -1268,7 +1268,7 @@ function ChatRoomSyncItem(data) {
 						return;
 					}
 				}
- 
+
 				// Wear the item and applies locks and properties if we need to
 				InventoryWear(ChatRoomCharacter[C], data.Item.Name, data.Item.Group, data.Item.Color, data.Item.Difficulty);
 				if (data.Item.Property != null) {
@@ -1347,7 +1347,7 @@ function ChatRoomStruggleAssist() {
  * Triggered when a character makes another character kneel/stand.
  * @returns {void} - Nothing
  */
-function ChatRoomKneelStandAssist() { 
+function ChatRoomKneelStandAssist() {
 	ServerSend("ChatRoomChat", { Content: (CurrentCharacter.ActivePose == null) ? "HelpKneelDown" : "HelpStandUp", Type: "Action", Dictionary: [{ Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber }, { Tag: "TargetCharacter", Text: CurrentCharacter.Name, MemberNumber: CurrentCharacter.MemberNumber }] });
 	CharacterSetActivePose(CurrentCharacter, (CurrentCharacter.ActivePose == null) ? "Kneel" : null, true);
 	ChatRoomCharacterUpdate(CurrentCharacter);
@@ -1444,7 +1444,7 @@ function ChatRoomGetTransparentColor(Color) {
 
 /**
  * Adds or removes an online member to/from a specific list. (From the dialog menu)
- * @param {"Add" | "Remove"} Operation - Operation to perform. 
+ * @param {"Add" | "Remove"} Operation - Operation to perform.
  * @param {string} ListType - Name of the list to alter. (Whitelist, friendlist, blacklist, ghostlist)
  * @returns {void} - Nothing
  */
@@ -1639,7 +1639,7 @@ function ChatRoomSetRule(data) {
 	}
 
 	// Only works if the sender is the lover of the player
-	if ((data != null) && Play.GetLoversNumbers().includes(data.Sender)) {
+	if ((data != null) && Player.GetLoversNumbers().includes(data.Sender)) {
 		if (data.Content == "LoverRuleSelfLoverLockAllow") LogDelete("BlockLoverLockSelf", "LoverRule");
 		if (data.Content == "LoverRuleSelfLoverLockBlock") LogAdd("BlockLoverLockSelf", "LoverRule");
 		if (data.Content == "LoverRuleOwnerLoverLockAllow") LogDelete("BlockLoverLockOwner", "LoverRule");
@@ -1735,7 +1735,7 @@ function ChatRoomSafewordRelease() {
 	CommonSetScreen("Online","ChatSearch");
 }
 
-/** 
+/**
  * Concatenates the list of users to ban.
  * @param {boolean} IncludesBlackList - Adds the blacklist to the banlist
  * @param {boolean} IncludesGhostList - Adds the ghostlist to the banlist
@@ -1754,10 +1754,10 @@ function ChatRoomConcatenateBanList(IncludesBlackList, IncludesGhostList, Existi
  * @param {Character} C - Character must be an owner of the Player
  */
 function ChatRoomGetLoadRules(C) {
-	if ((Play.OwnerOnly == null) || (Player.Ownership.MemberNumber == null) || (Player.Ownership.MemberNumber != C.MemberNumber)) return;  
-	ServerSend("ChatRoomChat", { 
-		Content: "RuleInfoSet", 
-		Type: "Hidden",  
+	if ((Player.OwnerOnly == null) || (Player.Ownership.MemberNumber == null) || (Player.Ownership.MemberNumber != C.MemberNumber)) return;  
+	ServerSend("ChatRoomChat", {
+		Content: "RuleInfoSet",
+		Type: "Hidden",
 		Target: C.MemberNumber,
 		Dictionary: Log.filter(L => L.Name == "BlockLoverLockOwner" && L.Group == "LoverRule")
 	})

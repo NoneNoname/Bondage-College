@@ -89,8 +89,8 @@ function ServerReconnecting() {
 	LoginUpdateMessage();
 }
 
-/** 
- * Callback used to parse received information related to the server 
+/**
+ * Callback used to parse received information related to the server
  * @param {{OnlinePlayers: number, Time: number}} data - Data object containing the server information
  * @returns {void} - Nothing
  */
@@ -99,7 +99,7 @@ function ServerInfo(data) {
 	if (data.Time != null) CurrentTime = data.Time;
 }
 
-/** 
+/**
  * Callback used when we are disconnected from the server, try to enter the reconnection mode (relog screen) if the user was logged in
  * @param {*} data - Error to log
  * @returns {void} - Nothing
@@ -206,7 +206,7 @@ function ServerPlayerSkillSync() {
 /** 
  * Prepares an appearance bundle so we can push it to the server. It minimizes it by keeping only the necessary information. (Asset name, group name, color, properties and difficulty)
  * @param {AppearanceArray} Appearance - The appearance array to bundle
- * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array 
+ * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array
  */
 function ServerAppearanceBundle(Appearance) {
 	var Bundle = [];
@@ -226,7 +226,7 @@ function ServerAppearanceBundle(Appearance) {
  * Validates the properties for a given item to prevent griefing in multiplayer
  * @param {Character} C - The character the item will be applied to
  * @param {Item} Item - The item for which to validate the properties
- * @param {Object} [Validation=null] - Validates the LockMemberNumber against the source 
+ * @param {Object} [Validation=null] - Validates the LockMemberNumber against the source
  * @param {number} Validation.SourceMemberNumber - Source character MemberNumber
  * @param {number} Validation.FromOwner - Indicates the source is an owner or herself
  * @param {number} Validation.FromLoversOrOwner - Indicates the source is an lover or owner or herself
@@ -372,11 +372,11 @@ function ServerValidateProperties(C, Item, Validation) {
 
 /**
  * Loads the appearance assets from a server bundle that only contains the main info (no asset) and validates their properties to prevent griefing and respecting permissions in multiplayer
- * @param {Character} C - Character for which to load the appearance 
+ * @param {Character} C - Character for which to load the appearance
  * @param {string} AssetFamily - Family of assets used for the appearance array
  * @param {AppearanceBundle} Bundle - Bundled appearance
  * @param {number} SourceMemberNumber - Member number of the user who triggered the change
- * @returns {void} - Nothing 
+ * @returns {void} - Nothing
  */
 function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumber) {
 
@@ -407,11 +407,11 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 					if (!C.Appearance[A].Asset.OwnerOnly && !C.Appearance[A].Asset.LoverOnly)  {
 						for (let B = 0; B < Bundle.length; B++)
 							if ((C.Appearance[A].Asset.Name == Bundle[B].Name) && (C.Appearance[A].Asset.Group.Name == Bundle[B].Group) && (C.Appearance[A].Asset.Group.Family == AssetFamily)) {
-								ServerItemCopyPropery(C, C.Appearance[A], Bundle[B].Property);
+								ServerItemCopyProperty(C, C.Appearance[A], Bundle[B].Property);
 								break;
 							}
 					}
-					Appearance.push(C.Appearance[A]);				
+					Appearance.push(C.Appearance[A]);
 				}
 			}
 		}
@@ -450,7 +450,7 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 
 				// Sets the item properties and make sure a non-owner cannot add an owner lock
 				if (Bundle[A].Property != null) {
-					NA.Property = Bundle[A].Property;	
+					NA.Property = Bundle[A].Property;
 					ServerValidateProperties(C, NA, { SourceMemberNumber: SourceMemberNumber, FromOwner: FromOwner, FromLoversOrOwner: FromLoversOrOwner });
 				}
 
@@ -514,13 +514,13 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 
 }
 
-/** 
+/**
  * Validates a new item properties to the item the character has
  * @param {Character} C - Character for which to apply the update
- * @param {Item} OldItem - The item the character has
+ * @param {Item} Item - The item the character has
  * @param {Property} NewProperty - The new Property we want to set on the item
  */
-function ServerItemCopyPropery(C, Item, NewProperty) {
+function ServerItemCopyProperty(C, Item, NewProperty) {
 	if (Item.Property == null) return;
 	if (Item.Property.LockedBy != null) NewProperty.LockedBy = Item.Property.LockedBy;
 	if (Item.Property.LockMemberNumber != null) NewProperty.LockMemberNumber = Item.Property.LockMemberNumber; else delete NewProperty.LockMemberNumber;
@@ -538,7 +538,7 @@ function ServerItemCopyPropery(C, Item, NewProperty) {
 	if (Item.Property.LockedBy == "LoversPadlock") InventoryLock(C, Item, { Asset: AssetGet(AssetFamily, "ItemMisc", "LoversPadlock") }, NewProperty.LockMemberNumber);
 }
 
-/** 
+/**
  * Validates and returns a color against a color schema
  * @param {string} Color - The color to validate
  * @param {string[]} Schema - The color schema to validate against (a list of accepted Color values)
@@ -567,9 +567,9 @@ function ServerPlayerAppearanceSync() {
 
 }
 
-/** 
+/**
  * Syncs all the private room characters with the server
- * @returns {void} - Nothing 
+ * @returns {void} - Nothing
  */
 function ServerPrivateCharacterSync() {
 	if (PrivateVendor != null) {
@@ -596,7 +596,7 @@ function ServerPrivateCharacterSync() {
 	}
 };
 
-/** 
+/**
  * Callback used to parse received information related to a query made by the player such as viewing their online friends or current email status
  * @param {object} data - Data object containing the query data
  * @returns {void} - Nothing
@@ -609,7 +609,7 @@ function ServerAccountQueryResult(data) {
 	}
 }
 
-/** 
+/**
  * Callback used to parse received information related to ta beep from another account
  * @param {object} data - Data object containing the beep object which contain at the very least a name and a member number
  * @returns {void} - Nothing
@@ -637,7 +637,7 @@ function ServerDrawBeep() {
 	if ((ServerBeep.Timer != null) && (ServerBeep.Timer > CurrentTime)) DrawButton((CurrentScreen == "ChatRoom") ? 0 : 500, 0, 1000, 50, ServerBeep.Message, "Pink", "");
 }
 
-/** 
+/**
  * Callback used to parse received information related to the player ownership data
  * @param {object} data - Data object containing the Owner name and Ownership object
  * @returns {void} - Nothing
@@ -665,7 +665,7 @@ function ServerAccountOwnership(data) {
 
 }
 
-/** 
+/**
  * Callback used to parse received information related to the player lovership data
  * @param {object} data - Data object containing the Lovership array
  * @returns {void} - Nothing
