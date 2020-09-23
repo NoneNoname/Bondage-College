@@ -203,7 +203,7 @@ function ServerPlayerSkillSync() {
 	ServerSend("AccountUpdate", D);
 }
 
-/** 
+/**
  * Prepares an appearance bundle so we can push it to the server. It minimizes it by keeping only the necessary information. (Asset name, group name, color, properties and difficulty)
  * @param {AppearanceArray} Appearance - The appearance array to bundle
  * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array
@@ -237,12 +237,12 @@ function ServerValidateProperties(C, Item, Validation) {
 	// No validations for NPCs
 	if ((C.AccountName.substring(0, 4) == "NPC_") || (C.AccountName.substring(0, 4) == "NPC-")) return;
 
-	// Remove LockMemberNumber if the source is incorrent prior to all checks
+	// Remove LockMemberNumber if the source is incorrect prior to all checks
 	if ((Item.Property != null) && (C.ID == 0) && (Validation != null) && (Validation.SourceMemberNumber != null)) {
 		var Lock = InventoryGetLock(Item);
 		if ((Lock != null) && (Lock.Asset != null)) {
 			if (!Validation.FromOwner && Lock.Asset.OwnerOnly) delete Item.Property.LockMemberNumber;
-			if (!Validation.FromLoversOrOwner && Lock.Asset.LoverOnly) delete Item.Property.LockMemberNumber;
+			else if (!Validation.FromLoversOrOwner && Lock.Asset.LoverOnly) delete Item.Property.LockMemberNumber;
 		}
 	}
 
@@ -291,7 +291,7 @@ function ServerValidateProperties(C, Item, Validation) {
 				var OwnerNumber = C.Ownership && C.Ownership.MemberNumber;
 
 				// Make sure the owner lock is valid
-				if (Lock.Asset.OwnerOnly && ((LockNumber == null) || ((LockNumber != C.MemberNumber) && (LockNumber == OwnerNumber)))) {
+				if (Lock.Asset.OwnerOnly && ((LockNumber == null) || ((LockNumber != C.MemberNumber) && (LockNumber != OwnerNumber)))) {
 					delete Item.Property.LockedBy;
 					delete Item.Property.LockMemberNumber;
 					delete Item.Property.CombinationNumber;
@@ -535,7 +535,7 @@ function ServerItemCopyProperty(C, Item, NewProperty) {
 	Item.Property = NewProperty;
 	ServerValidateProperties(C, Item);
 	if (Item.Property.LockedBy == "OwnerPadlock") InventoryLock(C, Item, { Asset: AssetGet(AssetFamily, "ItemMisc", "OwnerPadlock") }, NewProperty.LockMemberNumber);
-	if (Item.Property.LockedBy == "LoversPadlock") InventoryLock(C, Item, { Asset: AssetGet(AssetFamily, "ItemMisc", "LoversPadlock") }, NewProperty.LockMemberNumber);
+	else if (Item.Property.LockedBy == "LoversPadlock") InventoryLock(C, Item, { Asset: AssetGet(AssetFamily, "ItemMisc", "LoversPadlock") }, NewProperty.LockMemberNumber);
 }
 
 /**

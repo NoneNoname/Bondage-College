@@ -1549,8 +1549,8 @@ function ChatRoomDrinkPick(DrinkType, Money) {
 	}
 }
 
-function ChatRoomSendLoverRule(RuleType, Option) { ChatRoomSendOwnerRule(RuleType, Option, "Owner"); }
-function ChatRoomSendOwnerRule(RuleType, Option) { ChatRoomSendOwnerRule(RuleType, Option, "Lover"); }
+function ChatRoomSendLoverRule(RuleType, Option) { ChatRoomSendRule(RuleType, Option, "Owner"); }
+function ChatRoomSendOwnerRule(RuleType, Option) { ChatRoomSendRule(RuleType, Option, "Lover"); }
 /**
  * Sends a rule / restriction / punishment to the player's slave/lover client, it will be handled on the slave/lover's side when received.
  * @param {string} RuleType - The rule selected.
@@ -1754,20 +1754,21 @@ function ChatRoomConcatenateBanList(IncludesBlackList, IncludesGhostList, Existi
  * @param {Character} C - Character must be an owner of the Player
  */
 function ChatRoomGetLoadRules(C) {
-	if ((Player.OwnerOnly == null) || (Player.Ownership.MemberNumber == null) || (Player.Ownership.MemberNumber != C.MemberNumber)) return;  
-	ServerSend("ChatRoomChat", {
-		Content: "RuleInfoSet",
-		Type: "Hidden",
-		Target: C.MemberNumber,
-		Dictionary: Log.filter(L => L.Name == "BlockLoverLockOwner" && L.Group == "LoverRule")
-	})
+	if (Player.Ownership && Player.Ownership.MemberNumber != null && Player.Ownership.MemberNumber != C.MemberNumber) {
+		ServerSend("ChatRoomChat", {
+			Content: "RuleInfoSet",
+			Type: "Hidden",
+			Target: C.MemberNumber,
+			Dictionary: LogGetOwnerReadableRules(),
+		});
+	}
 }
 
 /**
  * Loads the rules for a character
  * @param {Character} C - Character to set the rules on
- * @param {Rule[]} Rules - An array of rules
+ * @param {Rule[]} Rule - An array of rules
  */
-function ChatRoomSetLoadRules(C, Rules) {
-	if (Array.isArray(Rules)) C.Rules = Rules;
+function ChatRoomSetLoadRules(C, Rule) {
+	if (Array.isArray(Rules)) C.Rule = Rule;
 }

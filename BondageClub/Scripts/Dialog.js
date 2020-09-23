@@ -47,13 +47,13 @@ var DialogSelfMenuOptions = [
 		IsAvailable: () => true,
 		Draw: DialogDrawExpressionMenu,
 		Click: DialogClickExpressionMenu,
-	},	
+	},
 	{
 		Name: "Pose",
 		IsAvailable: () => CurrentScreen == "ChatRoom",
 		Draw: DialogDrawPoseMenu,
 		Click: DialogClickPoseMenu,
-	},	
+	},
 	{
 		Name: "OwnerRules",
 		IsAvailable: () => DialogSelfMenuSelected && DialogSelfMenuSelected.Name == "OwnerRules",
@@ -63,7 +63,7 @@ var DialogSelfMenuOptions = [
 ];
 
 /**
- * Compares the player's reputation with a given value 
+ * Compares the player's reputation with a given value
  * @param {string} RepType - The name of the reputation to check
  * @param {string} Value - The value to compare
  * @returns {boolean} - Returns TRUE if a specific reputation type is less or equal than a given value
@@ -132,7 +132,7 @@ function DialogRemoveItem(AssetGroup) { InventoryRemove(Player, AssetGroup); }
 
 /**
  * Releases a character from restraints
- * @param {string} C - The character to be released. 
+ * @param {string} C - The character to be released.
  * Either the player (value: Player) or the current character (value: CurrentCharacter)
  * @returns {void} - Nothing
  */
@@ -167,7 +167,7 @@ function DialogLogQuery(LogType, LogGroup) { return LogQuery(LogType, LogGroup);
  * @param {string} Allow - The flag to set. Either "TRUE" or "FALSE"
  * @returns {boolean} - The boolean version of the flag
  */
-function DialogAllowItem(Allow) { return CurrentCharacter.AllowItem = (Allow.toUpperCase().trim() == "TRUE"); } // 
+function DialogAllowItem(Allow) { return CurrentCharacter.AllowItem = (Allow.toUpperCase().trim() == "TRUE"); } //
 
 /**
  * Returns the value of the AllowItem flag of a given character
@@ -239,7 +239,7 @@ function DialogCanInteract(C) { return ((C.toUpperCase().trim() == "PLAYER") ? P
  * Sets a new pose for the given character
  * @param {string} C - The character whose pose should be altered.
  * Either the player (value: Player) or the current character (value: CurrentCharacter)
- * @param {string} [NewPose=null] - The new pose, the character should take. 
+ * @param {string} [NewPose=null] - The new pose, the character should take.
  * Can be omitted to bring the character back to the standing position.
  * @returns {void} - Nothing
  */
@@ -441,7 +441,7 @@ function DialogLeaveItemMenu() {
 }
 
 /**
- * Leaves the item menu of the focused item. Constructs a function name from the 
+ * Leaves the item menu of the focused item. Constructs a function name from the
  * item's asset group name and the item's name and tries to call that.
  * @returns {boolean} - Returns true, if an item specific exit function was called, false otherwise
  */
@@ -463,7 +463,7 @@ function DialogLeaveFocusItem() {
  * @param {Character} C - The character, whose inventory should be manipulated
  * @param {Item} NewInv - The item that should be added to the player's inventory
  * @param {boolean} NewInvWorn - Should be true, if the item is worn, false otherwise
- * @param {number} SortOrder - Defines the group the item is added to. 
+ * @param {number} SortOrder - Defines the group the item is added to.
  * @returns {void} - Nothing
  */
 function DialogInventoryAdd(C, NewInv, NewInvWorn, SortOrder) {
@@ -472,10 +472,11 @@ function DialogInventoryAdd(C, NewInv, NewInvWorn, SortOrder) {
 	if (NewInv.Asset.OwnerOnly && !NewInvWorn && !C.IsOwnedByPlayer())
 		if ((C.ID != 0) || ((C.Owner == "") && (C.Ownership == null)) || !NewInv.Asset.IsLock || ((C.ID == 0) && LogQuery("BlockOwnerLockSelf", "OwnerRule")))
 			return;
-	if (NewInv.Asset.LoverOnly && !NewInvWorn && !C.IsLoverOfPlayer())
-		if ((C.ID != 0) || (C.Lovership.length == 0) || !NewInv.Asset.IsLock || ((C.ID == 0) && LogQuery("BlockLoverLockSelf", "LoverRule")))
-		 	if ((C.GetLoversNumbers(true).length == 0) || !(C.IsOwnedByPlayer() && (NewInv.Asset.Group.Name == "ItemMisc") && !LogQueryRemote(C, "BlockLoverLockOwner", "LoverRule")))
-				return;
+	if (NewInv.Asset.LoverOnly && !NewInvWorn && !C.IsLoverOfPlayer()) {
+		if ((C.GetLoversNumbers(true).length == 0) || !NewInv.Asset.IsLock || ((C.ID == 0) && LogQuery("BlockLoverLockSelf", "LoverRule")) || ((C.ID != 0) && (!C.IsOwnedByPlayer() || LogQuery("BlockLoverLockSelf", "LoverRule"))))
+			return;
+	}
+
 
 	// Do not show keys if they are in the deposit
 	if (LogQuery("KeyDeposit", "Cell") && InventoryIsKey(NewInv)) return;

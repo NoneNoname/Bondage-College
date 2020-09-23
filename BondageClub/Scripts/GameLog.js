@@ -108,7 +108,7 @@ function LogLoad(NewLog) {
 				LogAdd(NewLog[L].Name, NewLog[L].Group, NewLog[L].Value, false);
 
 	}
-	
+
 }
 
 /**
@@ -123,4 +123,12 @@ function LogQueryRemote(C, QueryLogName, QueryLogGroup) {
 	if (!C.Rule || !Array.isArray(C.Rule)) return false;
 	var R = C.Rule.find(R => R.Name == QueryLogName && R.Group == QueryLogGroup);
 	return (R != null) && ((R.Value == null) || (R.Value >= CurrenTime));
+}
+
+/**
+ * Filters the Player's log and returns those that the owner can see
+ * @returns {Rule[]} - OwnerRules and LoverRules which involve the Owner
+ */
+function LogGetOwnerReadableRules() {
+    return Log.filter(L => L.Group == "OwnerRule" || (L.Group == "LoverRule" && L.Name.includes("Owner")));
 }
