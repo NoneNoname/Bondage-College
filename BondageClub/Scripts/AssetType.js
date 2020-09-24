@@ -3,7 +3,7 @@
 /* TODO
  *
  * Expression
- * 
+ *
  */
 
  /** Type selection before item add */
@@ -13,7 +13,7 @@ var AssetTypeSelectBefore = false;
  * @type {string[]}
  */
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
-const AssetTypeDialog = {};
+var AssetTypeDialog = {};
 /** @type AssetTypeDraw */
 let AssetTypeDrawType = AssetTypeDrawTypeWithImage;
 /** @type AssetTypeClick */
@@ -49,8 +49,8 @@ const AssetTypeXYWithoutImages = [
  * Loads the type info
  */
 function AssetTypeLoad() {
-    // Tools_AssetTypeInfoPreload();
-    // let Tools_Count = 0;
+     Tools_AssetTypeInfoPreload();
+     let Tools_Count = 0;
 
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
@@ -73,11 +73,11 @@ function AssetTypeLoad() {
         A.ExtendedOrTypeInfo = true;
         A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
 
-        // Tools_Count++;
+         Tools_Count++;
     });
     AssetTypeLoadDialog();
 
-    // Tools_AssetTypeReport(Tools_Count);
+     Tools_AssetTypeReport(Tools_Count);
 }
 
 /**
@@ -102,10 +102,12 @@ async function AssetTypeLoadDialog() {
  */
 async function AssetTypeDialogTranslate() {
     if (TranslationLanguage == "EN") return;
-    const Data = TranslationParseTXT(await fetch(`Assets/Female3DCG/Female3DCG_Type_${TranslationLanguage}.txt`).then(r => r.text()));
-    for (let Group of Object.keys(AssetTypeDialog)) for (let Asset of Object.keys(AssetTypeDialog[Group])) for (let Key of Object.keys(AssetTypeDialog[Group][Asset])) for (let Dialog of Object.keys(AssetTypeDialog[Group][Asset][Key])) {
-        AssetTypeDialog[Group][Asset][Key][Dialog] = TranslationString(AssetTypeDialog[Group][Asset][Key][Dialog], Data);
-    }
+    const Data = TranslationParseTXT(await fetch(`Assets/Female3DCG/Female3DCG_Type_${TranslationLanguage}.txt`).then(status).then(r => r.text()));
+    for (let Group in AssetTypeDialog)
+        for (let Asset in AssetTypeDialog[Group])
+            for (let Key in AssetTypeDialog[Group][Asset])
+                for (let Dialog in AssetTypeDialog[Group][Asset][Key])
+                    AssetTypeDialog[Group][Asset][Key][Dialog] = TranslationString(AssetTypeDialog[Group][Asset][Key][Dialog], Data);
 }
 
 /**
@@ -249,7 +251,7 @@ function AssetTypeSetClick() {
             if (((C.ID != 0) || Player.CanInteract()) && Prerequisite && !IsGroupBlocked && DialogCanUnlock(C, Item)) { unlock = true; if (MouseIn(1015, 25, 90, 90)) { DialogDialogMenuButtonClickUnlock(C, Item); return; } }
             if (!Player.IsBlind() && Item.Property && Item.Property.LockedBy) { if (MouseIn(unlock ? 1125 : 1015, 25, 90, 90)) { DialogDialogMenuButtonClickInspectLock(Item); return; } }
         } else if (Player.CanInteract() && Prerequisite && !IsGroupBlocked) {
-            if (MouseIn(1015, 25, 90, 90)) {                
+            if (MouseIn(1015, 25, 90, 90)) {
                 DialogFocusItem = null;
                 DialogDialogMenuButtonClickLock(C, Item);
                 return;
@@ -291,7 +293,7 @@ function AssetTypeClickTypeWithoutImage(C, Info, Types, ShowCount, Offset, I) {
 }
 
 /**
- * Checks the Skill/Prerequisite/DynamicAllowSetType then sets the type on the DialogFocusItem 
+ * Checks the Skill/Prerequisite/DynamicAllowSetType then sets the type on the DialogFocusItem
  * @param {Character} C - Current character
  * @param {TypeInfo} Info - Type info
  * @param {string|null} TypeName - Name of the type
@@ -317,15 +319,15 @@ function AssetTypeClicked(C, Info, TypeName) {
     }
     if (DialogInventory != null) {
         DialogFocusItem = null;
-        DialogMenuButtonBuild(C);
+        if (C.FocusGroup) DialogMenuButtonBuild(C);
     }
 }
 
 /**
  * Sets the item type on a character
  * @param {Character} C - Current character
- * @param {Item} Item 
- * @param {string} NewType 
+ * @param {Item} Item
+ * @param {string} NewType
  */
 function AssetTypeSet(C, Item, NewType) {
     if (CurrentScreen == "ChatRoom") {
@@ -339,7 +341,7 @@ function AssetTypeSet(C, Item, NewType) {
 
     AssetTypeSetMofifiers(Item, NewType);
 
-    if (Item.Asset.Group.Category == "Item") {        
+    if (Item.Asset.Group.Category == "Item") {
         if (CurrentScreen === "ChatRoom") {
             ChatRoomCharacterUpdate(C);
             AssetTypePublish(C, Item, OldType);
@@ -360,7 +362,7 @@ function AssetTypeSet(C, Item, NewType) {
 /**
  * Publish a Type change to the chat room
  * @param {Character} C - Current Character
- * @param {Item} Item - 
+ * @param {Item} Item -
  * @param {string} OldType - Previous type of the item
  * @returns {void} - Nothing
  */
@@ -433,8 +435,8 @@ function AssetTypeGetDialog(key, obj) {
 
 /**
  * Finds a dialog for a typed item
- * @param {string} msg 
- * @param {Array} Dictionary 
+ * @param {string} msg
+ * @param {Array} Dictionary
  * @returns {string} - Dialog
  */
 function AssetTypeDialogFind(msg, Dictionary) {
@@ -447,7 +449,7 @@ function AssetTypeDialogFind(msg, Dictionary) {
 /**
  * Gets the Asset dynamic description
  * @param {Character} C - Character the assets is on
- * @param {Asset} Asset - The asset 
+ * @param {Asset} Asset - The asset
  * @param {string|null} Type - Type of the asset
  * @returns {string} - Description of the asset
  */

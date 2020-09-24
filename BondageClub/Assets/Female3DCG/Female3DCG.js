@@ -2096,8 +2096,8 @@ var AssetFemale3DCG = [
 			{
 				Name: "CupholderGag", Fetish: ["Leather"], Priority: 42, Value: 30, Difficulty: 4, Time: 20, Random: false, AllowLock: true, BuyGroup: "CupholderGag", Hide: ["Mouth"], AllowType: ["Cup"], Extended: true, AlwaysExtend: true, AlwaysInteract: true, Effect: ["BlockMouth", "GagEasy"], Block: ["ItemMouth2", "ItemMouth3"],
 				Layer: [
-					{ Name: "Gag", HasType: false, AllowTypes: ["", "Cup"] },
-					{ Name: "Holder", HasType: false, AllowTypes: ["", "Cup"] },
+					{ Name: "Gag", HasType: false, AllowTypes: ["", "Cup", "Tip"] },
+					{ Name: "Holder", HasType: false, AllowTypes: ["", "Cup", "Tip"] },
 					{ Name: "Cup", HasType: false, AllowTypes: ["Cup"] }
 				]
 			},

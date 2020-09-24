@@ -101,7 +101,7 @@ function Tools_AssetTypeSaveJs() {
                 write(`Types: [${Types.map(s => `"${s}"`).join(", ")}]`);
             } else {
                 File += types;
-            }        
+            }
             if (!Info.DynamicDictionary.Default) {
                 write(`DynamicDictionary: ${Info.DynamicDictionary.toString().replace(/\s+/gs, ' ')}`)
             }
@@ -129,7 +129,7 @@ function Tools_AssetTypeSaveJs() {
 }
 
 function Tools_AssetTypeDialogFind(G, A, D, T, I) {
-    const Desc = AssetTypeDescription[G] && AssetTypeDescription[G][A] && AssetTypeDescription[G][A][D || "Name"];
+    const Desc = AssetTypeDialog[G] && AssetTypeDialog[G][A] && AssetTypeDialog[G][A][D || "Name"];
     const Text = Desc && Desc[T === undefined ? "Default" : (T || I.NoneTypeName)];
     if (Text) return [G,A,D || "Name", T === undefined ? "Default" : (T || I.NoneTypeName), Text];
 

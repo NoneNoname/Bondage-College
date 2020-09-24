@@ -44,6 +44,7 @@ var AssetTypeInfo = {
     ItemMouth: {
         ClothGag: Tools_AssetTypeTransform("ItemMouthClothGag", "ClothGagType", "SelectGagType", "ClothGagSet", "ClothGag"),
         DildoPlugGag: Tools_AssetTypeTransform("ItemMouthDildoPlugGag", "PlugGagMouthType", "SelectGagType", "DildoPlugGagMouthSet", "ItemMouthDildoPlugGag"),
+        DuctTape: Tools_AssetTypeTransform("ItemMouthDuctTape", "DuctTapeMouthType", "SelectGagType", "DuctTapeMouthSet", "ItemMouthDuctTape"),
         MilkBottle: Tools_AssetTypeTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
         PlugGag: Tools_AssetTypeTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
     },

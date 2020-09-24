@@ -7,11 +7,29 @@ ItemMouth,ClothGag,Set,Cleave,SourceCharacter ties the cloth into a cleave gag o
 ItemMouth,ClothGag,Set,OTM,SourceCharacter stuffs DestinationCharacter mouth with a piece of cloth and secures it with another piece.
 ItemMouth,ClothGag,Set,OTN,SourceCharacter stuffs DestinationCharacter mouth with a piece of cloth and secures the gag over her mouth and nose.
 ItemMouth,ClothGag,Set,Small,SourceCharacter ties the cloth into a small gag over DestinationCharacter mouth.
+ItemMouth,CupholderGag,Select,Default,Cup interactions
+ItemMouth,CupholderGag,Name,NoCup,Remove
+ItemMouth,CupholderGag,Name,Cup,Place
+ItemMouth,CupholderGag,Name,Tip,Tip over
+ItemMouth,CupholderGag,Set,NoCup,SourceCharacter removes the cup from DestinationCharacter cup holder gag.
+ItemMouth,CupholderGag,Set,Cup,SourceCharacter places a cup on DestinationCharacter cup holder gag.
+ItemMouth,CupholderGag,Set,Tip,SourceCharacter tips over the cup on DestinationCharacter cup holder gag.
 ItemMouth,DildoPlugGag,Select,Default,Select the type of gag
 ItemMouth,DildoPlugGag,Name,Open,Open
 ItemMouth,DildoPlugGag,Name,Plug,Plugged
 ItemMouth,DildoPlugGag,Set,Open,SourceCharacter pulls out DestinationCharacter dildo plug from her gag.
 ItemMouth,DildoPlugGag,Set,Plug,SourceCharacter plugs up DestinationCharacter mouth with the dildo plug.
+ItemMouth,DuctTape,Select,Default,Select the type of gag
+ItemMouth,DuctTape,Name,Cover,OTN
+ItemMouth,DuctTape,Name,Crossed,Crossed strips
+ItemMouth,DuctTape,Name,Double,Double layer
+ItemMouth,DuctTape,Name,Full,Full face
+ItemMouth,DuctTape,Name,Small,Single strip
+ItemMouth,DuctTape,Set,Cover,SourceCharacter wraps many layers on DestinationCharacter mouth.
+ItemMouth,DuctTape,Set,Crossed,SourceCharacter crosses two pieces of duct tape on DestinationCharacter mouth.
+ItemMouth,DuctTape,Set,Double,SourceCharacter fully tapes DestinationCharacter mouth with double layers.
+ItemMouth,DuctTape,Set,Full,SourceCharacter fully tapes DestinationCharacter mouth.
+ItemMouth,DuctTape,Set,Small,SourceCharacter puts a piece of duct tape on DestinationCharacter mouth.
 ItemMouth,MilkBottle,Select,Default,Raise or lower the bottle
 ItemMouth,MilkBottle,Name,Chug,Help up high
 ItemMouth,MilkBottle,Name,Raised,Held up
