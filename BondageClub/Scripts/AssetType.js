@@ -49,8 +49,8 @@ const AssetTypeXYWithoutImages = [
  * Loads the type info
  */
 function AssetTypeLoad() {
-     Tools_AssetTypeInfoPreload();
-     let Tools_Count = 0;
+    // Tools_AssetTypeInfoPreload();
+    // let Tools_Count = 0;
 
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
@@ -73,11 +73,11 @@ function AssetTypeLoad() {
         A.ExtendedOrTypeInfo = true;
         A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
 
-         Tools_Count++;
+        // Tools_Count++;
     });
     AssetTypeLoadDialog();
 
-     Tools_AssetTypeReport(Tools_Count);
+    // Tools_AssetTypeReport(Tools_Count);
 }
 
 /**
@@ -128,7 +128,7 @@ function AssetTypeSetLoad(Item) {
         }
     }
     ExtendedItemSetOffset(0);
-    DialogExtendedMessage = AssetTypeDialog[Item.Asset.Group.Name][Item.Asset.Name]["Select"]["Default"];
+    DialogExtendedMessage = AssetTypeDialog[Item.Asset.Group.Name.replace(/[23]/g, "")][Item.Asset.Name]["Select"]["Default"];
 
     if (Item.Asset.TypeInfo.DrawType == "Images") {
         AssetTypeDrawType = AssetTypeDrawTypeWithImage;
@@ -151,7 +151,7 @@ function AssetTypeSetDraw() {
     const Types = Info.DynamicAllowType(DialogFocusItem);
     const Offset = ExtendedItemGetOffset();
     const ShowCount = Info.ShowCount > 8 ? Info.ShowCount : Math.min(Info.ShowCount, Types.length);
-    const Description = AssetTypeDialog[Asset.Group.Name][Asset.Name];
+    const Description = AssetTypeDialog[Asset.Group.Name.replace(/[23]/g, "")][Asset.Name];
 
     if (Offset >= ShowCount) {
         DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
@@ -456,7 +456,7 @@ function AssetTypeDialogFind(msg, Dictionary) {
 function AssetTypeGetDescription(C, Asset, Type) {
     // MAYBE: find the item on C and get the type if it is null
     if (Asset.TypeInfo && Asset.TypeInfo.TypedName) {
-        const D = AssetTypeGetDialog("Name", { Asset: Asset.Name, Group: Asset.Group.Name, Type: Type || Asset.TypeInfo.NoneTypeName });
+        const D = AssetTypeGetDialog("Name", { Asset: Asset.Name, Group: Asset.Group.Name.replace(/[23]/g, ""), Type: Type || Asset.TypeInfo.NoneTypeName });
         if (D) return D;
     }
     return Asset.DynamicDescription(C); // Can be removed after all items are added
