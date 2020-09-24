@@ -57,8 +57,7 @@ function AssetTypeLoad() {
 
         const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")]
         if (Group == null) return;
-        const Info = Group[A.Name];
-        if (typeof Info === 'string') return;
+        let Info = Group[A.Name];
         if (Info == null) return;
 
         if (Array.isArray(Info.Types)) Info.Types = Info.Types.reduce((acc, value) => { acc[value] = {}; return acc; }, {});

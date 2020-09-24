@@ -227,6 +227,12 @@ function Tools_AssetTypeAutoConvert(Name) {
 }
 
 function Tools_AssetTypeInfoPreload() {
+    for (let Group in Tools_AssetTypeInfo) {
+        for (let Asset in Tools_AssetTypeInfo[Group]) {
+            if (!AssetTypeInfo[Group]) AssetTypeInfo[Group] = {};
+            if (!AssetTypeInfo[Group][Asset]) AssetTypeInfo[Group][Asset] = Tools_AssetTypeInfo[Group][Asset];
+        }
+    }
     // AssetTypeInfo.ItemArms.Web.DynamicDictionary = function (_, Item, OldType) {
     //     const keys = Object.keys(AssetTypeInfo.ItemArms.Web.Types);
     //     const NewIndex = keys.indexOf(InventoryItemGetType(Item));

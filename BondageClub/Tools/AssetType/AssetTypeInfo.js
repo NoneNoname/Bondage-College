@@ -1,6 +1,6 @@
 "use strict"
 
-var AssetTypeInfo = {
+var Tools_AssetTypeInfo = {
     // ItemArms: {
     //     BitchSuit: Tools_AssetTypeTransform("ItemArmsBitchSuit", "BitchSuitType", "SelectBitchSuitType", "BitchSuitSet", "BitchSuitType"),
     //     Chains: Tools_AssetTypeTransform("ItemArmsChains", "ChainBondage", "SelectChainBondage", "ArmsChainSet", "ChainBondage"),
@@ -41,11 +41,11 @@ var AssetTypeInfo = {
     //     SturdyLeatherBelts: Tools_AssetTypeTransform("ItemLegsSturdyLeatherBelts", "SturdyLeatherBeltsPose", "SturdyLeatherBeltsSelectTightness", "SturdyLeatherBeltsRestrain", "ItemBootsToeTapeNPCReaction"),
     //     Zipties: Tools_AssetTypeTransform("ItemLegsZipties", "ZipBondage", "SelectZipTie", "ZipLegsSet", "ItemBootsToeTapeNPCReaction"),
     // },
-    ItemMouth: {
-        ClothGag: Tools_AssetTypeTransform("ItemMouthClothGag", "ClothGagType", "SelectGagType", "ClothGagSet", "ClothGag"),
-        DildoPlugGag: Tools_AssetTypeTransform("ItemMouthDildoPlugGag", "PlugGagMouthType", "SelectGagType", "DildoPlugGagMouthSet", "ItemMouthDildoPlugGag"),
-        DuctTape: Tools_AssetTypeTransform("ItemMouthDuctTape", "DuctTapeMouthType", "SelectGagType", "DuctTapeMouthSet", "ItemMouthDuctTape"),
-        MilkBottle: Tools_AssetTypeTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
-        PlugGag: Tools_AssetTypeTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
-    },
+    // ItemMouth: {
+    //     ClothGag: Tools_AssetTypeTransform("ItemMouthClothGag", "ClothGagType", "SelectGagType", "ClothGagSet", "ClothGag"),
+    //     DildoPlugGag: Tools_AssetTypeTransform("ItemMouthDildoPlugGag", "PlugGagMouthType", "SelectGagType", "DildoPlugGagMouthSet", "ItemMouthDildoPlugGag"),
+    //     DuctTape: Tools_AssetTypeTransform("ItemMouthDuctTape", "DuctTapeMouthType", "SelectGagType", "DuctTapeMouthSet", "ItemMouthDuctTape"),
+    //     MilkBottle: Tools_AssetTypeTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
+    //     PlugGag: Tools_AssetTypeTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
+    // },
 }
