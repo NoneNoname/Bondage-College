@@ -292,7 +292,7 @@ const CommonCommands = [
         Action: () => { }
     },
     {
-        Tag: "CommandsKey",
+        Tag: CommandsKey,
         Description: '[Message], send "/Message"',
         Action: (_, msg) => { ServerSend("ChatRoomChat", { Content: msg.substring(1), Type: "Chat" }); }
     },
