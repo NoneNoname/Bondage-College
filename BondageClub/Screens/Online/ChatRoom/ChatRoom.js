@@ -1545,8 +1545,8 @@ function ChatRoomDrinkPick(DrinkType, Money) {
 	}
 }
 
-function ChatRoomSendLoverRule(RuleType, Option) { ChatRoomSendRule(RuleType, Option, "Owner"); }
-function ChatRoomSendOwnerRule(RuleType, Option) { ChatRoomSendRule(RuleType, Option, "Lover"); }
+function ChatRoomSendLoverRule(RuleType, Option) { ChatRoomSendRule(RuleType, Option, "Lover"); }
+function ChatRoomSendOwnerRule(RuleType, Option) { ChatRoomSendRule(RuleType, Option, "Owner"); }
 /**
  * Sends a rule / restriction / punishment to the player's slave/lover client, it will be handled on the slave/lover's side when received.
  * @param {string} RuleType - The rule selected.
@@ -1629,7 +1629,7 @@ function ChatRoomSetRule(data) {
 			LogDelete("ReleasedCollar", "OwnerRule");
 			LoginValidCollar();
 		}
-		
+
 		// Forced labor
 		if (data.Content == "OwnerRuleLaborMaidDrinks" && Player.CanTalk()) {
 			CharacterSetActivePose(Player, null);
@@ -1657,6 +1657,8 @@ function ChatRoomSetRule(data) {
 		if (data.Content == "LoverRuleSelfLoverLockBlock") LogAdd("BlockLoverLockSelf", "LoverRule");
 		if (data.Content == "LoverRuleOwnerLoverLockAllow") LogDelete("BlockLoverLockOwner", "LoverRule");
 		if (data.Content == "LoverRuleOwnerLoverLockBlock") LogAdd("BlockLoverLockOwner", "LoverRule");
+
+		data.Type = "ServerMessage";
 	}
 
 	// Returns the data packet
@@ -1767,7 +1769,7 @@ function ChatRoomConcatenateBanList(IncludesBlackList, IncludesGhostList, Existi
  * @param {Character} C - Character must be an owner of the Player
  */
 function ChatRoomGetLoadRules(C) {
-	if (Player.Ownership && Player.Ownership.MemberNumber != null && Player.Ownership.MemberNumber != C.MemberNumber) {
+	if (Player.Ownership && Player.Ownership.MemberNumber != null && Player.Ownership.MemberNumber == C.MemberNumber) {
 		ServerSend("ChatRoomChat", {
 			Content: "RuleInfoSet",
 			Type: "Hidden",
