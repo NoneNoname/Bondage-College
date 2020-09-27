@@ -127,8 +127,17 @@ function LogQueryRemote(C, QueryLogName, QueryLogGroup) {
 
 /**
  * Filters the Player's log and returns those that the owner can see
+ * @param {boolean} OwnerIsLover - Ididates that the target is owner and lover of the Player
  * @returns {Rule[]} - OwnerRules and LoverRules which involve the Owner
  */
-function LogGetOwnerReadableRules() {
-    return Log.filter(L => L.Group == "OwnerRule" || (L.Group == "LoverRule" && L.Name.includes("Owner")));
+function LogGetOwnerReadableRules(OwnerIsLover) {
+    return Log.filter(L => L.Group == "OwnerRule" || (L.Group == "LoverRule" && (OwnerIsLover || L.Name.includes("Owner"))));
+}
+
+/**
+ * Filters the Player's log and returns those that the owner can see
+ * @returns {Rule[]} - OwnerRules and LoverRules which involve the Owner
+ */
+function LogGetLoverReadableRules() {
+    return Log.filter(L => L.Group == "LoverRule");
 }

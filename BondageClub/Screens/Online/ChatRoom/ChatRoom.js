@@ -1563,6 +1563,19 @@ function ChatRoomSendRule(RuleType, Option, Sender) {
 	if ((Option == "Leave") || (Option == "Quest")) DialogLeave();
 }
 
+function ChatRoomGetLoverRule(RuleType) { return ChatRoomGetRule(RuleType, "Lover"); }
+function ChatRoomGetOwnerRule(RuleType) { return ChatRoomGetRule(RuleType, "Owner"); }
+
+/**
+ * Gets a rule from the current character
+ * @param {string} RuleType - The rule selected.
+ * @param {"Owner" | "Lover"} Sender - Type of the sender
+ */
+function ChatRoomGetRule(RuleType, Sender) {
+	return LogQueryRemote(CurrentCharacter, RuleType, Sender + "Rule");
+}
+
+
 /**
  * Processes a rule sent to the player from her owner or from her lover.
  * @param {object} data - Received rule data object.
@@ -1649,6 +1662,7 @@ function ChatRoomSetRule(data) {
 		// Switches it to a server message to announce the new rule to the player
 		data.Type = "ServerMessage";
 
+		ChatRoomGetLoadRules(data.Sender);
 	}
 
 	// Only works if the sender is the lover of the player
@@ -1659,6 +1673,8 @@ function ChatRoomSetRule(data) {
 		if (data.Content == "LoverRuleOwnerLoverLockBlock") LogAdd("BlockLoverLockOwner", "LoverRule");
 
 		data.Type = "ServerMessage";
+
+		ChatRoomGetLoadRules(data.Sender);
 	}
 
 	// Returns the data packet
@@ -1766,15 +1782,26 @@ function ChatRoomConcatenateBanList(IncludesBlackList, IncludesGhostList, Existi
 
 /**
  * Resolve a request for the Player current rules
- * @param {Character} C - Character must be an owner of the Player
+ * @param {Character|number} C - Character must be an owner of the Player
  */
 function ChatRoomGetLoadRules(C) {
+	if (typeof C === "number") {
+		C = ChatRoomCharacter.find(CC => CC.MemberNumber == C);
+	}
+	if (C == null) return;
 	if (Player.Ownership && Player.Ownership.MemberNumber != null && Player.Ownership.MemberNumber == C.MemberNumber) {
 		ServerSend("ChatRoomChat", {
 			Content: "RuleInfoSet",
 			Type: "Hidden",
 			Target: C.MemberNumber,
-			Dictionary: LogGetOwnerReadableRules(),
+			Dictionary: LogGetOwnerReadableRules(C.IsLoverOfPlayer()),
+		});
+	} else if (C.IsLoverOfPlayer()) {
+		ServerSend("ChatRoomChat", {
+			Content: "RuleInfoSet",
+			Type: "Hidden",
+			Target: C.MemberNumber,
+			Dictionary: LogGetLoverReadableRules(),
 		});
 	}
 }
