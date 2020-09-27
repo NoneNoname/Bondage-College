@@ -529,8 +529,8 @@ function ServerItemCopyProperty(C, Item, NewProperty) {
 	}
 	Item.Property = NewProperty;
 	ServerValidateProperties(C, Item);
-	if (Item.Property.LockedBy == "OwnerPadlock") InventoryLock(C, Item, { Asset: AssetGet(AssetFamily, "ItemMisc", "OwnerPadlock") }, NewProperty.LockMemberNumber);
-	else if (Item.Property.LockedBy == "LoversPadlock") InventoryLock(C, Item, { Asset: AssetGet(AssetFamily, "ItemMisc", "LoversPadlock") }, NewProperty.LockMemberNumber);
+	if (Item.Property.LockedBy == "OwnerPadlock") InventoryLock(C, Item, { Asset: AssetGet(Item.Asset.Group.Family, "ItemMisc", "OwnerPadlock") }, NewProperty.LockMemberNumber);
+	else if (Item.Property.LockedBy == "LoversPadlock") InventoryLock(C, Item, { Asset: AssetGet(Item.Asset.Group.Family, "ItemMisc", "LoversPadlock") }, NewProperty.LockMemberNumber);
 }
 
 /**
