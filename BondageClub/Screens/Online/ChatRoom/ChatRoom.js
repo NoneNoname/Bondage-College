@@ -1785,5 +1785,5 @@ function ChatRoomGetLoadRules(C) {
  * @param {Rule[]} Rule - An array of rules
  */
 function ChatRoomSetLoadRules(C, Rule) {
-	if (Array.isArray(Rules)) C.Rule = Rule;
+	if (Array.isArray(Rule)) C.Rule = Rule;
 }
