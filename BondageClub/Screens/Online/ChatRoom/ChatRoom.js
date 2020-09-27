@@ -1234,7 +1234,7 @@ function ChatRoomSyncItem(data) {
 			var FromSelf = data.Source == data.Item.Target;
 			var FromOwner = (ChatRoomCharacter[C].Ownership != null) && ((data.Source == ChatRoomCharacter[C].Ownership.MemberNumber) || FromSelf);
 			var LoverNumbers = ChatRoomCharacter[C].GetLoversNumbers();
-			var FromLoversOrOwner = (LoverNumbers.length != 0) && (LoverNumbers.includes(SourceMemberNumber) || FromOwner);		
+			var FromLoversOrOwner = (LoverNumbers.length != 0) && (LoverNumbers.includes(data.Source) || FromOwner);
 
 			// From another user, we prevent changing the item if the current item is locked by owner/lover locks
 			if (!FromOwner) {
