@@ -478,7 +478,7 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 
 			// Adds the missing appearance part, we copy the mirrored group if it is not found and it exists
 			if (!Found) {
-				if (AssetGroup[G].MirrorGroup) { 
+				if (AssetGroup[G].MirrorGroup) {
 					var MirroredAsset = null;
 					for (let A = 0; A < Appearance.length; A++)
 						if (Appearance[A].Asset.Group.Name == AssetGroup[G].MirrorGroup) {
