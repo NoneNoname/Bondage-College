@@ -5,6 +5,7 @@ let CommandText = null;
 
 /**
  * Loads the commands for the Player
+ * @returns {void} - Nothing
  */
 function CommandsLoad() {
     CommandCombine(CommonCommands);
@@ -13,6 +14,7 @@ function CommandsLoad() {
 
 /**
  * Translates the help for commands
+ * @returns {void} - Nothing
  */
 function CommandsTranslate() {
     if (!CommandText) {
@@ -100,7 +102,7 @@ function CommandHelp(low) {
 
 /**
  * Finds command and executes it from the message
- * @param {string} msg 
+ * @param {string} msg - User input
  * @returns {void} - Nothing
  */
 function CommandExecute(msg) {
@@ -179,12 +181,6 @@ const CommonCommands = [
                 { Tag: "CoinResult", TextToLookUp: Heads ? "Heads" : "Tails" }];
             ServerSend("ChatRoomChat", { Content: "ActionCoin", Type: "Action", Dictionary: Dictionary });
         }
-    },
-    {
-        Tag: 'safeword',
-        Description: ', use safeword',
-        Prerequisite: () => DialogChatRoomCanSafeword(),
-        Action: () => ChatRoomSafewordChatCommand(),
     },
     {
         Tag: 'friendlistadd',
