@@ -128,6 +128,7 @@ function AssetTypeSetLoad(Item) {
     }
     ExtendedItemSetOffset(0);
     DialogExtendedMessage = AssetTypeDialog[Item.Asset.Group.Name.replace(/[23]/g, "")][Item.Asset.Name]["Select"]["Default"];
+    ExtendedItemPermissionMode = false;
 
     if (Item.Asset.TypeInfo.DrawType == "Images") {
         AssetTypeDrawType = AssetTypeDrawTypeWithImage;
@@ -185,6 +186,28 @@ function AssetTypeSetDraw() {
     } else {
         DrawText(Description["TypeLocked"]["Default"], 1500, 500, "white", "gray");
     }
+
+    if (C.ID == 0) DrawButton(1775, 25, 90, 90, "", "White", ExtendedItemPermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, ExtendedItemPermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
+}
+
+/**
+ * Gets the color for the Type button
+ * @param {Character} C - Current Character
+ * @param {Asset} Asset - asset
+ * @param {string|null} Type - type of the asset
+ * @param {boolean} IsSelected - Type is selected
+ * @param {boolean} Hover - Mouse is over the button
+ */
+function AssetTypeGetDrawColor(C, Asset, Type, IsSelected, Hover) {
+    const SkillCheck = !!AssetTypeSkillCheck(Asset.TypeInfo, Type, C.ID == 0);
+    if (ExtendedItemPermissionMode && C.ID == 0) {
+        const Blocked = InventoryIsPermissionBlocked(C, Asset.DynamicName(Player), Asset.DynamicGroupName, Type);
+        const Limited = InventoryIsPermissionLimited(C, Asset.Name, Asset.Group.Name, Type);
+        return (IsSelected || !Type) ? "#888888" : Blocked ? (Hover ? "Red" : "Pink") : Limited ? (Hover ? "Orange" : "#FED8B1") : (Hover ? "Green" : "Lime");
+    }
+    const Blocked = InventoryIsPermissionBlocked(C, Asset.DynamicName(Player), Asset.DynamicGroupName, Type);
+    const Limited = !InventoryIsPermissionLimited(C, Asset.Name, Asset.Group.Name, Type);
+    return IsSelected ? "#888888" : (Blocked || Limited) ? "Red" : SkillCheck ? "Pink" : (Hover ? "Cyan" : "White");
 }
 
 /**
@@ -193,9 +216,11 @@ function AssetTypeSetDraw() {
 function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Description, Offset, I) {
     const X = AssetTypeXY[ShowCount][I - Offset][0];
     const Y = AssetTypeXY[ShowCount][I - Offset][1];
+    const Hover = (MouseX >= X) && (MouseX < X + 225) && (MouseY >= Y) && (MouseY < Y + 275) && !CommonIsMobile;
     const Type = Types[I] || Info.NoneTypeName;
-    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
-    DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info.Types[Type], C.ID == 0) ? "Pink" : "White", null, null, IsSelected);
+    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I]);
+    const Color = AssetTypeGetDrawColor(C, Asset, Types[I], IsSelected, Hover);
+    DrawButton(X, Y, 225, 275, "", Color, null, null, IsSelected);
     DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
     DrawTextFit(Description[Type], X + 112, Y + 250, 225, "black");
 }
@@ -206,9 +231,11 @@ function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Descriptio
 function AssetTypeDrawTypeWithoutImage(C, _, Info, Types, ShowCount, Description, Offset, I) {
     const X = AssetTypeXYWithoutImages[ShowCount][I - Offset][0];
     const Y = AssetTypeXYWithoutImages[ShowCount][I - Offset][1];
+    const Hover = (MouseX >= X) && (MouseX < X + 225) && (MouseY >= Y) && (MouseY < Y + 55) && !CommonIsMobile;
     const Type = Types[I] || Info.NoneTypeName;
-    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I])
-    DrawButton(X, Y, 225, 55, "", IsSelected ? "#888888" : AssetTypeSkillCheck(Info.Types[Type], C.ID == 0) ? "Pink" : "White", null, null, IsSelected);
+    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I]);
+    const Color = AssetTypeGetDrawColor(C, Asset, Types[I], IsSelected, Hover);
+    DrawButton(X, Y, 225, 55, "", Color, null, null, IsSelected);
     DrawTextFit(Description[Type], X + 112, Y + 30, 225, "black");
 }
 
@@ -221,6 +248,8 @@ function AssetTypeSetClick() {
     // Exit button
     if (MouseIn(1885, 25, 90, 85)) {
         DialogFocusItem = null;
+        if (ExtendedItemPermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+        ExtendedItemPermissionMode = false;
         return;
     }
 
@@ -240,6 +269,12 @@ function AssetTypeSetClick() {
         ExtendedItemSetOffset(Offset + ShowCount);
         return;
     }
+
+    // Permission toggle button
+	if (MouseIn(1775, 25, 90, 90) && C.ID == 0) {
+		if (ExtendedItemPermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+		ExtendedItemPermissionMode = !ExtendedItemPermissionMode;
+	}
 
     if (!AssetTypeSelectBefore && Asset.AllowLock && MouseIn(1015, 25, 190, 90)) {
         const Item = DialogFocusItem;
@@ -296,14 +331,29 @@ function AssetTypeClickTypeWithoutImage(C, Info, Types, ShowCount, Offset, I) {
  * @param {Character} C - Current character
  * @param {TypeInfo} Info - Type info
  * @param {string|null} TypeName - Name of the type
+ * @returns {void} - Nothing
  */
 function AssetTypeClicked(C, Info, TypeName) {
-    const Type = Info.Types[TypeName || Info.NoneTypeName];
-    const R = AssetTypeSkillCheck(Type, C.ID == 0);
-    if (R) {
-        DialogExtendedMessage = DialogFind(Player, "Require" + R.Skill + "Level").replace("ReqLevel", R.Level);
-        return true;
+
+    if (InventoryItemIsType(DialogFocusItem, TypeName)) return;
+
+    if (ExtendedItemPermissionMode && C.ID == 0) {
+        if (!TypeName) return;
+        InventoryTogglePermission(DialogFocusItem, TypeName);
+        return;
     }
+
+    const Blocked = InventoryIsPermissionBlocked(C, DialogFocusItem.Asset.DynamicName(Player), DialogFocusItem.Asset.DynamicGroupName, Option.Property.Type);
+    const Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, Option.Property.Type);
+    if (Blocked || Limited) return;
+
+    const SkillCheck = AssetTypeSkillCheck(Info, TypeName, C.ID == 0);
+    if (SkillCheck) {
+        DialogExtendedMessage = DialogFind(Player, "Require" + SkillCheck.Skill + "Level").replace("ReqLevel", SkillCheck.Level);
+        return;
+    }
+
+    const Type = Info.Types[TypeName || Info.NoneTypeName];
     if (Type.Prerequisite && !InventoryAllow(C, Type.Prerequisite, true)) {
         DialogExtendedMessage = DialogText;
         return;
@@ -463,12 +513,13 @@ function AssetTypeGetDescription(C, Asset, Type) {
 
 /**
  * Checks the skill requirements on a type
- * @param {TypeInfoType} Type - Type information
+ * @param {TypeInfo} Info - Type info
+ * @param {string|null} Type - Type name
  * @param {boolean} Self - the character is the player
  * @returns {{Skill: string, Level: number}|null} - Missing skill or null
  */
-function AssetTypeSkillCheck(Type, Self) {
-    const Skills = Type.Skills;
+function AssetTypeSkillCheck(Info, Type, Self) {
+    const Skills = Info.Types[Type || Info.NoneTypeName].Skills;
     if (!Skills) return null;
     for (let key in Skills) {
         if (key == "Bondage" && Self) key = "Self" + key;
