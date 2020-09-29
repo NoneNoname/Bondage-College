@@ -34,9 +34,9 @@ function MovieStudioRun() {
 		DrawButton(1885, 145, 90, 90, "", "White", "Icons/Character.png", TextGet("Profile"));
 	}
 	if ((MovieStudioCurrentMovie == "Interview") && (MovieStudioCurrentScene == "1")) {
-		DrawCharacter(MovieStudioActor1, 250, 0, 1);
+		DrawImageZoomCanvas("Screens/Room/MovieStudio/Drawer.png", MainCanvas, 0, 0, 500, 1000, 250, 0, 500, 1000);
 		DrawCharacter(Player, 750, 0, 1);
-		DrawCharacter(MovieStudioActor2, 1250, 0, 1);
+		DrawImageZoomCanvas("Screens/Room/MovieStudio/XCross.png", MainCanvas, 0, 0, 500, 1000, 1250, 0, 500, 1000);
 		DrawText(TextGet("Recording"), 1900, 920, "#FF4444", "White");
 		DrawText(TimermsToTime(CurrentTime - MovieStudioTimer), 1900, 960, "#FF4444", "White");
 	}
@@ -85,9 +85,7 @@ function MovieStudioProgress(Movie, Scene, Role) {
 	if ((Movie == "Interview") && (Scene == "1")) {
 		MovieStudioBackground = CommonRandomItemFromList("", ["BDSMRoomRed", "BDSMRoomBlue", "BDSMRoomPurple"]);
 		MovieStudioActor1 = CharacterLoadNPC("NPC_MovieStudio_Interview_Drawer");
-		MovieStudioActor1.FixedImage = "Screens/Room/MovieStudio/Drawer.png";
 		MovieStudioActor2 = CharacterLoadNPC("NPC_MovieStudio_Interview_XCross");
-		MovieStudioActor2.FixedImage = "Screens/Room/MovieStudio/XCross.png";
 	}
 	if (CurrentCharacter != null) DialogLeave();
 }
