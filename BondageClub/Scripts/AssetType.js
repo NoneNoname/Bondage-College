@@ -343,8 +343,8 @@ function AssetTypeClicked(C, Info, TypeName) {
         return;
     }
 
-    const Blocked = InventoryIsPermissionBlocked(C, DialogFocusItem.Asset.DynamicName(Player), DialogFocusItem.Asset.DynamicGroupName, Option.Property.Type);
-    const Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, Option.Property.Type);
+    const Blocked = InventoryIsPermissionBlocked(C, DialogFocusItem.Asset.DynamicName(Player), DialogFocusItem.Asset.DynamicGroupName, TypeName);
+    const Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, TypeName);
     if (Blocked || Limited) return;
 
     const SkillCheck = AssetTypeSkillCheck(Info, TypeName, C.ID == 0);
