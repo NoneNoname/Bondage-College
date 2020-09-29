@@ -5,14 +5,21 @@
  */
 "use strict";
 var MainCanvas;
-var ColorCanvas;
+let TempCanvas;
+let ColorCanvas;
+let CharacterCanvas;
+const DrawRunMap = new Map();
+let DrawRun = () => {};
+let DrawScreen;
 
 // A bank of all the chached images
-var DrawCacheImage = {};
+const DrawCacheImage = new Map;
 var DrawCacheLoadedImages = 0;
 var DrawCacheTotalImages = 0;
 var DrawScreenWidth = -1;
 var DrawScreenHeight = -1;
+
+window.addEventListener('resize', DrawWindowResize);
 
 /**
  * Converts a hex color string to a RGB color
@@ -55,7 +62,9 @@ function DrawLoad() {
 
 	// Creates the objects used in the game
 	MainCanvas = document.getElementById("MainCanvas").getContext("2d");
-	ColorCanvas = document.createElement("canvas");
+	TempCanvas = document.createElement("canvas").getContext("2d");
+	ColorCanvas = document.createElement("canvas").getContext("2d");
+	CharacterCanvas = document.createElement("canvas").getContext("2d");
 	document.getElementById("MainCanvas").addEventListener("keypress", KeyDown);
 	document.getElementById("MainCanvas").tabIndex = 1000;
 	document.addEventListener("keydown", DocumentKeyDown);
@@ -64,6 +73,10 @@ function DrawLoad() {
 	MainCanvas.font = "36px Arial";
 	MainCanvas.textAlign = "center";
 	MainCanvas.textBaseline = "middle";
+
+	DrawWindowResize();
+	setTimeout(DrawWindowResize, 1000);
+	setTimeout(DrawWindowResize, 3000);
 
 	// Loads the 3D engine as well
 	Draw3DLoad();
@@ -77,12 +90,12 @@ function DrawLoad() {
  */
 function DrawGetImage(Source) {
 	// Search in the cache to find the image and make sure this image is valid
-	var Img = DrawCacheImage[Source];
+	let Img = DrawCacheImage.get(Source);
 	if (!Img) {
 		Img = new Image;
-		DrawCacheImage[Source] = Img;
+		DrawCacheImage.set(Source, Img);
 		// Keep track of image load state
-		var IsAsset = (Source.indexOf("Assets") >= 0);
+		const IsAsset = (Source.indexOf("Assets") >= 0);
 		if (IsAsset) {
 			++DrawCacheTotalImages;
 			Img.addEventListener("load", function () {
@@ -201,69 +214,67 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 					C, Item, PersistentData: () => AnimationPersistentDataGet(C, Item.Asset)
 				})
 			);
-			
+
 			// If we must rebuild the canvas due to an animation
 			const refreshTimeKey = AnimationGetDynamicDataName(C, AnimationDataTypes.RefreshTime);
 			const refreshRateKey = AnimationGetDynamicDataName(C, AnimationDataTypes.RefreshRate);
 			const buildKey = AnimationGetDynamicDataName(C, AnimationDataTypes.Rebuild);
 			const lastRefresh = AnimationPersistentStorage[refreshTimeKey] || 0;
 			const refreshRate = AnimationPersistentStorage[refreshRateKey] == null ? 60000 : AnimationPersistentStorage[refreshRateKey];
-			if (refreshRate + lastRefresh < CommonTime() && AnimationPersistentStorage[buildKey]) { 
+			if (refreshRate + lastRefresh < CommonTime() && AnimationPersistentStorage[buildKey]) {
 				CharacterRefresh(C, false);
 				AnimationPersistentStorage[buildKey] = false;
 				AnimationPersistentStorage[refreshTimeKey] = CommonTime();
 			}
 		}
-		
+
 		// There's 2 different canvas, one blinking and one that doesn't
-		var seconds = new Date().getTime();
-		var Canvas = (Math.round(seconds / 400) % C.BlinkFactor == 0) ? C.CanvasBlink : C.Canvas;
+		let Canvas = (Math.round(CurrentTime / 400) % C.BlinkFactor == 0) ? C.CanvasBlink : C.Canvas;
 
 		// Applies an offset to X and Y based on the HeightRatio.  If the player prefers full height, we always use 1.0
-		var HeightRatio = 1.0;
+		let HeightRatio = 1.0;
 		if ((IsHeightResizeAllowed == undefined) || IsHeightResizeAllowed) HeightRatio = CharacterAppearanceGetCurrentValue(C, "Height", "Zoom");
 		if ((Player != null) && (Player.VisualSettings != null) && (Player.VisualSettings.ForceFullHeight != null) && Player.VisualSettings.ForceFullHeight) HeightRatio = 1.0;
 		if (Zoom == null) Zoom = 1;
 		X += Zoom * Canvas.width * (1 - HeightRatio) / 2;
 		if ((C.Pose.indexOf("Suspension") < 0) && (C.Pose.indexOf("SuspensionHogtied") < 0)) Y += Zoom * Canvas.height * (1 - HeightRatio);
 
+		// Initialize the working canvas
+		CharacterCanvas.canvas.width = Canvas.width;
+		CharacterCanvas.canvas.height = Canvas.height;
+
 		// If we must dark the Canvas characters
 		if ((C.ID != 0) && Player.IsBlind() && (CurrentScreen != "InformationSheet")) {
-			var CanvasH = document.createElement("canvas");
-			CanvasH.width = Canvas.width;
-			CanvasH.height = Canvas.height;
-			var DarkFactor = (Player.Effect.indexOf("BlindNormal") >= 0) ? 0.3 : 0.6;
-			var ctx = CanvasH.getContext('2d');
-			ctx.drawImage(Canvas, 0, 0);
+			let DarkFactor = (Player.Effect.indexOf("BlindNormal") >= 0) ? 0.3 : 0.6;
+			CharacterCanvas.globalCompositeOperation = "copy";
+			CharacterCanvas.drawImage(Canvas, 0, 0);
 			// Overlay black rectangle.
-			ctx.fillStyle = "rgba(0,0,0," + (1.0 - DarkFactor) + ")";
-			ctx.fillRect(0, 0, CanvasH.width, CanvasH.height);
+			CharacterCanvas.globalCompositeOperation = "source-over";
+			CharacterCanvas.fillStyle = "rgba(0,0,0," + (1.0 - DarkFactor) + ")";
+			CharacterCanvas.fillRect(0, 0, Canvas.width, Canvas.height);
 			// Re-apply character alpha channel
-			ctx.globalCompositeOperation = 'destination-in';
-			ctx.drawImage(Canvas, 0, 0);
-			Canvas = CanvasH;
+			CharacterCanvas.globalCompositeOperation = 'destination-in';
+			CharacterCanvas.drawImage(Canvas, 0, 0);
+			Canvas = CharacterCanvas.canvas;
 		}
 
 		// If we must flip the canvas vertically
 		if (C.Pose.indexOf("Suspension") >= 0) {
-			var CanvasH = document.createElement("canvas");
-			CanvasH.width = Canvas.width;
-			CanvasH.height = Canvas.height;
-			CanvasH.getContext("2d").rotate(Math.PI);
-			CanvasH.getContext("2d").translate(-Canvas.width, -Canvas.height);
-			// Render to the flipped canvas, and crop off the height modifier to prevent vertical overflow
-			CanvasH.getContext("2d").drawImage(Canvas, 0, 0, Canvas.width, Canvas.height - C.HeightModifier, 0, 0, Canvas.width, Canvas.height - C.HeightModifier);
-			Canvas = CanvasH;
+			CharacterCanvas.rotate(Math.PI);
+			CharacterCanvas.translate(-Canvas.width, -Canvas.height);
+			CharacterCanvas.globalCompositeOperation = "copy";
+			CharacterCanvas.drawImage(Canvas, 0, 0);
+			Canvas = CharacterCanvas.canvas;
 		}
 
 		// Draw the character and applies the zoom ratio, the canvas to draw can be shrunk based on the height modifier
 		Zoom *= HeightRatio;
-		var H = Canvas.height + (((C.HeightModifier != null) && (C.HeightModifier < 0)) ? C.HeightModifier : 0);
+		let H = Canvas.height + (((C.HeightModifier != null) && (C.HeightModifier < 0)) ? C.HeightModifier : 0);
 		MainCanvas.drawImage(Canvas, 0, 0, Canvas.width, H, X, Y - (C.HeightModifier * Zoom), Canvas.width * Zoom, H * Zoom);
 
 		// Applies a Y offset if the character is suspended
 		if (C.Pose.indexOf("Suspension") >= 0) Y += (Zoom * Canvas.height * (1 - HeightRatio) / HeightRatio);
-		
+
 		// Draw the arousal meter & game images on certain conditions
 		DrawArousalMeter(C, X - Zoom * Canvas.width * (1 - HeightRatio) / 2, Y - Zoom * Canvas.height * (1 - HeightRatio), Zoom / HeightRatio);
 		OnlineGameDrawCharacter(C, X - Zoom * Canvas.width * (1 - HeightRatio) / 2, Y - Zoom * Canvas.height * (1 - HeightRatio), Zoom / HeightRatio);
@@ -304,7 +315,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
  * @param {number} X - Position of the character on the X axis
  * @param {number} Y - Position of the character on the Y axis
  * @param {string} Color - Color of the zone outline
- * @param {number} [Thickness=3] - Thickness of the outline 
+ * @param {number} [Thickness=3] - Thickness of the outline
  * @returns {void} - Nothing
  */
 function DrawAssetGroupZone(C, Zone, HeightRatio, X, Y, Color, Thickness = 3) {
@@ -331,6 +342,27 @@ function DrawAssetGroupZoneBackground(C, Zone, HeightRatio, X, Y, Color) {
 			DrawRect((HeightRatio * Zone[Z][0]) + X, (1000 - (HeightRatio * (Zone[Z][1] + Y + Zone[Z][3]))) - C.HeightModifier, (HeightRatio * Zone[Z][2]), (HeightRatio * Zone[Z][3]), Color);
 		else
 			DrawRect((HeightRatio * Zone[Z][0]) + X, HeightRatio * (Zone[Z][1] - C.HeightModifier) + Y, (HeightRatio * Zone[Z][2]), (HeightRatio * Zone[Z][3]), Color);
+}
+
+/**
+ * Return a semi-transparent copy of a canvas
+ * @param {HTMLCanvasElement} Canvas - source
+ * @param {number} Alpha - transparency between 0-1
+ * @returns {HTMLCanvasElement} - result
+ */
+function DrawAlpha(Canvas, Alpha) {
+	// If there's nothing to do simply return the original image
+	if ((Alpha == null) || (Alpha >= 1.0)) return Canvas;
+	// Copy the image to the temp canvas
+	TempCanvas.canvas.width = Canvas.width;
+	TempCanvas.canvas.height = Canvas.height;
+	TempCanvas.globalCompositeOperation = "copy";
+	TempCanvas.drawImage(Canvas, 0, 0);
+	// Apply the alpha
+	TempCanvas.globalCompositeOperation = "destination-in";
+	TempCanvas.fillStyle = "rgba(0,0,0," + Alpha + ")";
+	TempCanvas.fillRect(0, 0, Canvas.width, Canvas.height);
+	return TempCanvas.canvas;
 }
 
 /**
@@ -365,7 +397,7 @@ function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Widt
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageResize(Source, X, Y, Width, Height) {
-	var Img = DrawGetImage(Source);
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	MainCanvas.drawImage(Img, 0, 0, Img.width, Img.height, X, Y, Width, Height);
@@ -382,17 +414,15 @@ function DrawImageResize(Source, X, Y, Width, Height) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks) {
-	var Img = DrawGetImage(Source);
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	if (AlphaMasks && AlphaMasks.length) {
-		var tmpCanvas = document.createElement("canvas");
-		tmpCanvas.width = Img.width;
-		tmpCanvas.height = Img.height;
-		var ctx = tmpCanvas.getContext('2d');
-		ctx.drawImage(Img, 0, 0);
-		AlphaMasks.forEach(([x, y, w, h]) => ctx.clearRect(x - X, y - Y, w, h));
-		Canvas.drawImage(tmpCanvas, X, Y);
+		TempCanvas.width = Img.width;
+		TempCanvas.height = Img.height;
+		TempCanvas.drawImage(Img, 0, 0);
+		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
+		Canvas.drawImage(TempCanvas, X, Y);
 	} else {
 		Canvas.drawImage(Img, X, Y);
 	}
@@ -411,13 +441,11 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks) {
  */
 function DrawCanvas(Img, Canvas, X, Y, AlphaMasks) {
 	if (AlphaMasks && AlphaMasks.length) {
-		var tmpCanvas = document.createElement("canvas");
-		tmpCanvas.width = Img.width;
-		tmpCanvas.height = Img.height;
-		var ctx = tmpCanvas.getContext('2d');
-		ctx.drawImage(Img, 0, 0);
-		AlphaMasks.forEach(([x, y, w, h]) => ctx.clearRect(x - X, y - Y, w, h));
-		Canvas.drawImage(tmpCanvas, X, Y);
+		TempCanvas.width = Img.width;
+		TempCanvas.height = Img.height;
+		TempCanvas.drawImage(Img, 0, 0);
+		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
+		Canvas.drawImage(TempCanvas, X, Y);
 	} else {
 		Canvas.drawImage(Img, X, Y);
 	}
@@ -446,7 +474,7 @@ function DrawCanvasZoom(Canvas, X, Y, Zoom) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageZoomMirror(Source, X, Y, Width, Height) {
-	var Img = DrawGetImage(Source);
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	MainCanvas.save();
@@ -464,7 +492,7 @@ function DrawImageZoomMirror(Source, X, Y, Width, Height) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImage(Source, X, Y) {
-	var Img = DrawGetImage(Source);
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	MainCanvas.drawImage(Img, X, Y);
@@ -486,35 +514,39 @@ function DrawImage(Source, X, Y) {
 function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha, AlphaMasks) {
 
 	// Make sure that the starting image is loaded
-	var Img = DrawGetImage(Source);
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 
+	// Variable initialization
+	const width = Img.width;
+	const height = Img.height;
+
 	// Prepares a canvas to draw the colorized image
-	ColorCanvas.width = Img.width;
-	ColorCanvas.height = Img.height;
-	var ctx = ColorCanvas.getContext("2d");
-	ctx.drawImage(Img, 0, 0);
-	var imageData = ctx.getImageData(0, 0, ColorCanvas.width, ColorCanvas.height);
-	var data = imageData.data;
+	ColorCanvas.canvas.width = width;
+	ColorCanvas.canvas.height = height;
+	ColorCanvas.globalCompositeOperation = "copy";
+	ColorCanvas.drawImage(Img, 0, 0);
+
+	const imageData = ColorCanvas.getImageData(0, 0, width, height);
+	const data = imageData.data;
 
 	// Get the RGB color used to transform
-	var rgbColor = DrawHexToRGB(HexColor);
-	var trans;
+	const rgbColor = DrawHexToRGB(HexColor);
 
 	// We transform each non transparent pixel based on the RGG value
 	if (FullAlpha) {
 		for (let p = 0, len = data.length; p < len; p += 4) {
 			if (data[p + 3] == 0)
 				continue;
-			trans = ((data[p] + data[p + 1] + data[p + 2]) / 383);
+			const trans = ((data[p] + data[p + 1] + data[p + 2]) / 383);
 			data[p + 0] = rgbColor.r * trans;
 			data[p + 1] = rgbColor.g * trans;
 			data[p + 2] = rgbColor.b * trans;
 		}
 	} else {
 		for (let p = 0, len = data.length; p < len; p += 4) {
-			trans = ((data[p] + data[p + 1] + data[p + 2]) / 383);
+			const trans = ((data[p] + data[p + 1] + data[p + 2]) / 383);
 			if ((data[p + 3] == 0) || (trans < 0.8) || (trans > 1.2))
 				continue;
 			data[p + 0] = rgbColor.r * trans;
@@ -524,11 +556,11 @@ function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha
 	}
 
 	// Replace the source image with the modified canvas
-	ctx.putImageData(imageData, 0, 0);
+	ColorCanvas.putImageData(imageData, 0, 0);
 	if (AlphaMasks && AlphaMasks.length) {
-		AlphaMasks.forEach(([x, y, w, h]) => ctx.clearRect(x - X, y - Y, w, h));
+		AlphaMasks.forEach(([x, y, w, h]) => ColorCanvas.clearRect(x - X, y - Y, w, h));
 	}
-	Canvas.drawImage(ctx.canvas, 0, 0, Img.width, Img.height, X, Y, Img.width * Zoom, Img.height * Zoom);
+	Canvas.drawImage(ColorCanvas.canvas, 0, 0, width, height, X, Y, width * Zoom, height * Zoom);
 
 	return true;
 }
@@ -541,7 +573,7 @@ function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageMirror(Source, X, Y) {
-	var Img = DrawGetImage(Source)
+	const Img = DrawGetImage(Source)
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	MainCanvas.save();
@@ -561,27 +593,26 @@ function DrawImageMirror(Source, X, Y) {
 function GetWrapTextSize(Text, Width, MaxLine) {
 
 	// Don't bother if it fits on one line
-	if (MainCanvas.measureText(Text).width > Width) {
-		var words = Text.split(' ');
-		var line = '';
+	if (MainCanvas.measureText(Text).width > Width) return;
 
-		// Find the number of lines
-		var LineCount = 1;
-		for (let n = 0; n < words.length; n++) {
-			var testLine = line + words[n] + ' ';
-			if (MainCanvas.measureText(testLine).width > Width && n > 0) {
-				line = words[n] + ' ';
-				LineCount++;
-			} else line = testLine;
-		}
+	const words = Text.split(' ');
+	let line = '';
 
-		// If there's too many lines, we launch the function again with size minus 2
-		if (LineCount > MaxLine) {
-			MainCanvas.font = (parseInt(MainCanvas.font.substring(0, 2)) - 2).toString() + "px arial";
-			return GetWrapTextSize(Text, Width, MaxLine);
-		} else return;
+	// Find the number of lines
+	let LineCount = 1;
+	for (let n = 0; n < words.length; n++) {
+		var testLine = line + words[n] + ' ';
+		if (MainCanvas.measureText(testLine).width > Width && n > 0) {
+			line = words[n] + ' ';
+			LineCount++;
+		} else line = testLine;
+	}
 
-	} return;
+	// If there's too many lines, we launch the function again with size minus 2
+	if (LineCount > MaxLine) {
+		MainCanvas.font = (parseInt(MainCanvas.font.substring(0, 2)) - 2).toString() + "px arial";
+			GetWrapTextSize(Text, Width, MaxLine);
+	}
 }
 
 /**
@@ -591,7 +622,7 @@ function GetWrapTextSize(Text, Width, MaxLine) {
  * @param {number} Y - Position of the rectangle on the Y axis
  * @param {number} Width - Width of the rectangle
  * @param {number} Height - Height of the rectangle
- * @param {string} ForeColor - Foreground color 
+ * @param {string} ForeColor - Foreground color
  * @param {string} BackColor - Background color
  * @param {number} MaxLine - Maximum of lines the word can wrap for
  * @returns {void} - Nothing
@@ -612,7 +643,7 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 	}
 
 	// Sets the text size if there's a maximum number of lines
-	var TextSize;
+	let TextSize;
 	if (MaxLine != null) {
 		TextSize = MainCanvas.font
 		GetWrapTextSize(Text, Width, MaxLine);
@@ -621,13 +652,13 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 	// Split the text if it wouldn't fit in the rectangle
 	MainCanvas.fillStyle = ForeColor;
 	if (MainCanvas.measureText(Text).width > Width) {
-		var words = Text.split(' ');
-		var line = '';
+		let words = Text.split(' ');
+		let line = '';
 
 		// Find the number of lines
-		var LineCount = 1;
+		let LineCount = 1;
 		for (let n = 0; n < words.length; n++) {
-			var testLine = line + words[n] + ' ';
+			const testLine = line + words[n] + ' ';
 			if (MainCanvas.measureText(testLine).width > Width && n > 0) {
 				line = words[n] + ' ';
 				LineCount++;
@@ -639,7 +670,7 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 		line = '';
 		Y = Y - ((LineCount - 1) * 23) + (Height / 2);
 		for (let n = 0; n < words.length; n++) {
-			var testLine = line + words[n] + ' ';
+			const testLine = line + words[n] + ' ';
 			if (MainCanvas.measureText(testLine).width > Width && n > 0) {
 				MainCanvas.fillText(line, X + Width / 2, Y);
 				line = words[n] + ' ';
@@ -672,7 +703,7 @@ function DrawTextFit(Text, X, Y, Width, Color) {
 
 	for (let S = 36; S >= 10; S = S - 2) {
 		MainCanvas.font = S.toString() + "px Arial";
-		var metrics = MainCanvas.measureText(Text);
+		const metrics = MainCanvas.measureText(Text);
 		if (metrics.width <= Width)
 			break;
 	}
@@ -712,9 +743,9 @@ function DrawText(Text, X, Y, Color, BackColor) {
  * @param {number} Height - Height of the component
  * @param {string} Label - Text to display in the button
  * @param {string} Color - Color of the component
- * @param {string} [Image] - URL of the image to draw inside the button, if applicable 
- * @param {string} [HoveringText] - Text of the tooltip, if applicable 
- * @param {boolean} [Disabled] - Disables the hovering options if set to true 
+ * @param {string} [Image] - URL of the image to draw inside the button, if applicable
+ * @param {string} [HoveringText] - Text of the tooltip, if applicable
+ * @param {boolean} [Disabled] - Disables the hovering options if set to true
  * @returns {void} - Nothing
  */
 function DrawButton(Left, Top, Width, Height, Label, Color, Image, HoveringText, Disabled) {
@@ -766,13 +797,13 @@ function DrawCheckbox(Left, Top, Width, Height, Text, IsChecked) {
  * @param {string} [Image] - Image URL to draw in the component
  * @param {string} BackText - Text for the back button tooltip
  * @param {string} NextText - Text for the next button tooltip
- * @param {boolean} [Disabled] - Disables the hovering options if set to true 
+ * @param {boolean} [Disabled] - Disables the hovering options if set to true
  * @returns {void} - Nothing
  */
 function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image, BackText, NextText, Disabled) {
 
 	// Draw the button rectangle (makes half of the background cyan colored if the mouse is over it)
-	var Split = Left + Width / 2;
+	const Split = Left + Width / 2;
 	MainCanvas.beginPath();
 	MainCanvas.rect(Left, Top, Width, Height);
 	MainCanvas.fillStyle = Color;
@@ -794,7 +825,7 @@ function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image, BackT
 	DrawTextFit(Label, Left + Width / 2, Top + (Height / 2) + 1, (CommonIsMobile) ? Width - 6 : Width - 36, "Black");
 	if ((Image != null) && (Image != "")) DrawImage(Image, Left + 2, Top + 2);
 
-	// Draw the back arrow 
+	// Draw the back arrow
 	MainCanvas.beginPath();
 	MainCanvas.fillStyle = "black";
 	MainCanvas.moveTo(Left + 15, Top + Height / 5);
@@ -803,7 +834,7 @@ function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image, BackT
 	MainCanvas.stroke();
 	MainCanvas.closePath();
 
-	// Draw the next arrow 
+	// Draw the next arrow
 	MainCanvas.beginPath();
 	MainCanvas.fillStyle = "black";
 	MainCanvas.moveTo(Left + Width - 15, Top + Height / 5);
@@ -854,7 +885,7 @@ function DrawButtonHover(Left, Top, Width, Height, HoveringText) {
  * @param {number} Width - Width of the rectangle
  * @param {number} Height - Height of the rectangle
  * @param {string} Color - Color of the rectangle outline
- * @param {number} [Thickness=3] - Thickness of the rectangle line 
+ * @param {number} [Thickness=3] - Thickness of the rectangle line
  * @returns {void} - Nothing
  */
 function DrawEmptyRect(Left, Top, Width, Height, Color, Thickness = 3) {
@@ -913,15 +944,11 @@ function DrawProgressBar(X, Y, W, H, Progress) {
 	DrawRect(Math.floor(X + 2 + (W - 4) * Progress / 100), Y + 2, Math.floor((W - 4) * (100 - Progress) / 100), H - 4, "red");
 }
 
-/**
- * Constantly looping draw process. Draws beeps, handles the screen size, handles the current blindfold state and draws the current screen.
- * @returns {void} - Nothing
- */
-function DrawProcess() {
+function DrawWindowResize() {
 
 	// Gets the Width and Height differently on mobile and regular browsers
-	var W = (CommonIsMobile) ? document.documentElement.clientWidth : window.innerWidth;
-	var H = (CommonIsMobile) ? document.documentElement.clientHeight : window.innerHeight;
+	const W = (CommonIsMobile) ? document.documentElement.clientWidth : window.innerWidth;
+	const H = (CommonIsMobile) ? document.documentElement.clientHeight : window.innerHeight;
 
 	// If we need to resize, we keep the 2x1 ratio
 	if ((DrawScreenWidth != W) || (DrawScreenHeight != H)) {
@@ -932,18 +959,53 @@ function DrawProcess() {
 			MainCanvas.height = MainCanvas.width / 2;
 			MainCanvas.canvas.style.width = "100%";
 			MainCanvas.canvas.style.height = "";
+			const MainCanvasRect = document.getElementById("MainCanvas").getBoundingClientRect();
+			MouseMove = function MouseMove(event) {
+				MouseX = Math.round((event.clientX - MainCanvasRect.left) * 2000 / W);
+				MouseY = Math.round((event.clientY - MainCanvasRect.top) * 2000 / W);
+			}
+			Touch = function Touch(event) {
+				if (!CommonIsMobile) return;
+				MouseX = Math.round((event.touches[0].clientX - MainCanvasRect.left) * 2000 / W);
+				MouseY = Math.round((event.touches[0].clientY - MainCanvasRect.top) * 2000 / W);
+				CommonClick();
+			}
 		} else {
 			MainCanvas.height = H;
 			MainCanvas.width = MainCanvas.height * 2;
 			MainCanvas.canvas.style.width = "";
 			MainCanvas.canvas.style.height = "100%";
+			const MainCanvasRect = document.getElementById("MainCanvas").getBoundingClientRect();
+			MouseMove = function MouseMove(event) {
+				MouseX = Math.round((event.clientX - MainCanvasRect.left) * 1000 / H);
+				MouseY = Math.round((event.clientY - MainCanvasRect.top) * 1000 / H);
+			}
+			Touch = function Touch(event) {
+				if (!CommonIsMobile) return;
+				MouseX = Math.round((event.touches[0].clientX - MainCanvasRect.left) * 1000 / H);
+				MouseY = Math.round((event.touches[0].clientY - MainCanvasRect.top) * 1000 / H);
+				CommonClick();
+			}
 		}
 	}
+}
+
+/**
+ * Constantly looping draw process. Draws beeps, handles the screen size, handles the current blindfold state and draws the current screen.
+ * @returns {void} - Nothing
+ */
+function DrawProcess() {
+	let RefreshDrawFunction = false;
+	if (DrawScreen != CurrentScreen) {
+		DrawScreen = CurrentScreen;
+		RefreshDrawFunction = true;
+	}
+		
 
 	// Gets the current screen background and draw it, it becomes darker in dialog mode or if the character is blindfolded
-	var B = window[CurrentScreen + "Background"];
+	const B = window[CurrentScreen + "Background"];
 	if ((B != null) && (B != "")) {
-		var DarkFactor = 1.0;
+		const DarkFactor = 1.0;
 		if ((CurrentModule != "Character") && (B != "Sheet")) {
 			if (Player.Effect.indexOf("BlindHeavy") >= 0) DarkFactor = 0.0;
 			else if (Player.Effect.indexOf("BlindNormal") >= 0) DarkFactor = 0.15;
@@ -956,7 +1018,20 @@ function DrawProcess() {
 
 	// Draws the dialog screen or current screen if there's no loaded character
 	if (CurrentCharacter != null) DialogDraw();
-	else CommonDynamicFunction(CurrentScreen + "Run()");
+	if (!RefreshDrawFunction) DrawRun();
+	else {
+		DrawRun = DrawRunMap.get(CurrentScreen);
+		if (DrawRun == null) {
+			if (typeof window[CurrentScreen + "Run"] === 'function') {
+				DrawRun = window[CurrentScreen + "Run"];
+				DrawRunMap.set(CurrentScreen, DrawRun);
+			} else {
+				console.log("Trying to launch invalid function: " + CurrentScreen + "Run()");
+				DrawRun = () => {};
+			}
+		}
+		DrawRun();
+	}
 
 	// Draws beep from online player sent by the server
 	ServerDrawBeep();
