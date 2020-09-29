@@ -13,7 +13,9 @@ var AssetTypeSelectBefore = false;
  * @type {string[]}
  */
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
+let AssetTypePermissionMode = false;
 var AssetTypeDialog = {};
+const AssetTypeOffset = new Map();
 /** @type AssetTypeDraw */
 let AssetTypeDrawType = AssetTypeDrawTypeWithImage;
 /** @type AssetTypeClick */
@@ -126,9 +128,9 @@ function AssetTypeSetLoad(Item) {
             console.log("Trying to launch invalid function: Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Load()");
         }
     }
-    ExtendedItemSetOffset(0);
+
     DialogExtendedMessage = AssetTypeDialog[Item.Asset.Group.Name.replace(/[23]/g, "")][Item.Asset.Name]["Select"]["Default"];
-    ExtendedItemPermissionMode = false;
+    AssetTypePermissionMode = false;
 
     if (Item.Asset.TypeInfo.DrawType == "Images") {
         AssetTypeDrawType = AssetTypeDrawTypeWithImage;
@@ -149,16 +151,15 @@ function AssetTypeSetDraw() {
     const Asset = DialogFocusItem.Asset;
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
-    const Offset = ExtendedItemGetOffset();
+    const Offset = AssetTypeGetOffset(Types.length);
     const ShowCount = Info.ShowCount > 8 ? Info.ShowCount : Math.min(Info.ShowCount, Types.length);
     const Description = AssetTypeDialog[Asset.Group.Name.replace(/[23]/g, "")][Asset.Name];
 
-    if (Offset >= ShowCount) {
+    if (ShowCount < Types.length) {
         DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
-    }
-    if (Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
         DrawButton(1775, 25, 90, 90, "", "White", "Icons/Next.png");
     }
+
     if (!AssetTypeSelectBefore && Asset.AllowLock) {
         const IsGroupBlocked = InventoryGroupIsBlocked(C);
         const Prerequisite = InventoryAllow(C, DialogFocusItem.Asset.Prerequisite);
@@ -187,7 +188,7 @@ function AssetTypeSetDraw() {
         DrawText(Description["TypeLocked"]["Default"], 1500, 500, "white", "gray");
     }
 
-    if (C.ID == 0) DrawButton(1775, 25, 90, 90, "", "White", ExtendedItemPermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, ExtendedItemPermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
+    if (C.ID == 0) DrawButton(1775, 25, 90, 90, "", "White", AssetTypePermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, AssetTypePermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
 }
 
 /**
@@ -200,7 +201,7 @@ function AssetTypeSetDraw() {
  */
 function AssetTypeGetDrawColor(C, Asset, Type, IsSelected, Hover) {
     const SkillCheck = !!AssetTypeSkillCheck(Asset.TypeInfo, Type, C.ID == 0);
-    if (ExtendedItemPermissionMode && C.ID == 0) {
+    if (AssetTypePermissionMode && C.ID == 0) {
         const Blocked = InventoryIsPermissionBlocked(C, Asset.DynamicName(Player), Asset.DynamicGroupName, Type);
         const Limited = InventoryIsPermissionLimited(C, Asset.Name, Asset.Group.Name, Type);
         return (IsSelected || !Type) ? "#888888" : Blocked ? (Hover ? "Red" : "Pink") : Limited ? (Hover ? "Orange" : "#FED8B1") : (Hover ? "Green" : "Lime");
@@ -248,8 +249,8 @@ function AssetTypeSetClick() {
     // Exit button
     if (MouseIn(1885, 25, 90, 85)) {
         DialogFocusItem = null;
-        if (ExtendedItemPermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
-        ExtendedItemPermissionMode = false;
+        if (AssetTypePermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+        AssetTypePermissionMode = false;
         return;
     }
 
@@ -257,23 +258,23 @@ function AssetTypeSetClick() {
     const Asset = DialogFocusItem.Asset;
     const Info = Asset.TypeInfo;
     const Types = Info.DynamicAllowType(DialogFocusItem);
-    const Offset = ExtendedItemGetOffset();
+    const Offset = AssetTypeGetOffset(Types.length);
     const ShowCount = Math.min(Info.ShowCount, Types.length);
 
     // Pagination buttons
-    if (MouseIn(1665, 25, 90, 90) && Offset >= ShowCount) {
-        ExtendedItemSetOffset(Offset - ShowCount);
+    if (MouseIn(1665, 25, 90, 90) && ShowCount < Types.length) {
+        AssetTypeSetOffset(-ShowCount, Types.length);
         return;
     }
-    if (MouseIn(1775, 25, 90, 90) && Types.length > ShowCount && Offset < ShowCount * Math.floor(Types.length / ShowCount)) {
-        ExtendedItemSetOffset(Offset + ShowCount);
+    if (MouseIn(1775, 25, 90, 90) && ShowCount < Types.length) {
+        AssetTypeSetOffset(+ShowCount, Types.length);
         return;
     }
 
     // Permission toggle button
 	if (MouseIn(1775, 25, 90, 90) && C.ID == 0) {
-		if (ExtendedItemPermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
-		ExtendedItemPermissionMode = !ExtendedItemPermissionMode;
+		if (AssetTypePermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+		AssetTypePermissionMode = !AssetTypePermissionMode;
 	}
 
     if (!AssetTypeSelectBefore && Asset.AllowLock && MouseIn(1015, 25, 190, 90)) {
@@ -337,7 +338,7 @@ function AssetTypeClicked(C, Info, TypeName) {
 
     if (InventoryItemIsType(DialogFocusItem, TypeName)) return;
 
-    if (ExtendedItemPermissionMode && C.ID == 0) {
+    if (AssetTypePermissionMode && C.ID == 0) {
         if (!TypeName) return;
         InventoryTogglePermission(DialogFocusItem, TypeName);
         return;
@@ -528,6 +529,37 @@ function AssetTypeSkillCheck(Info, Type, Self) {
     return null;
 }
 
+/**
+ * Get the current offset for an item
+ * @param {number} Length - length of the types array
+ * @returns {number} - Offset
+ */
+function AssetTypeGetOffset(Length) {
+    const key = DialogFocusItem.Asset.Group.Name + "/" + DialogFocusItem.Asset.Name;
+    let value = AssetTypeOffset.get(key);
+    if ((value == null) || (value < 0) || (value >= Length)) {
+        value = 0;
+        AssetTypeOffset.set(key, value);
+    }
+    return value;
+}
+
+/**
+ * Set the current offset for an item
+ * @param {number} Change - the change on the offset
+ * @param {number} Length - length of the types array
+ * @returns {void} - Nothing
+ */
+function AssetTypeSetOffset(Change, Length) {
+    const key = DialogFocusItem.Asset.Group.Name + "/" + DialogFocusItem.Asset.Name;
+    let value = AssetTypeOffset.get(key) + Change;
+    if (value >= Length) {
+        value = 0;
+    } else if (value < 0) {
+        value = Math.floor(Length / Change) * Change;
+    }
+    AssetTypeOffset.set(key, value);
+}
 
 /**
  * @callback AssetTypeDraw
