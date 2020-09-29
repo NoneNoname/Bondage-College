@@ -207,7 +207,7 @@ function AssetTypeGetDrawColor(C, Asset, Type, IsSelected, Hover) {
         return (IsSelected || !Type) ? "#888888" : Blocked ? (Hover ? "Red" : "Pink") : Limited ? (Hover ? "Orange" : "#FED8B1") : (Hover ? "Green" : "Lime");
     }
     const Blocked = InventoryIsPermissionBlocked(C, Asset.DynamicName(Player), Asset.DynamicGroupName, Type);
-    const Limited = !InventoryIsPermissionLimited(C, Asset.Name, Asset.Group.Name, Type);
+    const Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, Type);
     return IsSelected ? "#888888" : (Blocked || Limited) ? "Red" : SkillCheck ? "Pink" : (Hover ? "Cyan" : "White");
 }
 
@@ -221,7 +221,7 @@ function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Descriptio
     const Type = Types[I] || Info.NoneTypeName;
     const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I]);
     const Color = AssetTypeGetDrawColor(C, Asset, Types[I], IsSelected, Hover);
-    DrawButton(X, Y, 225, 275, "", Color, null, null, IsSelected);
+    DrawRect(X, Y, 225, 275, Color);
     DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Type + ".png", X - 1, Y - 1);
     DrawTextFit(Description[Type], X + 112, Y + 250, 225, "black");
 }
@@ -236,7 +236,7 @@ function AssetTypeDrawTypeWithoutImage(C, _, Info, Types, ShowCount, Description
     const Type = Types[I] || Info.NoneTypeName;
     const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I]);
     const Color = AssetTypeGetDrawColor(C, Asset, Types[I], IsSelected, Hover);
-    DrawButton(X, Y, 225, 55, "", Color, null, null, IsSelected);
+    DrawRect(X, Y, 225, 55, Color);
     DrawTextFit(Description[Type], X + 112, Y + 30, 225, "black");
 }
 
