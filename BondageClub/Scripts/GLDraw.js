@@ -498,7 +498,7 @@ function GLDrawLoadImage(gl, url) {
 			Img.addEventListener('load', function () {
 				GLDrawBingImageToTextureInfo(gl, Img, textureInfo);
 				if (!textureInfo.error) ++GLDrawCacheLoadedImages;
-				if (GLDrawCacheLoadedImages == GLDrawCacheTotalImages) { Player.MustDraw = true; GLDrawForceRedraw(); }
+				if (GLDrawCacheLoadedImages == GLDrawCacheTotalImages) GLDrawForceRedraw();
 			});
 			Img.addEventListener('error', function () {
 				if (!textureInfo.error) {
