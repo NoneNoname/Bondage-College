@@ -14,6 +14,7 @@ var AssetTypeSelectBefore = false;
  */
 const AssetTypeControlledProperties = ["Effect", "Block", "SetPose", "Difficulty", "SelfUnlock", "Hide"];
 let AssetTypePermissionMode = false;
+let AssetTypeSkillCheckCache = null;
 var AssetTypeDialog = {};
 const AssetTypeOffset = new Map();
 /** @type AssetTypeDraw */
@@ -131,6 +132,7 @@ function AssetTypeSetLoad(Item) {
 
     DialogExtendedMessage = AssetTypeDialog[Item.Asset.Group.Name.replace(/[23]/g, "")][Item.Asset.Name]["Select"]["Default"];
     AssetTypePermissionMode = false;
+    AssetTypeSkillCheckCache = null;
 
     if (Item.Asset.TypeInfo.DrawType == "Images") {
         AssetTypeDrawType = AssetTypeDrawTypeWithImage;
@@ -348,7 +350,7 @@ function AssetTypeClicked(C, Info, TypeName) {
     const Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, TypeName);
     if (Blocked || Limited) return;
 
-    const SkillCheck = AssetTypeSkillCheck(Info, TypeName, C.ID == 0);
+    const SkillCheck = AssetTypeSkillCheck(Info, TypeName, C.ID == 0, true);
     if (SkillCheck) {
         DialogExtendedMessage = DialogFind(Player, "Require" + SkillCheck.Skill + "Level").replace("ReqLevel", SkillCheck.Level);
         return;
@@ -528,16 +530,18 @@ function AssetTypeGetDescription(C, Asset, Type) {
  * @param {TypeInfo} Info - Type info
  * @param {string|null} Type - Type name
  * @param {boolean} Self - the character is the player
- * @returns {{Skill: string, Level: number}|null} - Missing skill or null
+ * @param {boolean} [ForceRecheck] - Force to recheck the skill even if the cache exists
+ * @returns {{Skill: string, Level: number}|false} - Missing skill or null
  */
-function AssetTypeSkillCheck(Info, Type, Self) {
+function AssetTypeSkillCheck(Info, Type, Self, ForceRecheck) {
+    if (!ForceRecheck && AssetTypeSkillCheckCache != null) return AssetTypeSkillCheckCache;
     const Skills = Info.Types[Type || Info.NoneTypeName].Skills;
-    if (!Skills) return null;
+    if (!Skills) return AssetTypeSkillCheckCache = false;
     for (let key in Skills) {
         if (key == "Bondage" && Self) key = "Self" + key;
-        if (Skills[key] && SkillGetLevelReal(Player, key) < Skills[key]) return { Skill: key, Level: Skills[key] };
+        if (Skills[key] && SkillGetLevelReal(Player, key) < Skills[key]) return AssetTypeSkillCheckCache = { Skill: key, Level: Skills[key] };
     }
-    return null;
+    return AssetTypeSkillCheckCache = false;
 }
 
 /**
