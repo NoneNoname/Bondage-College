@@ -599,10 +599,25 @@ function AssetTypeSetOffset(Change, Length) {
  /**
  * @typedef {Object} TypeInfo
  * @property {Object<string, TypeInfoType>|string[]} Types
+ * @property {string} NoneTypeName - Name of the default Type (when the type is null)
+ * @property {"Images"|"TextOnly"} DrawType
+ * @property {number} ShowCount - Number of items shown in the UI
+ * @property {boolean} Unextend - Remove Extend tag from the asset
+ * @property {boolean} TypeLocking - Lock type selection if the item is locked
+ * @property {boolean} SelectBeforeWear - Allow type selection before the item is worn
+ * @property {boolean} TypedName - The name of the asset should change dynamicly to the type name
+ * @property {boolean} ExtraPublish - Send a set type message after the item is applied on the character (SelectBefore)
+ * @property {string} DialogNpc - NPC dialog to search for
+ * @property {"Increment"} [PublishTypeTransform] - Transform the type name before publish
+ * @property {(C: Character, Item: Item, OldType: string) => DirectoryEntry[]} [DynamicDictionary]
+ * @property {(Item: Item) => (string|null)[]} [DynamicAllowType]
+ * @property {(C: Character, Item: Item, NewType: string) => boolean} [DynamicAllowSetType]
  */
 
 /**
  * @typedef {Object} TypeInfoType
  * @property {Property} Property
  * @property {Object<string, number>} Skills
+ * @property {string[]} Prerequisite
+ * @property {{ Group: string, Name: string, Timer: number }[]} Expression
  */
