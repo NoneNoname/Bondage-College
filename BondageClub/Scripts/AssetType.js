@@ -229,7 +229,7 @@ function AssetTypeDrawTypeWithImage(C, Asset, Info, Types, ShowCount, Descriptio
 /**
  * @type AssetTypeDraw
  */
-function AssetTypeDrawTypeWithoutImage(C, _, Info, Types, ShowCount, Description, Offset, I) {
+function AssetTypeDrawTypeWithoutImage(C, Asset, Info, Types, ShowCount, Description, Offset, I) {
     const X = AssetTypeXYWithoutImages[ShowCount][I - Offset][0];
     const Y = AssetTypeXYWithoutImages[ShowCount][I - Offset][1];
     const Hover = (MouseX >= X) && (MouseX < X + 225) && (MouseY >= Y) && (MouseY < Y + 55) && !CommonIsMobile;
