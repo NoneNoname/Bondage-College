@@ -42,3 +42,17 @@ ItemMouth,PlugGag,Name,Open,Open
 ItemMouth,PlugGag,Name,Plug,Plugged
 ItemMouth,PlugGag,Set,Open,SourceCharacter pulls out DestinationCharacter plug from her gag.
 ItemMouth,PlugGag,Set,Plug,SourceCharacter plugs up DestinationCharacter mouth.
+ItemMouth,PumpGag,Select,Default,Select inflation level
+ItemMouth,PumpGag,Name,Bloated,Bloated
+ItemMouth,PumpGag,Name,Empty,Empty
+ItemMouth,PumpGag,Name,Inflated,Inflated
+ItemMouth,PumpGag,Name,Light,Light
+ItemMouth,PumpGag,Name,Maximum,Maximum
+ItemMouth,PumpGag,Set,IncreaseToLight,SourceCharacter inflates DestinationCharacter gag only slightly.
+ItemMouth,PumpGag,Set,IncreaseToInflated,SourceCharacter inflates DestinationCharacter gag till half full.
+ItemMouth,PumpGag,Set,IncreaseToBloated,SourceCharacter inflates DestinationCharacter gag three quarters filled.
+ItemMouth,PumpGag,Set,IncreaseToMaximum,SourceCharacter inflates DestinationCharacter gag to the maximum amount.
+ItemMouth,PumpGag,Set,DecreaseToEmpty,SourceCharacter deflates DestinationCharacter gag fully till it's empty.
+ItemMouth,PumpGag,Set,DecreaseToLight,SourceCharacter deflates DestinationCharacter gag till only slighty filled.
+ItemMouth,PumpGag,Set,DecreaseToInflated,SourceCharacter deflates DestinationCharacter gag till it's half full.
+ItemMouth,PumpGag,Set,DecreaseToBloated,SourceCharacter deflates DestinationCharacter gag only a tiny bit.

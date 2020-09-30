@@ -59,6 +59,7 @@ function Tools_AssetTypeSaveJs() {
             const Info = AssetTypeInfo[G][A];
             write(`${A}: {`, 1);
             write(`NoneTypeName: "${Info.NoneTypeName}", DrawType: "${Info.DrawType}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, TypeLocking: ${Info.TypeLocking}, SelectBeforeWear: ${Info.SelectBeforeWear}, TypedName: ${Info.TypedName}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
+            if (Info.PublishTypeTransform) write(`PublishTypeTransform: "${Info.PublishTypeTransform}"`);
             let types = "";
             let emptyCount = 0;
             getBuffer = str => types += str;

@@ -51,8 +51,8 @@ const AssetTypeXYWithoutImages = [
  * Loads the type info
  */
 function AssetTypeLoad() {
-    // Tools_AssetTypeInfoPreload();
-    // let Tools_Count = 0;
+    if (typeof Tools_AssetTypeInfoPreload !== "undefined") Tools_AssetTypeInfoPreload();
+    let Tools_Count = 0;
 
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
@@ -74,11 +74,11 @@ function AssetTypeLoad() {
         A.ExtendedOrTypeInfo = true;
         A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
 
-        // Tools_Count++;
+        Tools_Count++;
     });
     AssetTypeLoadDialog();
 
-    // Tools_AssetTypeReport(Tools_Count);
+    if (typeof Tools_AssetTypeReport !== "undefined") Tools_AssetTypeReport(Tools_Count);
 }
 
 /**
@@ -418,8 +418,19 @@ function AssetTypeSet(C, Item, NewType) {
  */
 function AssetTypePublish(C, Item, OldType) {
     const Info = Item.Asset.TypeInfo;
+    let Type = InventoryItemGetType(Item);
+    switch (Info.PublishTypeTransform) {
+        case null: break;
+        case "Increment": {
+            const keys = Object.keys(Info.Types);
+            if (keys.indexOf(Type) > keys.indexOf(OldType)) Type = "IncreaseTo" + Type;
+            else Type = "DecreaseTo" + Type
+            break;
+        }
+        default: break;
+    }
     const Dictionary = [
-        { Tag: "AssetTypeInfo", Group: Item.Asset.Group.Name, Asset: Item.Asset.Name, Type: InventoryItemGetType(Item) },
+        { Tag: "AssetTypeInfo", Group: Item.Asset.Group.Name, Asset: Item.Asset.Name, Type: Type },
         { Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber },
         { Tag: "TargetCharacter", Text: C.Name, MemberNumber: C.MemberNumber },
         { Tag: "DestinationCharacter", Text: C.Name, MemberNumber: C.MemberNumber }];

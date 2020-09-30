@@ -47,5 +47,6 @@ var Tools_AssetTypeInfo = {
     //     DuctTape: Tools_AssetTypeTransform("ItemMouthDuctTape", "DuctTapeMouthType", "SelectGagType", "DuctTapeMouthSet", "ItemMouthDuctTape"),
     //     MilkBottle: Tools_AssetTypeTransform("ItemMouthMilkBottle", "MilkBottle", "SelectMilkBottleState", "MilkBottleSet", "MilkBottle"),
     //     PlugGag: Tools_AssetTypeTransform("ItemMouthPlugGag", "PlugGagMouthType", "SelectGagType", "PlugGagMouthSet", "ItemMouthPlugGag"),
+    //     PumpGag: Tools_AssetTypeTransform("ItemMouthPumpGag", "InflateLevel", "SelectInflateLevel", "??", "InventoryItemMouthPumpGagNPCReaction"),
     // },
 }

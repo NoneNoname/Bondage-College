@@ -70,5 +70,26 @@ var AssetTypeInfo = {
 				},
 			},
 		},
+		PumpGag: {
+			NoneTypeName: "Empty", DrawType: "Images", ShowCount: 5, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "InventoryItemMouthPumpGagNPCReaction",
+			PublishTypeTransform: "Increment",
+			Types: {
+				Empty: {
+					Property: { Difficulty: 0, Effect: ["BlockMouth"] },
+				},
+				Light: {
+					Property: { Difficulty: 2, Effect: ["BlockMouth", "GagLight"] },
+				},
+				Inflated: {
+					Property: { Difficulty: 4, Effect: ["BlockMouth", "GagEasy"] },
+				},
+				Bloated: {
+					Property: { Difficulty: 6, Effect: ["BlockMouth", "GagMedium"] },
+				},
+				Maximum: {
+					Property: { Difficulty: 8, Effect: ["BlockMouth", "GagVeryHeavy"] },
+				},
+			},
+		},
 	},
 }
