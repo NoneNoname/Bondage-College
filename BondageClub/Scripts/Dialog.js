@@ -471,8 +471,11 @@ function DialogInventoryAdd(C, NewInv, NewInvWorn, SortOrder) {
 		if ((C.ID != 0) || ((C.Owner == "") && (C.Ownership == null)) || !NewInv.Asset.IsLock || ((C.ID == 0) && LogQuery("BlockOwnerLockSelf", "OwnerRule")))
 			return;
 	if (NewInv.Asset.LoverOnly && !NewInvWorn && !C.IsLoverOfPlayer()) {
-		if ((C.GetLoversNumbers(true).length == 0) || !NewInv.Asset.IsLock || ((C.ID == 0) && LogQuery("BlockLoverLockSelf", "LoverRule")) || ((C.ID != 0) && (!C.IsOwnedByPlayer() || LogQuery("BlockLoverLockSelf", "LoverRule"))))
-			return;
+		if (!NewInv.Asset.IsLock || C.GetLoversNumbers(true).length == 0) return;
+		if (C.ID == 0) {
+			if (LogQuery("BlockLoverLockSelf", "LoverRule")) return;
+		}
+		else if (!C.IsOwnedByPlayer() || LogQueryRemote("BlockLoverLockSelf", "LoverRule")) return;
 	}
 
 
