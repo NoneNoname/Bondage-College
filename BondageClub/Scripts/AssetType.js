@@ -475,7 +475,8 @@ function AssetTypeSetMofifiers(Item, NewType) {
         else Item.Property.Effect = ["Lock"];
     }
     if (InventoryItemHasEffect(Item, "Egged", true) && Item.Property.Intensity > 0) {
-        Item.Property.Effect.push("Vibrating");
+        if (Item.Property.Effect) Item.Property.Effect.push("Vibrating");
+        else Item.Property.Effect = ["Vibrating"];
     }
 }
 
