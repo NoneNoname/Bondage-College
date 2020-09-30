@@ -71,7 +71,7 @@ var AssetTypeInfo = {
 			},
 		},
 		PumpGag: {
-			NoneTypeName: "Empty", DrawType: "TextOnly", ShowCount: 5, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "InventoryItemMouthPumpGagNPCReaction",
+			NoneTypeName: "Empty", DrawType: "TextOnly", ShowCount: 5, Unextend: true, TypeLocking: false, SelectBeforeWear: false, TypedName: false, ExtraPublish: true, DialogNpc: "InventoryItemMouthPumpGagNPCReaction",
 			PublishTypeTransform: "Increment",
 			Types: {
 				Empty: {

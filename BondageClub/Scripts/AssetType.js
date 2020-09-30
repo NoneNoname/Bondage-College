@@ -93,7 +93,7 @@ async function AssetTypeLoadDialog() {
         if (!AssetTypeDialog[G][A]) AssetTypeDialog[G][A] = {};
         if (!AssetTypeDialog[G][A]) AssetTypeDialog[G][A] = {};
         if (!AssetTypeDialog[G][A][K]) AssetTypeDialog[G][A][K] = {};
-        AssetTypeDialog[G][A][K][T || "Default"] = D;
+        AssetTypeDialog[G][A][K][T || "Default"] = D.trim();
     });
     await AssetTypeDialogTranslate();
 }
@@ -108,7 +108,7 @@ async function AssetTypeDialogTranslate() {
         for (let Asset in AssetTypeDialog[Group])
             for (let Key in AssetTypeDialog[Group][Asset])
                 for (let Dialog in AssetTypeDialog[Group][Asset][Key])
-                    AssetTypeDialog[Group][Asset][Key][Dialog] = TranslationString(AssetTypeDialog[Group][Asset][Key][Dialog], Data);
+                    AssetTypeDialog[Group][Asset][Key][Dialog] = TranslationString(AssetTypeDialog[Group][Asset][Key][Dialog], Data).trim();
 }
 
 /**
@@ -393,7 +393,6 @@ function AssetTypeSet(C, Item, NewType) {
 
     if (Item.Asset.Group.Category == "Item") {
         if (CurrentScreen === "ChatRoom") {
-            ChatRoomCharacterUpdate(C);
             AssetTypePublish(C, Item, OldType);
         } else {
             CharacterRefresh(C);
