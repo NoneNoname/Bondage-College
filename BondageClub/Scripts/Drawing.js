@@ -4,12 +4,18 @@
  * @typedef {{Asset: object, Color: string, Difficulty: number, Property: object | undefined}} Item
  */
 "use strict";
+/** @type {CanvasRenderingContext2D} */
 var MainCanvas;
+/** @type {CanvasRenderingContext2D} */
 let TempCanvas;
+/** @type {CanvasRenderingContext2D} */
 let ColorCanvas;
+/** @type {CanvasRenderingContext2D} */
 let CharacterCanvas;
+/** @type {Map<string, () => {}>} */
 const DrawRunMap = new Map();
 let DrawRun = () => {};
+/** @type {string} */
 let DrawScreen;
 
 // A bank of all the chached images
@@ -368,7 +374,7 @@ function DrawAlpha(Canvas, Alpha) {
 /**
  * Draws a zoomed image from a source to a specific canvas
  * @param {string} Source - URL of the image
- * @param {HTMLCanvasElement} Canvas - Canvas on which to draw the image
+ * @param {CanvasRenderingContext2D} Canvas - Canvas on which to draw the image
  * @param {number} SX - The X coordinate where to start clipping
  * @param {number} SY - The Y coordinate where to start clipping
  * @param {number} SWidth - The width of the clipped image
@@ -407,7 +413,7 @@ function DrawImageResize(Source, X, Y, Width, Height) {
 /**
  * Draws a zoomed image from a source to a specific canvas
  * @param {string} Source - URL of the image
- * @param {HTMLCanvasElement} Canvas - Canvas on which to draw the image
+ * @param {CanvasRenderingContext2D} Canvas - Canvas on which to draw the image
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
  * @param {number[][]} AlphaMasks - A list of alpha masks to apply to the asset
@@ -432,8 +438,8 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks) {
 
 /**
  * Draws a canvas to a specific canvas
- * @param {HTMLCanvasElement} Img - Canvas to draw
- * @param {HTMLCanvasElement} Canvas - Canvas on which to draw the image
+ * @param {CanvasImageSource} Img - Canvas to draw
+ * @param {CanvasRenderingContext2D} Canvas - Canvas on which to draw the image
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
  * @param {number[][]} AlphaMasks - A list of alpha masks to apply to the asset
@@ -454,7 +460,7 @@ function DrawCanvas(Img, Canvas, X, Y, AlphaMasks) {
 
 /**
  * Draws a specific canvas with a zoom on the main canvas
- * @param {HTMLCanvasElement} Canvas - Canvas to draw on the main canvas
+ * @param {CanvasImageSource} Canvas - Canvas to draw on the main canvas
  * @param {number} X - Position of the canvas on the X axis
  * @param {number} Y - Position of the canvas on the Y axis
  * @param {number} Zoom - Zoom factor
@@ -502,7 +508,7 @@ function DrawImage(Source, X, Y) {
 /**
  * Draws an image from a source to the specified canvas
  * @param {string} Source - URL of the image
- * @param {HTMLCanvasElement} Canvas - Canvas on which to draw the image
+ * @param {CanvasRenderingContext2D} Canvas - Canvas on which to draw the image
  * @param {number} X - Position of the rectangle on the X axis
  * @param {number} Y - Position of the rectangle on the Y axis
  * @param {number} Zoom - Zoom factor
@@ -1000,12 +1006,11 @@ function DrawProcess() {
 		DrawScreen = CurrentScreen;
 		RefreshDrawFunction = true;
 	}
-		
 
 	// Gets the current screen background and draw it, it becomes darker in dialog mode or if the character is blindfolded
 	const B = window[CurrentScreen + "Background"];
 	if ((B != null) && (B != "")) {
-		const DarkFactor = 1.0;
+		let DarkFactor = 1.0;
 		if ((CurrentModule != "Character") && (B != "Sheet")) {
 			if (Player.Effect.indexOf("BlindHeavy") >= 0) DarkFactor = 0.0;
 			else if (Player.Effect.indexOf("BlindNormal") >= 0) DarkFactor = 0.15;
