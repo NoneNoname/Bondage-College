@@ -22,6 +22,10 @@ ClothLowerSkirt2Color,Skirt
 ClothLowerSkirt2Stripe,Trim
 ClothLowerSkirt3Color,Skirt
 ClothLowerSkirt3Stripe,Trim
+ClothLowerLeggings1Cloth,Cloth
+ClothLowerLeggings1Stripe,Stripe
+ClothLowerLeggings2Cloth,Cloth
+ClothLowerLeggings2Stripe,Stripe
 SuitLowerCatsuitBase,Suit
 SuitLowerCatsuitZip,Zip
 SuitLowerSeethroughSuitZipBase,Suit
@@ -44,6 +48,8 @@ HairAccessory1FoxEars3EarOuter,Outer Ear
 HairAccessory1FoxEars3EarInner,Inner Ear
 HairAccessory1FoxEars3Strap,Strap
 HairAccessory1FoxEars3Bell,Bell
+HairAccessory1BunnyEars2Outer,Outer
+HairAccessory1BunnyEars2Inner,Inner
 HairAccessory2KittenEars1Outer,Outer Ear
 HairAccessory2KittenEars1Inner,Inner Ear
 HairAccessory2FoxEars2Inner,Inner Ear
@@ -52,6 +58,8 @@ HairAccessory2FoxEars3EarOuter,Outer Ear
 HairAccessory2FoxEars3EarInner,Inner Ear
 HairAccessory2FoxEars3Strap,Strap
 HairAccessory2FoxEars3Bell,Bell
+HairAccessory2BunnyEars2Outer,Outer
+HairAccessory2BunnyEars2Inner,Inner
 GlovesGlovesFurFabric,Glove
 GlovesGlovesFurFur,Fur
 TailStrapsTailStrapTail,Tail
@@ -126,16 +134,17 @@ ItemArmsLeatherArmbinderStrap,Straps
 ItemArmsArmbinderJacketJacket,Jacket
 ItemArmsArmbinderJacketStraps,Straps
 ItemArmsArmbinderJacketRings,Buckles
+ItemArmsHempRope,Ropes
+ItemArmsHempRopeSuspension,Suspension Rope
+ItemArmsChains,Chains
+ItemArmsChainsSuspension,Suspension Chain
 ItemNeckHighCollarLeather,Leather
 ItemNeckHighCollarRings,Rings
 ItemNeckOrnateCollarCollar,Collar
 ItemNeckOrnateCollarGem,Gems
-ItemDevicesBedCoverOuter,Cover Outer Layer
-ItemDevicesBedCoverInner,Cover Inner Layer
-ItemDevicesBedTopPillow,Top Pillow
-ItemDevicesBedBottomPillow,Bottom Pillow
+ItemDevicesBedPillow,Pillow
 ItemDevicesBedMattress,Mattress
-ItemDevicesBedHeadboard,Headboard
+ItemDevicesBedBedFrame,Frame
 ItemAddonCoversOuter,Outer
 ItemAddonCoversInner,Inner
 ItemDevicesCageFrame,Frame
