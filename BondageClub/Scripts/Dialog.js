@@ -477,7 +477,7 @@ function DialogInventoryAdd(C, NewInv, NewInvWorn, SortOrder) {
 		if (C.ID == 0) {
 			if (LogQuery("BlockLoverLockSelf", "LoverRule")) return;
 		}
-		else if (!C.IsOwnedByPlayer() || LogQueryRemote("BlockLoverLockSelf", "LoverRule")) return;
+		else if (!C.IsOwnedByPlayer() || LogQueryRemote(C, "BlockLoverLockOwner", "LoverRule")) return;
 	}
 
 
