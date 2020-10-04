@@ -396,6 +396,7 @@ function AssetTypeSet(C, Item, NewType) {
     if (Item.Asset.Group.Category == "Item") {
         if (CurrentScreen === "ChatRoom") {
             AssetTypePublish(C, Item, OldType);
+            CharacterRefresh(C);
         } else {
             CharacterRefresh(C);
             DialogFocusItem = null;
