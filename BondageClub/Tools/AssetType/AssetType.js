@@ -10,6 +10,13 @@ function Tools_AssetTypeSaveCsv() {
         const Assets = Object.keys(AssetTypeInfo[G]);
         Assets.sort();
         Assets.forEach(A => {
+            const Selector = AssetTypeDialog[G] && AssetTypeInfo[G][A];
+            if (Selector) {
+                for (const Key in Selector)
+                    for (const Dialog in Selector[Key])
+                        CSV.push([G, A, KEy, Dialog, Selector[Key][Dialog]].join(","));
+                return;
+            }
             const Info = AssetTypeInfo[G][A];
             const PrintAll = D => {
                 var Types = Object.keys(Info.Types);
