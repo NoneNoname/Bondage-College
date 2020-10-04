@@ -1,6 +1,23 @@
 "use strict"
 
 var AssetTypeInfo = {
+	ItemEars: {
+		BluetoothEarbuds: { CopyFrom: { Group: "ItemEars", Asset: "HeadphoneEarPlugs" } },
+		HeadphoneEarPlugs: {
+			NoneTypeName: "Off", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			Types: {
+				Off: {
+					Property: { Effect: [] },
+				},
+				Light: {
+					Property: { Effect: ["DeafLight"] },
+				},
+				Heavy: {
+					Property: { Effect: ["DeafHeavy"] },
+				},
+			},
+		},
+	},
 	ItemMouth: {
 		ClothGag: {
 			NoneTypeName: "Small", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ClothGag",
@@ -22,7 +39,7 @@ var AssetTypeInfo = {
 		CupholderGag: {
 			NoneTypeName: "NoCup", DrawType: "TextOnly", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: false, TypedName: false, ExtraPublish: true, DialogNpc: "ItemMouthCupholderGag",
 			Types: ["NoCup", "Cup", "Tip"],
-			DynamicAllowType: Item => { const Type = InventoryItemGetType(Item); return Item.Asset.AllowType.filter(T => (T == Type) || (Player.CanInteract() && (Type == "Cup" || T == "Cup"))); }
+			DynamicAllowType: Item => { const Type = InventoryItemGetType(Item); return Item.Asset.AllowType.filter(T => (T == Type) || (Player.CanInteract() && (Type == "Cup" || T == "Cup"))); },
 		},
 		DildoPlugGag: {
 			NoneTypeName: "Open", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemMouthDildoPlugGag",

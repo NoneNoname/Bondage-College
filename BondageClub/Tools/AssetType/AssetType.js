@@ -57,6 +57,10 @@ function Tools_AssetTypeSaveJs() {
         Assets.sort();
         Assets.forEach(A => {
             const Info = AssetTypeInfo[G][A];
+            if (Info.CopyFrom && Info.CopyFrom.Group && Info.CopyFrom.Asset) {
+                write(`${A}: { CopyFrom: { Group: "${Info.CopyFrom.Group}", Asset: "${Info.CopyFrom.Asset}" } }`);
+                return;
+            }
             write(`${A}: {`, 1);
             write(`NoneTypeName: "${Info.NoneTypeName}", DrawType: "${Info.DrawType}", ShowCount: ${Info.ShowCount}, Unextend: ${Info.Unextend}, TypeLocking: ${Info.TypeLocking}, SelectBeforeWear: ${Info.SelectBeforeWear}, TypedName: ${Info.TypedName}, ExtraPublish: ${Info.ExtraPublish}, DialogNpc: "${Info.DialogNpc}"`)
             if (Info.PublishTypeTransform) write(`PublishTypeTransform: "${Info.PublishTypeTransform}"`);

@@ -1,3 +1,10 @@
+ItemEars,HeadphoneEarPlugs,Select,Default,Turn the headphones on/off and adjust their volume.
+ItemEars,HeadphoneEarPlugs,Name,Heavy,Heavy
+ItemEars,HeadphoneEarPlugs,Name,Light,Light
+ItemEars,HeadphoneEarPlugs,Name,Off,Off
+ItemEars,HeadphoneEarPlugs,Set,Heavy,SourceCharacter turns the volume up to high on DestinationCharacter AssetName.
+ItemEars,HeadphoneEarPlugs,Set,Light,SourceCharacter turns the volume to low on DestinationCharacter AssetName.
+ItemEars,HeadphoneEarPlugs,Set,Off,SourceCharacter turns off DestinationCharacter AssetName.
 ItemMouth,ClothGag,Select,Default,Select the type of gag
 ItemMouth,ClothGag,Name,Cleave,Cleave
 ItemMouth,ClothGag,Name,OTM,OTM

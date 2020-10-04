@@ -1,6 +1,9 @@
 "use strict"
 
 var Tools_AssetTypeInfo = {
+    // ItemEars: {
+    //     HeadphoneEarPlugs: Tools_AssetTypeTransform("ItemEarsHeadphoneEarPlugs", "HeadphoneEarPlugsPose", "HeadphoneEarPlugsSelectLoudness", "HeadphoneEarPlugsRestrain", "ItemBootsToeTapeNPCReaction"),
+    // }
     // ItemArms: {
     //     BitchSuit: Tools_AssetTypeTransform("ItemArmsBitchSuit", "BitchSuitType", "SelectBitchSuitType", "BitchSuitSet", "BitchSuitType"),
     //     Chains: Tools_AssetTypeTransform("ItemArmsChains", "ChainBondage", "SelectChainBondage", "ArmsChainSet", "ChainBondage"),

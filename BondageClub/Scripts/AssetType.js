@@ -51,17 +51,26 @@ const AssetTypeXYWithoutImages = [
 /**
  * Loads the type info
  */
-function AssetTypeLoad() {
+async function AssetTypeLoad() {
     if (typeof Tools_AssetTypeInfoPreload !== "undefined") Tools_AssetTypeInfoPreload();
     let Tools_Count = 0;
+
+
+    let AfterLoad = [];
 
     Asset.forEach(A => {
         A.ExtendedOrTypeInfo = A.Extended;
 
-        const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")]
+        const Group = AssetTypeInfo[A.Group.Name.replace(/[23]/g, "")];
         if (Group == null) return;
         let Info = Group[A.Name];
         if (Info == null) return;
+
+        if (Info.CopyFrom && Info.CopyFrom.Group && Info.CopyFrom.Asset) {
+            A.TypeInfo = Info;
+            AfterLoad.push(A);
+            return;
+        }
 
         if (Array.isArray(Info.Types)) Info.Types = Info.Types.reduce((acc, value) => { acc[value] = {}; return acc; }, {});
 
@@ -77,7 +86,23 @@ function AssetTypeLoad() {
 
         Tools_Count++;
     });
-    AssetTypeLoadDialog();
+    await AssetTypeLoadDialog();
+
+    AfterLoad.forEach(A => {
+        const I = A.TypeInfo;
+        const Parent = CommonObjectTraverse(AssetTypeInfo, I.CopyFrom.Group, I.CopyFrom.Asset);
+        if (!Parent || Parent.CopyFrom) return;
+
+        const Info = A.TypeInfo = Object.assign(I, Parent);
+
+        if (A.Extended && Info.Unextend) A.Extended = false;
+        A.ExtendedOrTypeInfo = true;
+        A.AllowType = Object.keys(Info.Types).map(T => T == Info.NoneTypeName ? null : T);
+
+        AssetTypeDialog[A.Group.Name][A.Name] = AssetTypeDialog[I.CopyFrom.Group][I.CopyFrom.Asset];
+
+        Tools_Count++;
+    });
 
     if (typeof Tools_AssetTypeReport !== "undefined") Tools_AssetTypeReport(Tools_Count);
 }
