@@ -18,6 +18,33 @@ var AssetTypeInfo = {
 			},
 		},
 	},
+	ItemHead: {
+		DuctTape: {
+			NoneTypeName: "Double", DrawType: "Images", ShowCount: 3, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			Types: {
+				Double: {
+					Property: { Block: ["ItemNose"], Effect: ["BlindNormal", "Prone"] },
+				},
+				Wrap: {
+					Property: { Block: ["ItemNose"], Effect: ["BlindNormal", "Prone"] },
+				},
+				Mummy: {
+					Property: { Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemEars", "ItemHood", "ItemNose"], Effect: ["GagNormal", "BlindNormal", "Prone", "BlockMouth"], Hide: ["ItemMouth", "ItemMouth2", "ItemMouth3", "HairFront", "HairBack"] },
+				},
+			},
+		},
+		WebBlindfold: {
+			NoneTypeName: "Blindfold", DrawType: "Images", ShowCount: 2, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemBootsToeTapeNPCReaction",
+			Types: {
+				Blindfold: {
+					Property: { Difficulty: 0 },
+				},
+				Cocoon: {
+					Property: { Block: ["ItemMouth", "ItemMouth2", "ItemMouth3", "ItemEars", "ItemHood", "ItemNose"], Difficulty: 30, Effect: ["BlindHeavy", "Prone", "GagNormal", "BlockMouth"], Hide: ["HairFront", "HairBack", "Glasses", "Hat", "ItemMouth", "ItemMouth2", "ItemMouth3"] },
+				},
+			},
+		},
+	},
 	ItemMouth: {
 		ClothGag: {
 			NoneTypeName: "Small", DrawType: "Images", ShowCount: 4, Unextend: true, TypeLocking: false, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ClothGag",
