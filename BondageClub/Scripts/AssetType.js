@@ -6,7 +6,7 @@
  *
  */
 
- /** Type selection before item add */
+/** Type selection before item add */
 var AssetTypeSelectBefore = false;
 
 /**
@@ -76,9 +76,11 @@ async function AssetTypeLoad() {
 
         if (Info.DynamicDictionary == null) { Info.DynamicDictionary = function () { return []; }; Info.DynamicDictionary.Default = true; }
         if (Info.DynamicAllowType == null) { Info.DynamicAllowType = function () { return A.AllowType; }; Info.DynamicAllowType.Default = true; }
-        if (Info.DynamicAllowSetType == null) { Info.DynamicAllowSetType = function () { return true; }; Info.DynamicAllowSetType.Default = true;}
+        if (Info.DynamicAllowSetType == null) { Info.DynamicAllowSetType = function () { return true; }; Info.DynamicAllowSetType.Default = true; }
 
         if (A.Extended && Info.Unextend) A.Extended = false;
+
+        if (Info.DrawType == "ManyTags") Info.ShowCount = Object.keys(Info.Types).length;
 
         A.TypeInfo = Info;
         A.ExtendedOrTypeInfo = true;
@@ -165,6 +167,9 @@ function AssetTypeSetLoad(Item) {
     } else if (Item.Asset.TypeInfo.DrawType == "TextOnly") {
         AssetTypeDrawType = AssetTypeDrawTypeWithoutImage;
         AssetTypeClickType = AssetTypeClickTypeWithoutImage;
+    } else if (Item.Asset.TypeInfo.DrawType == "ManyTags") {
+        AssetTypeDrawType = AssetTypeDrawTypeManyTags;
+        AssetTypeClickType = AssetTypeClickTypeManyTags;
     }
 }
 
@@ -204,15 +209,15 @@ function AssetTypeSetDraw() {
     DrawImageResize("Assets/" + Asset.Group.Family + "/" + Asset.Group.Name + "/Preview/" + Asset.Name + ".png", 1389, 57, 221, 221);
     // TODO Dynamic Description
     DrawTextFit(Asset.Description, 1500, 310, 221, "black");
-    DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
 
     if (!Info.TypeLocking || !InventoryItemHasEffect(DialogFocusItem, "Lock", true)) {
+        DrawText(DialogExtendedMessage, 1500, 375, "white", "gray");
         // Draw the possible variants and their requirements, arranged based on the number per page
         for (let I = Offset; (I < Types.length) && ((ShowCount == 0) || (I < ShowCount + Offset)); I++) {
             AssetTypeDrawType(C, Asset, Info, Types, ShowCount, Description["Name"], Offset, I);
         }
     } else {
-        DrawText(Description["TypeLocked"]["Default"], 1500, 500, "white", "gray");
+        DrawText(Description["Select"]["Locked"], 1500, 500, "white", "gray");
     }
 
     if (C.ID == 0) DrawButton(1775, 25, 90, 90, "", "White", AssetTypePermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, AssetTypePermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
@@ -267,6 +272,17 @@ function AssetTypeDrawTypeWithoutImage(C, Asset, Info, Types, ShowCount, Descrip
     DrawTextFit(Description[Type], X + 112, Y + 30, 225, "black");
 }
 
+function AssetTypeDrawTypeManyTags(C, Asset, Info, Types, ShowCount, Description, Offset, I) {
+    const X = 955 + (210 * (I % 5));
+    const Y = 530 + (60 * parseInt(I / 5));
+    const Hover = (MouseX >= X) && (MouseX < X + 200) && (MouseY >= Y) && (MouseY < Y + 55) && !CommonIsMobile;
+    const Type = Types[I] || Info.NoneTypeName;
+    const IsSelected = !AssetTypeSelectBefore && InventoryItemIsType(DialogFocusItem, Types[I]);
+    const Color = AssetTypeGetDrawColor(C, Asset, Types[I], IsSelected, Hover);
+    DrawRect(X, Y, 200, 55, Color);
+    DrawTextFit(Description[Type], X + 100, Y + 30, 200, "black");
+}
+
 /**
  * Click handler for FocusItem with TypeInfo
  */
@@ -299,10 +315,10 @@ function AssetTypeSetClick() {
     }
 
     // Permission toggle button
-	if (MouseIn(1775, 25, 90, 90) && C.ID == 0) {
-		if (AssetTypePermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
-		AssetTypePermissionMode = !AssetTypePermissionMode;
-	}
+    if (MouseIn(1775, 25, 90, 90) && C.ID == 0) {
+        if (AssetTypePermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+        AssetTypePermissionMode = !AssetTypePermissionMode;
+    }
 
     if (!AssetTypeSelectBefore && Asset.AllowLock && MouseIn(1015, 25, 190, 90)) {
         const Item = DialogFocusItem;
@@ -348,6 +364,16 @@ function AssetTypeClickTypeWithoutImage(C, Info, Types, ShowCount, Offset, I) {
     const X = AssetTypeXYWithoutImages[ShowCount][I - Offset][0];
     const Y = AssetTypeXYWithoutImages[ShowCount][I - Offset][1];
     if (MouseIn(X, Y, 225, 55) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
+        AssetTypeClicked(C, Info, Types[I]);
+        return true;
+    }
+    return false;
+}
+
+function AssetTypeClickTypeManyTags(C, Info, Types, ShowCount, Offset, I) {
+    const X = 955 + (210 * (I % 5));
+    const Y = 530 + (60 * parseInt(I / 5));
+    if (MouseIn(X, Y, 200, 55) && (AssetTypeSelectBefore || !InventoryItemIsType(DialogFocusItem, Types[I]))) {
         AssetTypeClicked(C, Info, Types[I]);
         return true;
     }
@@ -421,6 +447,7 @@ function AssetTypeSet(C, Item, NewType) {
     if (Item.Asset.Group.Category == "Item") {
         if (CurrentScreen === "ChatRoom") {
             AssetTypePublish(C, Item, OldType);
+            CharacterRefresh(C);
         } else {
             CharacterRefresh(C);
             DialogFocusItem = null;
@@ -518,7 +545,8 @@ function AssetTypeSetMofifiers(Item, NewType) {
  */
 function AssetTypeGetDialog(key, obj) {
     const { Group, Asset, Type } = obj;
-    return CommonObjectTraverse(AssetTypeDialog, Group, Asset, key, Type) || "";
+    const Selection = CommonObjectTraverse(AssetTypeDialog, Group, Asset, key);
+    return Selection[Type] || Selection["Default"] || "";
 }
 
 /**
@@ -625,23 +653,23 @@ function AssetTypeSetOffset(Change, Length) {
  * @returns {boolean}
  */
 
- /**
- * @typedef {Object} TypeInfo
- * @property {Object<string, TypeInfoType>|string[]} Types
- * @property {string} NoneTypeName - Name of the default Type (when the type is null)
- * @property {"Images"|"TextOnly"} DrawType
- * @property {number} ShowCount - Number of items shown in the UI
- * @property {boolean} Unextend - Remove Extend tag from the asset
- * @property {boolean} TypeLocking - Lock type selection if the item is locked
- * @property {boolean} SelectBeforeWear - Allow type selection before the item is worn
- * @property {boolean} TypedName - The name of the asset should change dynamicly to the type name
- * @property {boolean} ExtraPublish - Send a set type message after the item is applied on the character (SelectBefore)
- * @property {string} DialogNpc - NPC dialog to search for
- * @property {"Increment"} [PublishTypeTransform] - Transform the type name before publish
- * @property {(C: Character, Item: Item, OldType: string) => DirectoryEntry[]} [DynamicDictionary]
- * @property {(Item: Item) => (string|null)[]} [DynamicAllowType]
- * @property {(C: Character, Item: Item, NewType: string) => boolean} [DynamicAllowSetType]
- */
+/**
+* @typedef {Object} TypeInfo
+* @property {Object<string, TypeInfoType>|string[]} Types
+* @property {string} NoneTypeName - Name of the default Type (when the type is null)
+* @property {"Images"|"TextOnly"} DrawType
+* @property {number} ShowCount - Number of items shown in the UI
+* @property {boolean} Unextend - Remove Extend tag from the asset
+* @property {boolean} TypeLocking - Lock type selection if the item is locked
+* @property {boolean} SelectBeforeWear - Allow type selection before the item is worn
+* @property {boolean} TypedName - The name of the asset should change dynamicly to the type name
+* @property {boolean} ExtraPublish - Send a set type message after the item is applied on the character (SelectBefore)
+* @property {string} DialogNpc - NPC dialog to search for
+* @property {"Increment"} [PublishTypeTransform] - Transform the type name before publish
+* @property {(C: Character, Item: Item, OldType: string) => DirectoryEntry[]} [DynamicDictionary]
+* @property {(Item: Item) => (string|null)[]} [DynamicAllowType]
+* @property {(C: Character, Item: Item, NewType: string) => boolean} [DynamicAllowSetType]
+*/
 
 /**
  * @typedef {Object} TypeInfoType

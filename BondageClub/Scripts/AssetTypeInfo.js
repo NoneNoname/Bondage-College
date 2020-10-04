@@ -136,4 +136,36 @@ var AssetTypeInfo = {
 			},
 		},
 	},
+	ItemNeckAccessories: {
+		CollarNameTag: {
+			NoneTypeName: "None", DrawType: "ManyTags", ShowCount: 0, Unextend: true, TypeLocking: true, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemNeckAccessories",
+			Types: ["None", "Angel", "BadGirl", "BindMe", "Bitch", "Boobs", "Cupcake", "Devil", "Dom", "Free", "FuckMe", "GagMe", "Goddess", "GoodGirl", "HoldMe", "Jewel", "Love", "Maid", "Meat", "Miss", "Mummy", "Nice", "Needy", "Owned", "Precious", "Pudding", "Queen", "Slave", "Slut", "Sub", "Sweetie", "Taken", "Toy", "Useless", "UseMe", "Whore"],
+			DynamicAllowType: Item => Item.Asset.AllowType.filter(Boolean),
+			DynamicDictionary: (_, Item) => [{ Tag: "NameTagType", Text: InventoryItemGetType(Item) }],
+		},
+		CollarNameTagOval: {
+			NoneTypeName: "None", DrawType: "ManyTags", ShowCount: 0, Unextend: true, TypeLocking: true, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemNeckAccessories",
+			Types: ["None", "Babe", "Bandit", "Bimbo", "Bratty", "Chair", "Chaste", "Crazy", "Cumslut", "Cutie", "Damsel", "Doll", "EdgeMe", "Evil", "ForSale", "Greedy", "Happy", "Horny", "Kinky", "Lady", "LockMe", "Nude", "Nurse", "Nympho", "Painslut", "Pillow", "Punish", "Robber", "Sad", "Switch", "Table", "Ticklish", "Undress", "Victim", "Violent", "Worm", "AnalSlut", "ButtSlut"],
+			DynamicAllowType: Item => Item.Asset.AllowType.filter(Boolean),
+			DynamicDictionary: (_, Item) => [{ Tag: "NameTagType", Text: InventoryItemGetType(Item) }],
+		},
+		CollarNameTagPet: {
+			NoneTypeName: "None", DrawType: "ManyTags", ShowCount: 0, Unextend: true, TypeLocking: true, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemNeckAccessories",
+			Types: ["None", "Bunny", "Cat", "Dog", "Foxy", "Kitten", "Kitty", "Mochi", "Panda", "Pet", "PetMe", "Pixie", "Pony", "Puppy", "Racoon", "Sloth"],
+			DynamicAllowType: Item => Item.Asset.AllowType.filter(Boolean),
+			DynamicDictionary: (_, Item) => [{ Tag: "NameTagType", Text: InventoryItemGetType(Item) }],
+		},
+		CollarNameTagLover: {
+			NoneTypeName: "None", DrawType: "ManyTags", ShowCount: 0, Unextend: true, TypeLocking: true, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemNeckAccessories",
+			Types: ["None", "Cookie", "Feather", "Lover", "Muffin"],
+			DynamicAllowType: Item => Item.Asset.AllowType.filter(Boolean),
+			DynamicDictionary: (_, Item) => [{ Tag: "NameTagType", Text: InventoryItemGetType(Item) }],
+		},
+		CollarNameTagLivestock: {
+			NoneTypeName: "None", DrawType: "ManyTags", ShowCount: 0, Unextend: true, TypeLocking: true, SelectBeforeWear: true, TypedName: false, ExtraPublish: true, DialogNpc: "ItemNeckAccessories",
+			Types: ["None", "Animal", "BreedMe", "Cow", "Meat", "MilkMe", "Pig"],
+			DynamicAllowType: Item => Item.Asset.AllowType.filter(Boolean),
+			DynamicDictionary: (_, Item) => [{ Tag: "NameTagType", Text: InventoryItemGetType(Item) }],
+		},
+	},
 }

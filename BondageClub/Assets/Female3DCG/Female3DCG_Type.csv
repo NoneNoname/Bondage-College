@@ -75,3 +75,120 @@ ItemMouth,PumpGag,Set,DecreaseToEmpty,SourceCharacter deflates DestinationCharac
 ItemMouth,PumpGag,Set,DecreaseToLight,SourceCharacter deflates DestinationCharacter gag till only slighty filled.
 ItemMouth,PumpGag,Set,DecreaseToInflated,SourceCharacter deflates DestinationCharacter gag till it's half full.
 ItemMouth,PumpGag,Set,DecreaseToBloated,SourceCharacter deflates DestinationCharacter gag only a tiny bit.
+ItemNeckAccessories,CollarNameTag,Select,Default,Select what tag you want to use
+ItemNeckAccessories,CollarNameTag,Select,Locked,You cannot change the tag while it's locked
+ItemNeckAccessories,CollarNameTag,Name,Angel,Angel
+ItemNeckAccessories,CollarNameTag,Name,BadGirl,Bad Girl
+ItemNeckAccessories,CollarNameTag,Name,BindMe,Bind Me
+ItemNeckAccessories,CollarNameTag,Name,Bitch,Bitch
+ItemNeckAccessories,CollarNameTag,Name,Boobs,Boobs
+ItemNeckAccessories,CollarNameTag,Name,Cupcake,Cupcake
+ItemNeckAccessories,CollarNameTag,Name,Devil,Devil
+ItemNeckAccessories,CollarNameTag,Name,Dom,Dom
+ItemNeckAccessories,CollarNameTag,Name,Free,Free
+ItemNeckAccessories,CollarNameTag,Name,FuckMe,Fuck Me
+ItemNeckAccessories,CollarNameTag,Name,GagMe,GagMe
+ItemNeckAccessories,CollarNameTag,Name,Goddess,Goddess
+ItemNeckAccessories,CollarNameTag,Name,GoodGirl,Good Girl
+ItemNeckAccessories,CollarNameTag,Name,HoldMe,Hold Me
+ItemNeckAccessories,CollarNameTag,Name,Jewel,Jewel
+ItemNeckAccessories,CollarNameTag,Name,Love,Love
+ItemNeckAccessories,CollarNameTag,Name,Maid,Maid
+ItemNeckAccessories,CollarNameTag,Name,Meat,Meat
+ItemNeckAccessories,CollarNameTag,Name,Miss,Miss
+ItemNeckAccessories,CollarNameTag,Name,Mummy,Mummy
+ItemNeckAccessories,CollarNameTag,Name,Needy,Needy
+ItemNeckAccessories,CollarNameTag,Name,Nice,Nice
+ItemNeckAccessories,CollarNameTag,Name,None,
+ItemNeckAccessories,CollarNameTag,Name,Owned,Owned
+ItemNeckAccessories,CollarNameTag,Name,Precious,Precious
+ItemNeckAccessories,CollarNameTag,Name,Pudding,Pudding
+ItemNeckAccessories,CollarNameTag,Name,Queen,Queen
+ItemNeckAccessories,CollarNameTag,Name,Slave,Slave
+ItemNeckAccessories,CollarNameTag,Name,Slut,Slut
+ItemNeckAccessories,CollarNameTag,Name,Sub,Sub
+ItemNeckAccessories,CollarNameTag,Name,Sweetie,Sweetie
+ItemNeckAccessories,CollarNameTag,Name,Taken,Taken
+ItemNeckAccessories,CollarNameTag,Name,Toy,Toy
+ItemNeckAccessories,CollarNameTag,Name,UseMe,Use Me
+ItemNeckAccessories,CollarNameTag,Name,Useless,Useless
+ItemNeckAccessories,CollarNameTag,Name,Whore,Whore
+ItemNeckAccessories,CollarNameTag,Set,Default,SourceCharacter uses a NameTagType name tag on DestinationCharacter collar.
+ItemNeckAccessories,CollarNameTagLivestock,Select,Default,Select what tag you want to use
+ItemNeckAccessories,CollarNameTagLivestock,Select,Locked,You cannot change the tag while it's locked
+ItemNeckAccessories,CollarNameTagLivestock,Name,Animal,Animal
+ItemNeckAccessories,CollarNameTagLivestock,Name,BreedMe,BreedMe
+ItemNeckAccessories,CollarNameTagLivestock,Name,Cow,Cow
+ItemNeckAccessories,CollarNameTagLivestock,Name,Meat,Meat
+ItemNeckAccessories,CollarNameTagLivestock,Name,MilkMe,MilkMe
+ItemNeckAccessories,CollarNameTagLivestock,Name,None,
+ItemNeckAccessories,CollarNameTagLivestock,Name,Pig,Pig
+ItemNeckAccessories,CollarNameTagLivestock,Set,Default,
+ItemNeckAccessories,CollarNameTagLover,Select,Default,Select what tag you want to use
+ItemNeckAccessories,CollarNameTagLover,Select,Locked,You cannot change the tag while it's locked
+ItemNeckAccessories,CollarNameTagLover,Name,Cookie,Cookie
+ItemNeckAccessories,CollarNameTagLover,Name,Feather,Feather
+ItemNeckAccessories,CollarNameTagLover,Name,Lover,Lover
+ItemNeckAccessories,CollarNameTagLover,Name,Muffin,Muffin
+ItemNeckAccessories,CollarNameTagLover,Name,None,
+ItemNeckAccessories,CollarNameTagLover,Set,Default,SourceCharacter uses a NameTagType lover name tag on DestinationCharacter collar.
+ItemNeckAccessories,CollarNameTagOval,Select,Default,Select what tag you want to use
+ItemNeckAccessories,CollarNameTagOval,Select,Locked,You cannot change the tag while it's locked
+ItemNeckAccessories,CollarNameTagOval,Name,AnalSlut,AnalSlut
+ItemNeckAccessories,CollarNameTagOval,Name,Babe,Babe
+ItemNeckAccessories,CollarNameTagOval,Name,Bandit,Bandit
+ItemNeckAccessories,CollarNameTagOval,Name,Bimbo,Bimbo
+ItemNeckAccessories,CollarNameTagOval,Name,Bratty,Bratty
+ItemNeckAccessories,CollarNameTagOval,Name,ButtSlut,ButtSlut
+ItemNeckAccessories,CollarNameTagOval,Name,Chair,Chair
+ItemNeckAccessories,CollarNameTagOval,Name,Chaste,Chaste
+ItemNeckAccessories,CollarNameTagOval,Name,Crazy,Crazy
+ItemNeckAccessories,CollarNameTagOval,Name,Cumslut,Cumslut
+ItemNeckAccessories,CollarNameTagOval,Name,Cutie,Cutie
+ItemNeckAccessories,CollarNameTagOval,Name,Damsel,Damsel
+ItemNeckAccessories,CollarNameTagOval,Name,Doll,Doll
+ItemNeckAccessories,CollarNameTagOval,Name,EdgeMe,EdgeMe
+ItemNeckAccessories,CollarNameTagOval,Name,Evil,Evil
+ItemNeckAccessories,CollarNameTagOval,Name,ForSale,ForSale
+ItemNeckAccessories,CollarNameTagOval,Name,Greedy,Greedy
+ItemNeckAccessories,CollarNameTagOval,Name,Happy,Happy
+ItemNeckAccessories,CollarNameTagOval,Name,Horny,Horny
+ItemNeckAccessories,CollarNameTagOval,Name,Kinky,Kinky
+ItemNeckAccessories,CollarNameTagOval,Name,Lady,Lady
+ItemNeckAccessories,CollarNameTagOval,Name,LockMe,LockMe
+ItemNeckAccessories,CollarNameTagOval,Name,None,
+ItemNeckAccessories,CollarNameTagOval,Name,Nude,Nude
+ItemNeckAccessories,CollarNameTagOval,Name,Nurse,Nurse
+ItemNeckAccessories,CollarNameTagOval,Name,Nympho,Nympho
+ItemNeckAccessories,CollarNameTagOval,Name,Painslut,Painslut
+ItemNeckAccessories,CollarNameTagOval,Name,Pillow,Pillow
+ItemNeckAccessories,CollarNameTagOval,Name,Punish,Punish
+ItemNeckAccessories,CollarNameTagOval,Name,Robber,Robber
+ItemNeckAccessories,CollarNameTagOval,Name,Sad,Sad
+ItemNeckAccessories,CollarNameTagOval,Name,Switch,Switch
+ItemNeckAccessories,CollarNameTagOval,Name,Table,Table
+ItemNeckAccessories,CollarNameTagOval,Name,Ticklish,Ticklish
+ItemNeckAccessories,CollarNameTagOval,Name,Undress,Undress
+ItemNeckAccessories,CollarNameTagOval,Name,Victim,Victim
+ItemNeckAccessories,CollarNameTagOval,Name,Violent,Violent
+ItemNeckAccessories,CollarNameTagOval,Name,Worm,Worm
+ItemNeckAccessories,CollarNameTagOval,Set,Default,SourceCharacter uses a NameTagType oval name tag on DestinationCharacter collar.
+ItemNeckAccessories,CollarNameTagPet,Select,Default,Select what tag you want to use
+ItemNeckAccessories,CollarNameTagPet,Select,Locked,You cannot change the tag while it's locked
+ItemNeckAccessories,CollarNameTagPet,Name,Bunny,Bunny
+ItemNeckAccessories,CollarNameTagPet,Name,Cat,Cat
+ItemNeckAccessories,CollarNameTagPet,Name,Dog,Dog
+ItemNeckAccessories,CollarNameTagPet,Name,Foxy,Foxy
+ItemNeckAccessories,CollarNameTagPet,Name,Kitten,Kitten
+ItemNeckAccessories,CollarNameTagPet,Name,Kitty,Kitty
+ItemNeckAccessories,CollarNameTagPet,Name,Mochi,Mochi
+ItemNeckAccessories,CollarNameTagPet,Name,None,
+ItemNeckAccessories,CollarNameTagPet,Name,Panda,Panda
+ItemNeckAccessories,CollarNameTagPet,Name,Pet,Pet
+ItemNeckAccessories,CollarNameTagPet,Name,PetMe,PetMe
+ItemNeckAccessories,CollarNameTagPet,Name,Pixie,Pixie
+ItemNeckAccessories,CollarNameTagPet,Name,Pony,Pony
+ItemNeckAccessories,CollarNameTagPet,Name,Puppy,Puppy
+ItemNeckAccessories,CollarNameTagPet,Name,Racoon,Racoon
+ItemNeckAccessories,CollarNameTagPet,Name,Sloth,Sloth
+ItemNeckAccessories,CollarNameTagPet,Set,Default,SourceCharacter uses a NameTagType pet name tag on DestinationCharacter collar.
