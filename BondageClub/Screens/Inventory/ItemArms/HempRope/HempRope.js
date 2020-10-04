@@ -1,6 +1,6 @@
 "use strict";
 
-const InventoryItemArmsHempRopeOptions = [
+var InventoryItemArmsHempRopeOptions = [
 	{
 		Name: "BoxTie",
 		BondageLevel: null,
@@ -66,8 +66,6 @@ const InventoryItemArmsHempRopeOptions = [
 		Expression: [{ Group: "Blush", Name: "Medium", Timer: 10 }],
 	}
 ];
-
-var InventoryItemArmsHempRopeOptions = HempRopeArmsOptions;
 
 function InventoryItemArmsHempRopeLoad() {
 	ExtendedItemLoad(InventoryItemArmsHempRopeOptions, "SelectRopeBondage");

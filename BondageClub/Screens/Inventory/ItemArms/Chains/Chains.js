@@ -1,6 +1,6 @@
 "use strict";
 
-const InventoryItemArmsChainsOptions = [
+var InventoryItemArmsChainsOptions = [
 	{
 		Name: "BoxTie",
 		BondageLevel: null,
@@ -51,8 +51,6 @@ const InventoryItemArmsChainsOptions = [
 		Expression: [{ Group: "Blush", Name: "Medium", Timer: 10 }],
 	}
 ];
-
-var InventoryItemArmsChainsOptions = ChainsArmsOptions;
 
 /**
  * Loads the item extension properties. This is called dynamically, when the player opens the menu for the first time
