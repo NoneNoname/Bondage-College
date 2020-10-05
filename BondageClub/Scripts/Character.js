@@ -1193,10 +1193,10 @@ function CharacterCanKneel(C) {
 }
 
 function CharacterGetDarkFactor(C) {
-	let DarkFactor = 1.0;
+	let DarkFactor = CurrentDarkFactor;
 	if (C.GetBlindLevel() >= 3) DarkFactor = 0.0;
 	else if (CommonPhotoMode) DarkFactor = 1.0;
-	else if (C.GetBlindLevel() == 2) DarkFactor = 0.15;
-	else if (C.GetBlindLevel() == 1) DarkFactor = 0.3;
+	else if (C.GetBlindLevel() == 2) DarkFactor *= 0.15;
+	else if (C.GetBlindLevel() == 1) DarkFactor *= 0.3;
 	return DarkFactor;
 }

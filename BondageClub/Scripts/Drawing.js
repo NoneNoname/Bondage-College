@@ -1088,7 +1088,7 @@ function DrawProcess() {
 	// Gets the current screen background and draw it, it becomes darker in dialog mode or if the character is blindfolded
 	const B = window[CurrentScreen + "Background"];
 	if ((B != null) && (B != "")) {
-		let DarkFactor = 1.0;
+		let DarkFactor = CurrentDarkFactor;
 		if ((CurrentModule != "Character") && (B != "Sheet")) {
 			DarkFactor = CharacterGetDarkFactor(Player);
 			if (DarkFactor == 1 && (CurrentCharacter != null || ShopStarted) && !CommonPhotoMode) DarkFactor = 0.5;
