@@ -1023,7 +1023,7 @@ function DrawProcess() {
 
 	// Draws the dialog screen or current screen if there's no loaded character
 	if (CurrentCharacter != null) DialogDraw();
-	if (!RefreshDrawFunction) DrawRun();
+	else if (!RefreshDrawFunction) DrawRun();
 	else {
 		DrawRun = DrawRunMap.get(CurrentScreen);
 		if (DrawRun == null) {
