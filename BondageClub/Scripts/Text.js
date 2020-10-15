@@ -73,8 +73,6 @@ function TextLoad(TextGroup) {
  * the game's current language, if a translation is available.
  */
 class TextCache {
-	_path = null;
-	cache = {};
 	get path() {
 		return this._path;
 	}
@@ -90,7 +88,10 @@ class TextCache {
 	 * @param {string} path - The path to the CSV lookup file for this TextCache instance
 	 */
 	constructor(path) {
-		this.path = path;
+		this._path = path;
+		this.language = TranslationLanguage;
+		this.cache = {};
+		this.buildCache();
 	}
 
 	/**
