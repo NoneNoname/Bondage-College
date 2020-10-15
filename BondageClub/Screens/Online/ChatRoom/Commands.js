@@ -87,15 +87,23 @@ function CommandParse(msg) {
 }
 
 /**
- * Prints out the commands with tags that include low
+ * Prints out the help for commands with tags that include low
  * @param {string} low - lower case search keyword for tags
  * @param {number} [timeout] - total time to display the help message in ms
  * @returns {void} - Nothing
  */
 function CommandHelp(low, timeout) {
     ChatRoomSendLocal(TextGet("CommandHelp").replace('KeyWord', low), timeout)
-    Commands
-        .filter(C => low == null || low == "" || C.Tag.includes(low))
+    CommandPrintHelpFor(Commands.filter(C => low == null || low == "" || C.Tag.includes(low)), timeout);
+}
+
+/**
+ * Prints out the help for commands
+ * @param {ICommand[]} commands - list of commands
+ * @param {number} timeout - total time to display the help message in ms
+ */
+function CommandPrintHelpFor(commands, timeout) {
+    commands
         .filter(C => C.Prerequisite == null || C.Prerequisite())
         .forEach(C => {
             const Help = CommandText.cache[C.Tag] || C.Description || TextGet("CommandHelpMissing");
@@ -141,8 +149,7 @@ function CommandAutoComplete(msg) {
     const CS = Commands.filter(C => (CommandsKey + C.Tag).indexOf(low) == 0);
     if (CS.length == 0) return;
 
-    if (CS.length == 1)
-    {
+    if (CS.length == 1) {
         ElementValue("InputChat", CommandsKey + CS[0].Tag + " ");
         return;
     }
@@ -158,7 +165,7 @@ function CommandAutoComplete(msg) {
     if (low.length != complete.length) {
         ElementValue("InputChat", complete);
     } else {
-        CommandHelp(low.substr(CommandsKey.length), 5000);
+        CommandPrintHelpFor(CS, 5000);
     }
 }
 
