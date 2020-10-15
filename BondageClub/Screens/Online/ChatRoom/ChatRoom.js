@@ -591,6 +591,8 @@ function ChatRoomKeyDown() {
 		ElementValue("InputChat", ChatRoomLastMessage[ChatRoomLastMessageIndex]);
 	}
 
+	// Try to autocomplete the command
+	if (KeyPress == 9) CommandAutoComplete(ElementValue("InputChat"))
 }
 
 /**
@@ -616,14 +618,17 @@ function ChatRoomSendChat() {
 /**
  * Sends message to user with HTML tags
  * @param {string} msg - InnerHTML for the message
+ * @param {number} [timeout] - total time to display the message in ms
  * @returns {void} - Nothing
  */
-function ChatRoomSendLocal(msg) {
+function ChatRoomSendLocal(msg, timeout) {
     const div = document.createElement("div");
     div.setAttribute('class', 'ChatMessage');
     div.setAttribute('data-time', ChatRoomCurrentTime());
-    div.setAttribute('data-sender', Player.MemberNumber.toString());
-    div.innerHTML = msg;
+	div.setAttribute('data-sender', Player.MemberNumber.toString());
+	div.innerHTML = msg;
+
+	if (timeout > 0) setTimeout(() => div.remove(), timeout);
 
     const Refocus = document.activeElement.id == "InputChat";
     const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");

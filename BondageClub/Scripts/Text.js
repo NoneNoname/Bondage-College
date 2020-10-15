@@ -73,22 +73,13 @@ function TextLoad(TextGroup) {
  * the game's current language, if a translation is available.
  */
 class TextCache {
-	get path() {
-		return this._path;
-	}
-	set path(value) {
-		if (this._path) TranslationTextCache[this._path] = undefined;
-		this._path = value;
-		if (this._path) TranslationTextCache[this._path] = this;
-		this.buildCache();
-	}
 
 	/**
 	 * Creates a new TextCache from the provided CSV file path.
 	 * @param {string} path - The path to the CSV lookup file for this TextCache instance
 	 */
 	constructor(path) {
-		this._path = path;
+		this.path = path;
 		this.language = TranslationLanguage;
 		this.cache = {};
 		this.buildCache();

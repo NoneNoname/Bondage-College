@@ -341,6 +341,9 @@ function DocumentKeyDown(event) {
 		} else if ((CurrentCharacter != null) && (CurrentScreen == "ChatRoom")) {
 			DialogLeave();
 		}
+	} else if (event.key == "Tab") {
+		event.preventDefault();
+		KeyPress = event.keyCode || event.which;
 	}
 }
 

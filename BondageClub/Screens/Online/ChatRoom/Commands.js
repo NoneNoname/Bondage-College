@@ -1,6 +1,9 @@
+"use strict"
 
+/** @type {ICommand[]} */
 var Commands = [];
-var CommandsKey = "/";
+let CommandsKey = "/";
+/** @type {TextCache} */
 let CommandText = null;
 
 /**
@@ -18,11 +21,7 @@ function CommandsLoad() {
  */
 function CommandsTranslate() {
     if (!CommandText) {
-        CommandText = new TextCache();
-        CommandText.fetchCsv = async () => {
-            return Promise.resolve(Commands.map(C => [C.Tag, C.Description]));
-        }
-        CommandText.path = "Screens/Online/ChatRoom/Commands.csv";
+        CommandText = new TextCache("Screens/Online/ChatRoom/Text_Commands.csv");
     }
     else CommandText.buildCache();
 }
@@ -90,14 +89,18 @@ function CommandParse(msg) {
 /**
  * Prints out the commands with tags that include low
  * @param {string} low - lower case search keyword for tags
+ * @param {number} [timeout] - total time to display the help message in ms
  * @returns {void} - Nothing
  */
-function CommandHelp(low) {
-    ChatRoomSendLocal(TextGet("CommandHelp").replace('KeyWord', low))
+function CommandHelp(low, timeout) {
+    ChatRoomSendLocal(TextGet("CommandHelp").replace('KeyWord', low), timeout)
     Commands
         .filter(C => low == null || low == "" || C.Tag.includes(low))
         .filter(C => C.Prerequisite == null || C.Prerequisite())
-        .forEach(C => ChatRoomSendLocal("<strong onclick='window.CommandSet(\"" + C.Tag + "\")'>" + CommandsKey + C.Tag + "</strong>" + CommandText.get(C.Tag)));
+        .forEach(C => {
+            const Help = CommandText.cache[C.Tag] || C.Description || TextGet("CommandHelpMissing");
+            ChatRoomSendLocal("<strong onclick='window.CommandSet(\"" + C.Tag + "\")'>" + CommandsKey + C.Tag + "</strong> " + Help, timeout);
+        });
 }
 
 /**
@@ -111,11 +114,11 @@ function CommandExecute(msg) {
     C = C[0] && C.reduce(function (a, b) { return a.length > b.length ? a : b; });
     if (C && C.Reference) C = Commands.find(D => D.Tag == C.Reference);
     if (C == null) {
-        ElementValue("InputChat", CommandsKey + "invalid command: no such command");
+        ElementValue("InputChat", CommandsKey + "invalid " + TextGet("CommandNoSuchCommand"));
         return;
     }
     if (C.Prerequisite && !C.Prerequisite()) {
-        ElementValue("InputChat", CommandsKey + "invalid command: prerequisite did not met");
+        ElementValue("InputChat", CommandsKey + "invalid " + TextGet("CommandPrerequisiteFailed"));
         return;
     }
     C.Action(low.substring(C.Tag.length + 2), msg);
@@ -126,12 +129,45 @@ function CommandExecute(msg) {
 }
 
 /**
+ * Tries to complete the message to a command or print help about it
+ * @param {string} msg - InputChat content
+ */
+function CommandAutoComplete(msg) {
+    const low = msg.toLowerCase();
+    if (!low || !low.startsWith(CommandsKey) || low.length <= CommandsKey.length) return;
+    if (low.substr(CommandsKey.length).startsWith(CommandsKey)) return;
+    if (low.includes(' ')) return;
+
+    const CS = Commands.filter(C => (CommandsKey + C.Tag).indexOf(low) == 0);
+    if (CS.length == 0) return;
+
+    if (CS.length == 1)
+    {
+        ElementValue("InputChat", CommandsKey + CS[0].Tag + " ");
+        return;
+    }
+
+    let complete = low;
+    for (let I = low.length - CommandsKey.length; ; ++I) {
+        const TSI = CS.map(C => C.Tag[I]);
+        if (TSI.some(TI => TI == null)) break;
+        if (new Set(TSI).size != 1) break;
+        complete += TSI[0];
+    }
+
+    if (low.length != complete.length) {
+        ElementValue("InputChat", complete);
+    } else {
+        CommandHelp(low.substr(CommandsKey.length), 5000);
+    }
+}
+
+/**
  * @type {ICommand[]}
  */
 const CommonCommands = [
     {
         Tag: 'dice',
-        Description: ' [Number: 6..1000], to cast a random dice roll',
         Action: args => {
             // The player can roll X dice of Y faces, using XdY.  If no size is specified, a 6 sided dice is assumed
             let DiceNumber = 0;
@@ -173,7 +209,6 @@ const CommonCommands = [
     },
     {
         Tag: 'coin',
-        Description: ', to throw a coin',
         Action: () => {
             const Heads = (Math.random() >= 0.5);
             const Dictionary = [
@@ -184,130 +219,106 @@ const CommonCommands = [
     },
     {
         Tag: 'friendlistadd',
-        Description: ' [MemberNumber], add to friendlist',
         Action: args => ChatRoomListManipulation(Player.FriendList, null, args)
     },
     {
         Tag: 'friendlistremove',
-        Description: ' [MemberNumber], remove from friendlist',
         Action: args => ChatRoomListManipulation(null, Player.FriendList, args)
     },
     {
         Tag: 'ghostadd',
-        Description: ' [MemberNumber], add to ghostlist',
         Action: args => ChatRoomListManipulation(Player.GhostList, null, args)
     },
     {
         Tag: 'ghostremove',
-        Description: ' [MemberNumber], remove from ghostlist',
         Action: args => ChatRoomListManipulation(null, Player.GhostList, args)
     },
     {
         Tag: 'whitelistadd',
-        Description: ' [MemberNumber], add to whitelist',
         Action: args => ChatRoomListManipulation(Player.WhiteList, Player.BlackList, args)
     },
     {
         Tag: 'whitelistremove',
-        Description: ' [MemberNumber], remove from whitelist',
         Action: args => ChatRoomListManipulation(null, Player.WhiteList, args)
     },
     {
         Tag: 'blacklistadd',
-        Description: ' [MemberNumber], add to blacklist',
         Action: args => ChatRoomListManipulation(Player.BlackList, Player.WhiteList, args)
     },
     {
         Tag: 'blacklistremove',
-        Description: ' [MemberNumber], remove from blacklist',
         Action: args => ChatRoomListManipulation(null, Player.BlackList, args)
     },
     {
-        Tag: 'showblack',
-        Description: ', show blacklist',
+        Tag: 'showblacklist',
         Action: () => ChatRoomSendLocal('Blacklist: ' + JSON.stringify(Player.BlackList))
     },
     {
-        Tag: 'showwhite',
-        Description: ', show whitelist',
+        Tag: 'showwhitelist',
         Action: () => ChatRoomSendLocal('Whitelist: ' + JSON.stringify(Player.WhiteList))
     },
     {
-        Tag: 'showghost',
-        Description: ', show ghostlist',
+        Tag: 'showghostlist',
         Action: () => ChatRoomSendLocal('Ghostlist: ' + JSON.stringify(Player.Ghostlist))
     },
     {
-        Tag: 'showfriends',
-        Description: ', show friendlist',
-        Action: () => ChatRoomSendLocal('Blacklist: ' + JSON.stringify(Player.FriendList))
+        Tag: 'showfriendlist',
+        Action: () => ChatRoomSendLocal('Friendlist: ' + JSON.stringify(Player.FriendList))
     },
     {
         Tag: 'ban',
-        Description: ' [MemberNumber], ban user',
         Prerequisite: () => ChatRoomPlayerIsAdmin(),
         Action: args => ChatRoomAdminChatAction("Ban", args)
     },
     {
         Tag: 'unban',
-        Description: ' [MemberNumber], remove ban',
         Prerequisite: () => ChatRoomPlayerIsAdmin(),
         Action: args => ChatRoomAdminChatAction("Unban", args)
     },
     {
         Tag: 'kick',
-        Description: ' [MemberNumber], kick user',
         Prerequisite: () => ChatRoomPlayerIsAdmin(),
         Action: args => ChatRoomAdminChatAction("Kick", args)
     },
     {
         Tag: 'promote',
-        Description: ' [MemberNumber], promote user to room administrator',
         Prerequisite: () => ChatRoomPlayerIsAdmin(),
         Action: args => ChatRoomAdminChatAction("Promote", args)
     },
     {
         Tag: 'demote',
-        Description: ' [MemberNumber], demote user from room administrator',
         Prerequisite: () => ChatRoomPlayerIsAdmin(),
         Action: args => ChatRoomAdminChatAction("Demote", args)
     },
     {
         Tag: 'me',
-        Description: ' [Message], send emote: "<i>*[PlayerName] Message*</i>", alternative start message with *"',
         Action: (_, msg) => ChatRoomSendEmote(msg)
     },
     {
         Tag: 'action',
-        Description: ' [Message], send emote: "<i>*Message*</i>", alternative start message with **',
         Action: (_, msg) => ChatRoomSendEmote(msg)
     },
     {
         Tag: 'invalid',
-        Description: ', do nothing',
         Action: () => { }
     },
     {
         Tag: CommandsKey,
-        Description: '[Message], send "/Message"',
-        Action: (_, msg) => { ServerSend("ChatRoomChat", { Content: msg.substring(1), Type: "Chat" }); }
+        Action: (_, msg) => { ServerSend("ChatRoomChat", { Content: msg.substr(CommandsKey.length), Type: "Chat" }); }
     },
     {
         Tag: 'help',
-        Description: ' [Name?], print help for commands where Name is prefix of command',
         Action: args => CommandHelp(args)
     },
     {
         Tag: 'afk',
-        Description: ', Set AFK emote',
         Action: () => CharacterSetFacialExpression(Player, "Emoticon", "Afk")
     },
     {
         Tag: 'beep',
-        Description: ' [MemberNumber], sends beep to someone',
         Action: arg => {
             const T = parseInt(arg);
-            if (isFinite(T) && T > 0 && T < ChatRoomCharacter.length) {
+            if (isFinite(T) && T >= 0) {
                 const C = ChatRoomCharacter.find(C => C.MemberNumber == T);
                 FriendListBeep(T, (C && C.Name) || ("#" + T.toString()));
             }
