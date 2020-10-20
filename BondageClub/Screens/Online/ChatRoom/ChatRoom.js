@@ -1244,7 +1244,7 @@ function ChatRoomSyncItem(data) {
 					if (Item.Asset.OwnerOnly) return;
 					if (Item.Asset.LoverOnly) return;
 					if (Item.Asset.Name == data.Item.Name) {
-						ServerItemCopyPropery(C, OldItem, data.Item.Property)
+						ServerItemCopyProperty(C, Item, data.Item.Property)
 					}
 					return;
 				}
