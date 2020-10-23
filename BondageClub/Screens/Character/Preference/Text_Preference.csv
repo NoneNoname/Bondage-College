@@ -13,6 +13,7 @@ HomepageArousal,Arousal
 HomepageSecurity,Security
 HomepageVisibility,Item Visibility
 HomepageOnline,Online
+HomepageSpamFilter,Spam Filter
 CharacterLabelColor,Character label color:
 ItemPermission,Item permission:
 PermissionLevel0,"Everyone, no exceptions"
@@ -154,7 +155,7 @@ VisibilityReset,Reset All
 VisibilityResetDescription,This will reset all items to be visible. Click again to confirm and exit.
 LeaveSave,Accept changes
 LeaveNoSave,Cancel changes
-SpamFilterPreferences,Spam Filter Settings
+SpamFilterPreferences,- Spam Filter Settings -
 SpamFilterDetails,When a character spams action messages in chat:
 SpamFilterHelp,Use '/unblock MemberNumber' to unblock a player who triggered the spam filter
 SpamFilterEnabled,Enabled

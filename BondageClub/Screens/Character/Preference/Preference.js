@@ -5,7 +5,7 @@ var PreferenceSafewordConfirm = false;
 var PreferenceMaidsButton = true;
 var PreferenceColorPick = "";
 var PreferenceSubscreen = "";
-var PreferenceSubscreenList = ["General", "Chat", "Audio", "Arousal", "Security", "Online", "Visibility"];
+var PreferenceSubscreenList = ["General", "Chat", "Audio", "Arousal", "Security", "Online", "Visibility", "SpamFilter"];
 var PreferenceChatColorThemeSelected = "";
 var PreferenceChatColorThemeList = ["Light", "Dark"];
 var PreferenceChatColorThemeIndex = 0;
@@ -367,8 +367,7 @@ function PreferenceRun() {
 	// Draw the player & controls
 	DrawCharacter(Player, 50, 50, 0.9);
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-	if (PreferenceSubscreen == "SpamFilter") return PreferenceSubscreenSpamFilterRun();
-
+	
 	MainCanvas.textAlign = "left";
 	DrawText(TextGet("Preferences"), 500, 125, "Black", "Gray");
 	MainCanvas.textAlign = "center";
@@ -576,7 +575,6 @@ function PreferenceSubscreenOnlineRun() {
 	DrawCheckbox(500, 785, 64, 64, TextGet("AllowFullWardrobeAccess"), Player.OnlineSharedSettings.AllowFullWardrobeAccess);
 	DrawCheckbox(500, 865, 64, 64, TextGet("BlockBodyCosplay"), Player.OnlineSharedSettings.BlockBodyCosplay);
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-	DrawButton(1815, 190, 90, 90, "", "White", "Icons/SpamFilter.png");
 	DrawCharacter(Player, 50, 50, 0.9);
 	MainCanvas.textAlign = "center";
 }
@@ -595,7 +593,6 @@ function PreferenceSubscreenSpamFilterRun() {
 	DrawCheckbox(500, T += 80, 64, 64, TextGet("IgnoreWhiteList"), Player.SpamFilter.IgnoreWhiteList, !Player.SpamFilter.Enabled);
 	DrawText(TextGet("SpamFilterHelp"), 500, T += 120, "Black", "Gray");
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
-	DrawButton(1815, 190, 90, 90, "", "White", "Icons/Online.png");
 	DrawCharacter(Player, 50, 50, 0.9);
 }
 
@@ -796,7 +793,6 @@ function PreferenceSubscreenOnlineClick() {
 	if (MouseIn(1815, 75, 90, 90)) {
 		PreferenceSubscreen = "";
 	}
-	else if (MouseIn(1815, 190, 90, 90) && PreferenceColorPick == "") PreferenceSubscreen = "SpamFilter";
 	else if (MouseIn(500, 225, 64, 64)) OnlineSettings.AutoBanBlackList = !OnlineSettings.AutoBanBlackList;
 	else if (MouseIn(500, 305, 64, 64)) OnlineSettings.AutoBanGhostList = !OnlineSettings.AutoBanGhostList;
 	else if (MouseIn(500, 385, 64, 64)) OnlineSettings.SearchShowsFullRooms = !OnlineSettings.SearchShowsFullRooms;
@@ -813,15 +809,11 @@ function PreferenceSubscreenOnlineClick() {
 
 function PreferenceSubscreenSpamFilterClick() {
 	let T = 195;
-	if (MouseIn(1815, 75, 90, 90) && PreferenceColorPick == "") {
+	if (MouseIn(1815, 75, 90, 90)) {
 		Player.SpamFilter.Save();
 		PreferenceSubscreen = "";
-		PreferenceMainScreenLoad();
 	}
-	else if (MouseIn(1815, 190, 90, 90) && PreferenceColorPick == "") {
-		Player.SpamFilter.Save();
-		PreferenceSubscreen = "Online";
-	}	
+	
 	else if (MouseIn(500, T += 70, 64, 64)) Player.SpamFilter.Enabled = !Player.SpamFilter.Enabled;
 	else if (!Player.SpamFilter.Enabled) return;
 	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.OnBlockAddToGhostList = !Player.SpamFilter.OnBlockAddToGhostList;
