@@ -41,6 +41,36 @@ const ExtendedXY = [
 	[[1020, 400], [1265, 400], [1510, 400], [1755, 400], [1020, 700], [1265, 700], [1510, 700], [1755, 700]], //8 options per page
 ];
 
+/** The X & Y co-ordinates of each option's button, based on the number to be displayed per page. */
+const ExtendedXYWithoutImages = [
+	[], //0 placeholder
+	[[1400, 450]], //1 option per page
+	[[1175, 450], [1425, 450]], //2 options per page
+	[[1175, 450], [1425, 450], [1675, 450]], //3 options per page
+	[[1175, 450], [1425, 450], [1175, 525], [1425, 525]], //4 options per page
+	[[1175, 450], [1425, 450], [1675, 450], [1175, 525], [1425, 525]], //5 options per page
+	[[1175, 450], [1425, 450], [1675, 450], [1175, 525], [1425, 525], [1675, 525]], //6 options per page
+	[[1050, 450], [1200, 450], [1450, 450], [1700, 450], [1050, 525], [1200, 525], [1425, 525]], //7 options per page
+	[[1050, 450], [1200, 450], [1450, 450], [1700, 450], [1050, 525], [1200, 525], [1425, 525], [1675, 525]], //8 options per page
+];
+
+/** The X & Y co-ordinates of each option's button, based on the number to be displayed per page. */
+const ExtendedXYClothes = [
+	[], //0 placeholder
+	[[1385, 450]], //1 option per page
+	[[1220, 450], [1550, 450]], //2 options per page
+	[[1140, 450], [1385, 450], [1630, 450]], //3 options per page
+	[[1220, 400], [1550, 400], [1220, 700], [1550, 700]], //4 options per page
+	[[1140, 400], [1385, 400], [1630, 400], [1220, 700], [1550, 700]], //5 options per page
+	[[1140, 400], [1385, 400], [1630, 400], [1140, 700], [1385, 700], [1630, 700]], //6 options per page
+];
+
+/**
+ * The current display mode
+ * @type {boolean}
+ */
+var ExtendedItemPermissionMode = false;
+
 /**
  * Loads the item extension properties
  * @param {ExtendedItemOption[]} Options - An Array of type definitions for each allowed extended type. The first item in the array should
@@ -69,13 +99,13 @@ function ExtendedItemLoad(Options, DialogKey) {
 					break;
 					}
 		if (MustRefresh) { 
-			var C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
+			var C = CharacterGetCurrent() || CharacterAppearanceSelection;
 			CharacterRefresh(C);
 			ChatRoomCharacterItemUpdate(C, DialogFocusItem.Asset.Group.Name);
 		}
 	}
 
-	ExtendedItemSetOffset(0);
+	if (ExtendedItemOffsets[ExtendedItemOffsetKey()] == null) ExtendedItemSetOffset(0);
 
 	DialogExtendedMessage = DialogFind(Player, DialogKey);
 }
@@ -87,20 +117,23 @@ function ExtendedItemLoad(Options, DialogKey) {
  * @param {string} DialogPrefix - The prefix to the dialog keys for the display strings describing each extended type.
  *     The full dialog key will be <Prefix><Option.Name>
  * @param {number} OptionsPerPage - The number of options displayed on each page
+ * @param {boolean} [ShowImages=true] - Denotes wether images should be shown for the specific item
+ * @param {boolean} IsCloth - Whether or not the click is performed on a clothing item.
  * @returns {void} Nothing
  */
-function ExtendedItemDraw(Options, DialogPrefix, OptionsPerPage) {
-	var IsSelfBondage = CharacterGetCurrent().ID === 0;
+function ExtendedItemDraw(Options, DialogPrefix, OptionsPerPage, ShowImages = true, IsCloth) {
+	var C = CharacterGetCurrent() || CharacterAppearanceSelection;
+	var IsSelfBondage = C.ID === 0;
 	var Asset = DialogFocusItem.Asset;
 	var ItemOptionsOffset = ExtendedItemGetOffset();
-	OptionsPerPage = OptionsPerPage || Math.min(Options.length, 8);
-
+	var XYPositions = !IsCloth ? (ShowImages ? ExtendedXY : ExtendedXYWithoutImages) : ExtendedXYClothes;
+	var ImageHeight = ShowImages ? 220 : 0;
+	OptionsPerPage = OptionsPerPage || Math.min(Options.length, XYPositions.length - 1);
+	
 	// If we have to paginate, draw the back/next buttons
-	if (ItemOptionsOffset >= OptionsPerPage) {
-		DrawButton(1665, 25, 90, 90, "", "White", "Icons/Prev.png");
-	}
-	if (Options.length > OptionsPerPage && ItemOptionsOffset < OptionsPerPage * Math.floor(Options.length / OptionsPerPage)) {
-		DrawButton(1775, 25, 90, 90, "", "White", "Icons/Next.png");
+	if (Options.length > OptionsPerPage) {
+		DrawButton(1665, 240, 90, 90, "", "White", "Icons/Prev.png");
+		DrawButton(1775, 240, 90, 90, "", "White", "Icons/Next.png");
 	}
 	
 	// Draw the header and item
@@ -112,16 +145,26 @@ function ExtendedItemDraw(Options, DialogPrefix, OptionsPerPage) {
 	// Draw the possible variants and their requirements, arranged based on the number per page
 	for (let I = ItemOptionsOffset; I < Options.length && I < ItemOptionsOffset + OptionsPerPage; I++) {
 		var PageOffset = I - ItemOptionsOffset;
-		var X = ExtendedXY[OptionsPerPage][PageOffset][0];
-		var Y = ExtendedXY[OptionsPerPage][PageOffset][1];
+		var X = XYPositions[OptionsPerPage][PageOffset][0];
+		var Y = XYPositions[OptionsPerPage][PageOffset][1];
+		
 		var Option = Options[I];
+		var Hover = MouseIn(X, Y, 225, 55 + ImageHeight) && !CommonIsMobile;
 		var FailSkillCheck = !!ExtendedItemRequirementCheckMessage(Option, IsSelfBondage);
 		var IsSelected = DialogFocusItem.Property.Type == Option.Property.Type;
+		var Blocked = InventoryIsPermissionBlocked(C, DialogFocusItem.Asset.DynamicName(Player), DialogFocusItem.Asset.DynamicGroupName, Option.Property.Type);
+		var Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, Option.Property.Type);
+		var PlayerBlocked = InventoryIsPermissionBlocked(Player, DialogFocusItem.Asset.DynamicName(Player), DialogFocusItem.Asset.DynamicGroupName, Option.Property.Type);
+		var PlayerLimited = InventoryIsPermissionLimited(Player, DialogFocusItem.Asset.Name, DialogFocusItem.Asset.Group.Name, Option.Property.Type);
+		var Color = ExtendedItemPermissionMode ? ((C.ID == 0 && IsSelected) || Option.Property.Type == null ? "#888888" : PlayerBlocked ? Hover ? "red" : "pink" : PlayerLimited ? Hover ? "orange" : "#fed8b1" : Hover ? "green" : "lime") : (IsSelected ? "#888888" : (Blocked || Limited) ? "Red" : FailSkillCheck ? "Pink" : Hover ? "Cyan" : "White");
 		
-		DrawButton(X, Y, 225, 275, "", IsSelected ? "#888888" : FailSkillCheck ? "Pink" : "White", null, null, IsSelected);
-		DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Option.Name + ".png", X+2, Y);
-		DrawTextFit(DialogFind(Player, DialogPrefix + Option.Name), X + 112, Y + 250, 225, "black");
+		DrawButton(X, Y, 225, 55 + ImageHeight, "", Color, null, null, IsSelected);
+		if (ShowImages) DrawImage("Screens/Inventory/" + Asset.Group.Name + "/" + Asset.Name + "/" + Option.Name + ".png", X + 2, Y);
+		DrawTextFit(DialogFind(Player, DialogPrefix + Option.Name), X + 112, Y + 30 + ImageHeight, 225, "black");
 	}
+	
+	// Permission mode toggle is always available
+	DrawButton(1775, 25, 90, 90, "", "White", ExtendedItemPermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, ExtendedItemPermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
 }
 
 /**
@@ -130,55 +173,70 @@ function ExtendedItemDraw(Options, DialogPrefix, OptionsPerPage) {
  *     be the default option.
  * @param {boolean} IsCloth - Whether or not the click is performed on a clothing item.
  * @param {number} OptionsPerPage - The number of options displayed on each page
+ * @param {boolean} [ShowImages=true] - Denotes wether images are shown for the specific item
  * @returns {void} Nothing
  */
-function ExtendedItemClick(Options, IsCloth, OptionsPerPage) {
-	var IsSelfBondage = CharacterGetCurrent().ID === 0;
+function ExtendedItemClick(Options, IsCloth, OptionsPerPage, ShowImages = true) {
+	var C = CharacterGetCurrent() || CharacterAppearanceSelection;
+	var IsSelfBondage = C.ID === 0;
 	var ItemOptionsOffset = ExtendedItemGetOffset();
-	OptionsPerPage = OptionsPerPage || Math.min(Options.length, 8);
+	var XYPositions = !IsCloth ? ShowImages ? ExtendedXY : ExtendedXYWithoutImages : ExtendedXYClothes;
+	var ImageHeight = ShowImages ? 220 : 0;
+	OptionsPerPage = OptionsPerPage || Math.min(Options.length, XYPositions.length - 1);
 
 	// Exit button
 	if (MouseIn(1885, 25, 90, 85)) {
 		DialogFocusItem = null;
+		if (ExtendedItemPermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+		ExtendedItemPermissionMode = false;
 		return;
 	}
 
-	// Pagination buttons
-	if (MouseIn(1665, 25, 90, 90) && ItemOptionsOffset >= OptionsPerPage) {
-		ExtendedItemSetOffset(ItemOptionsOffset - OptionsPerPage);
+	// Permission toggle button
+	if (MouseIn(1775, 25, 90, 90)) { 
+		if (ExtendedItemPermissionMode && CurrentScreen == "ChatRoom") ChatRoomCharacterUpdate(Player);
+		ExtendedItemPermissionMode = !ExtendedItemPermissionMode;
 	}
-	if (MouseIn(1775, 25, 90, 90) && Options.length > OptionsPerPage && ItemOptionsOffset < OptionsPerPage * Math.floor(Options.length / OptionsPerPage)) {
-		ExtendedItemSetOffset(ItemOptionsOffset + OptionsPerPage);
+	
+	// Pagination buttons
+	if (MouseIn(1665, 240, 90, 90) && Options.length > OptionsPerPage) {
+		if (ItemOptionsOffset - OptionsPerPage < 0) ExtendedItemSetOffset(OptionsPerPage * (Math.ceil(Options.length / OptionsPerPage) - 1));
+		else ExtendedItemSetOffset(ItemOptionsOffset - OptionsPerPage);
+	}
+	if (MouseIn(1775, 240, 90, 90) && Options.length > OptionsPerPage) {
+		if (ItemOptionsOffset + OptionsPerPage >= Options.length) ExtendedItemSetOffset(0);
+		else ExtendedItemSetOffset(ItemOptionsOffset + OptionsPerPage);
 	}
 	
 	// Options
 	for (let I = ItemOptionsOffset; I < Options.length && I < ItemOptionsOffset + OptionsPerPage; I++) {
 		var PageOffset = I - ItemOptionsOffset;
-		var X = ExtendedXY[OptionsPerPage][PageOffset][0];
-		var Y = ExtendedXY[OptionsPerPage][PageOffset][1];
+		var X = XYPositions[OptionsPerPage][PageOffset][0];
+		var Y = XYPositions[OptionsPerPage][PageOffset][1];
 		var Option = Options[I];
-		if (MouseIn(X, Y, 225, 275) && DialogFocusItem.Property.Type !== Option.Property.Type) {
-			ExtendedItemHandleOptionClick(Options, Option, IsSelfBondage, IsCloth);
+		if (MouseIn(X, Y, 225, 55 + ImageHeight)) {
+			ExtendedItemHandleOptionClick(C, Options, Option, IsSelfBondage, IsCloth);
 		}
 	}
 }
 
 /**
  * Handler function for setting the type of an extended item
+ * @param {Character} C - The character wearing the item
  * @param {ExtendedItemOption[]} Options - An Array of type definitions for each allowed extended type. The first item in the array should
  *     be the default option.
  * @param {ExtendedItemOption} Option - The selected type definition
  * @param {boolean} IsCloth - Whether or not the click is performed on a clothing item.
  * @returns {void} Nothing
  */
-function ExtendedItemSetType(Options, Option, IsCloth) {
-	var C = CharacterGetCurrent();
+function ExtendedItemSetType(C, Options, Option, IsCloth) {
+    DialogFocusItem = InventoryGet(C, C.FocusGroup.Name);
 	var FunctionPrefix = ExtendedItemFunctionPrefix();
 
 	// An extendable item may provide a validation function. Returning false from the validation function will drop out of
 	// this function, and the new type will not be applied.
 	if (typeof window[FunctionPrefix + "Validate"] === "function") {
-		if (CommonCallFunctionByName(FunctionPrefix + "Validate", Option) === false) {
+		if (CommonCallFunctionByName(FunctionPrefix + "Validate", C, Option) === false) {
 			return;
 		}
 	}
@@ -188,7 +246,6 @@ function ExtendedItemSetType(Options, Option, IsCloth) {
 		return;
 	}
 
-	DialogFocusItem = InventoryGet(C, C.FocusGroup.Name);
 	if (CurrentScreen == "ChatRoom") {
 		// Call the item's load function
 		CommonCallFunctionByName(FunctionPrefix + "Load");
@@ -236,6 +293,7 @@ function ExtendedItemSetType(Options, Option, IsCloth) {
 
 /**
  * Handler function called when an option on the type selection screen is clicked
+ * @param {Character} C - The character wearing the item
  * @param {ExtendedItemOption[]} Options - An Array of type definitions for each allowed extended type. The first item in the array should
  *     be the default option.
  * @param {ExtendedItemOption} Option - The selected type definition
@@ -243,12 +301,21 @@ function ExtendedItemSetType(Options, Option, IsCloth) {
  * @param {boolean} IsCloth - Whether or not the click is performed on a clothing item.
  * @returns {void} Nothing
  */
-function ExtendedItemHandleOptionClick(Options, Option, IsSelfBondage, IsCloth) {
-	var requirementMessage = ExtendedItemRequirementCheckMessage(Option, IsSelfBondage);
-	if (requirementMessage) {
-		DialogExtendedMessage = requirementMessage;
+function ExtendedItemHandleOptionClick(C, Options, Option, IsSelfBondage, IsCloth) {
+	if (ExtendedItemPermissionMode) {
+		if (Option.Property.Type == null || (C.ID == 0 && DialogFocusItem.Property.Type == Option.Property.Type)) return;
+		InventoryTogglePermission(DialogFocusItem, Option.Property.Type);
 	} else {
-		ExtendedItemSetType(Options, Option, IsCloth);
+		var Blocked = InventoryIsPermissionBlocked(C, DialogFocusItem.Asset.DynamicName(Player), DialogFocusItem.Asset.DynamicGroupName, Option.Property.Type);
+		var Limited = !InventoryCheckLimitedPermission(C, DialogFocusItem, Option.Property.Type);
+		if (DialogFocusItem.Property.Type === Option.Property.Type || Blocked || Limited) return;
+		
+		var requirementMessage = ExtendedItemRequirementCheckMessage(Option, IsSelfBondage);
+		if (requirementMessage) {
+			DialogExtendedMessage = requirementMessage;
+		} else {
+			ExtendedItemSetType(C, Options, Option, IsCloth);
+		}
 	}
 }
 

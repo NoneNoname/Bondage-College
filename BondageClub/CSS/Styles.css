@@ -23,6 +23,7 @@ TextArea {
 .ChatMessage {
 	position: relative;
 	padding-left: 0.4em;
+	overflow: hidden;
 }
 .ChatMessage::before {
 	content: attr(data-time);
@@ -93,6 +94,10 @@ TextArea {
 #TextAreaChatLog[data-coloremotes=false] .ChatMessageEmote,
 #TextAreaChatLog[data-coloractivities=false] .ChatMessageActivity {
 	background-color: transparent !important;
+}
+#TextAreaChatLog[data-whitespace=preserve] {
+	white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 #FriendList {
 	border: 2px solid white;
@@ -171,4 +176,10 @@ TextArea {
 
 .select-items div:hover, .same-as-selected {
   background-color: cyan;
+}
+
+/* Custom fonts */
+@font-face {
+    font-family: 'Calligraffitti';
+    src: url('../Fonts/Calligraffitti/Calligraffitti-Regular.ttf');
 }

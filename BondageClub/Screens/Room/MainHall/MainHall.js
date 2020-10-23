@@ -10,6 +10,36 @@ var MainHallHasOwnerLock = false;
 var MainHallHasLoverLock = false;
 var MainHallHasSlaveCollar = false;
 var MainHallTip = 0;
+var MainHallMaidWasCalledManually = false;
+
+var MainHallRemoveLockTypes = [
+	"CombinationPadlock",
+]
+
+/**
+ * Checks to see if the player needs help in any way
+ * @returns {boolean} - True if player has any restraints or locks, False otherwise
+ */
+function MainHallPlayerNeedsHelpAndHasNoOwnerOrLoverItem() {
+	var needsHelp = false
+	
+	for (let E = Player.Appearance.length - 1; E >= 0; E--) {
+		if (Player.Appearance[E].Asset.IsRestraint) {
+			needsHelp = true;
+			break;
+		}
+		
+		for (let L = 0; L < MainHallRemoveLockTypes.length; L++) {
+			if (((Player.Appearance[E].Property != null) && (Player.Appearance[E].Property.LockedBy == MainHallRemoveLockTypes[L]))) {
+				needsHelp = true
+				break;
+			}
+		}
+	}
+	
+	return needsHelp && !MainHallHasOwnerOrLoverItem()
+}
+
 
 /**
  * Checks if the dialog option to trick the maid is available
@@ -125,6 +155,9 @@ function MainHallRun() {
 		if (!ManagementIsClubSlave()) DrawButton(1765, 625, 90, 90, "", "White", "Icons/College.png", TextGet("College"));
 		DrawButton(1885, 625, 90, 90, "", "White", "Icons/Asylum.png", TextGet("Asylum"));
 
+		// Movie Studio (Must be able to change to enter it)
+		if (Player.CanChange()) DrawButton(1885, 745, 90, 90, "", "White", "Icons/MovieStudio.png", TextGet("MovieStudio"));
+		
 		// Draws the custom content rooms - Gambling, Prison & Photographic
 		DrawButton(265, 25, 90, 90, "", "White", "Icons/Camera.png", TextGet("Photographic"));
 		DrawButton(145, 25, 90, 90, "", "White", "Icons/Cage.png", TextGet("Prison"));
@@ -139,17 +172,7 @@ function MainHallRun() {
 		DrawButton(25, 265, 90, 90, "", "White", "Icons/Refreshsments.png", TextGet("Cafe"));
 	}
 
-	// Check if there's a new maid rescue event to trigger
-	if (!Player.CanInteract() || !Player.CanWalk() || !Player.CanTalk() || Player.IsShackled()) {
-		if (MainHallNextEventTimer == null) {
-			MainHallStartEventTimer = CommonTime();
-			MainHallNextEventTimer = CommonTime() + 40000 + Math.floor(Math.random() * 40000);
-		}
-	} else {
-		MainHallStartEventTimer = null;
-		MainHallNextEventTimer = null;
-	}
-	
+
 	// If we must send a maid to rescue the player
 	if ((MainHallNextEventTimer != null) && (CommonTime() >= MainHallNextEventTimer)) {
 		MainHallMaid.Stage = "0";
@@ -157,13 +180,29 @@ function MainHallRun() {
 		CharacterSetCurrent(MainHallMaid);
 		MainHallStartEventTimer = null;
 		MainHallNextEventTimer = null;
+		MainHallMaidWasCalledManually = false
 	}
 	
-	// If we must show a progress bar for the rescue maid.  If not, we show the number of online players
-	if ((!Player.CanInteract() || !Player.CanWalk() || !Player.CanTalk() || Player.IsShackled()) && (MainHallStartEventTimer != null) && (MainHallNextEventTimer != null)) {
-		DrawText(TextGet("RescueIsComing"), 1750, 925, "White", "Black");
-		DrawProgressBar(1525, 955, 450, 35, (1 - ((MainHallNextEventTimer - CommonTime()) / (MainHallNextEventTimer - MainHallStartEventTimer))) * 100);
-	} else DrawText(TextGet("OnlinePlayers") + " " + CurrentOnlinePlayers.toString(), 1750, 960, "White", "Black");
+	// If we must show a progress bar for the rescue maid.  If not, we show the number of online players or a button to request the maid
+	if ((MainHallStartEventTimer == null) && (MainHallNextEventTimer == null)) {
+		if ( (!Player.GameplaySettings || !Player.GameplaySettings.DisableAutoMaid) && ((!Player.CanInteract() || !Player.CanWalk() || !Player.CanTalk() || Player.IsShackled()))) {
+			MainHallStartEventTimer = CommonTime();
+			MainHallNextEventTimer = CommonTime() + 40000 + Math.floor(Math.random() * 40000);
+		} else {
+			DrawText(TextGet("OnlinePlayers") + " " + CurrentOnlinePlayers.toString(), 1650, 960, "White", "Black");
+			DrawButton(1885, 900, 90, 90, "", "White", "Icons/ServiceBell.png", TextGet("RequestMaid"));
+		}
+		
+		MainHallMaidWasCalledManually = false
+	} else {
+		if (!MainHallMaidWasCalledManually && !((!Player.CanInteract() || !Player.CanWalk() || !Player.CanTalk() || Player.IsShackled()))) {
+			MainHallStartEventTimer = null
+			MainHallNextEventTimer = null
+		} else {
+			DrawText(TextGet("RescueIsComing"), 1750, 925, "White", "Black");
+			DrawProgressBar(1525, 955, 450, 35, (1 - ((MainHallNextEventTimer - CommonTime()) / (MainHallNextEventTimer - MainHallStartEventTimer))) * 100);
+		}
+	}
 
 }
 
@@ -245,6 +284,9 @@ function MainHallClick() {
 		if ((MouseX >= 1645) && (MouseX < 1735) && (MouseY >= 625) && (MouseY < 715) && !ManagementIsClubSlave()) MainHallWalk("LARP");
 		if ((MouseX >= 1765) && (MouseX < 1855) && (MouseY >= 625) && (MouseY < 715) && !ManagementIsClubSlave()) MainHallWalk("CollegeEntrance");
 		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 625) && (MouseY < 715)) MainHallWalk("AsylumEntrance");
+
+		// Movie Studio (Must be able to change to enter it)
+		if ((MouseX >= 1885) && (MouseX < 1975) && (MouseY >= 745) && (MouseY < 855) && Player.CanChange()) MainHallWalk("MovieStudio");
 		
 		// Custom content rooms - Gambling, Prison & Photographic
 		if ((MouseX >=   25) && (MouseX <  115) && (MouseY >=  25) && (MouseY < 115)) MainHallWalk("Gambling");
@@ -259,6 +301,23 @@ function MainHallClick() {
 		// Cafe
 		if ((MouseX >=   25) && (MouseX <  115) && (MouseY >= 265) && (MouseY < 355)) MainHallWalk("Cafe");
 	}
+	
+	
+	if ((MainHallStartEventTimer == null) && (MainHallNextEventTimer == null)) {
+		
+		if (MouseIn(1885, 900, 90, 90)) {
+			if (MainHallNextEventTimer == null) {
+				var vol = 1
+				if (Player.AudioSettings && Player.AudioSettings.Volume) {
+					vol = Player.AudioSettings.Volume
+				}
+				AudioPlayInstantSound("Audio/BellSmall.mp3", vol)
+				MainHallStartEventTimer = CommonTime();
+				MainHallNextEventTimer = CommonTime() + 40000 + Math.floor(Math.random() * 40000);
+				MainHallMaidWasCalledManually = true;
+			}
+		}
+	}
 
 }
 
@@ -272,7 +331,9 @@ function MainHallMaidReleasePlayer() {
 			if ((MainHallMaid.Dialog[D].Stage == "0") && (MainHallMaid.Dialog[D].Option == null))
 				MainHallMaid.Dialog[D].Result = DialogFind(MainHallMaid, "AlreadyReleased");
 		CharacterRelease(Player);
-		CharacterReleaseFromLock(Player, "CombinationPadlock");
+		for (let L = 0; L < MainHallRemoveLockTypes.length; L++) {
+			CharacterReleaseFromLock(Player, MainHallRemoveLockTypes[L]);
+		}
 		MainHallMaid.Stage = "10";
 	} else MainHallMaid.CurrentDialog = DialogFind(MainHallMaid, "CannotRelease");
 }

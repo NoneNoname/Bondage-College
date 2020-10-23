@@ -1,8 +1,11 @@
 "use strict";
 var PreferenceBackground = "Sheet";
 var PreferenceMessage = "";
+var PreferenceSafewordConfirm = false;
+var PreferenceMaidsButton = true;
 var PreferenceColorPick = "";
 var PreferenceSubscreen = "";
+var PreferenceSubscreenList = ["General", "Chat", "Audio", "Arousal", "Security", "Online", "Visibility"];
 var PreferenceChatColorThemeSelected = "";
 var PreferenceChatColorThemeList = ["Light", "Dark"];
 var PreferenceChatColorThemeIndex = 0;
@@ -201,17 +204,9 @@ function PreferenceInit(C) {
 	if (C.ChatSettings.ColorEmotes == null) C.ChatSettings.ColorEmotes = true;
 	if (C.ChatSettings.ShowActivities == null) C.ChatSettings.ShowActivities = true;
 	if (C.ChatSettings.ShowAutomaticMessages == null) C.ChatSettings.ShowAutomaticMessages = false;
+	if (C.ChatSettings.WhiteSpace == null) C.ChatSettings.WhiteSpace = "Preserve";
+	if (C.ChatSettings.ColorActivities == null) C.ChatSettings.ColorActivities = true;
 	if (!C.VisualSettings) C.VisualSettings = { ForceFullHeight: false };
-
-	if (!C.OnlineSettings) C.OnlineSettings = {};
-	// TODO: The following preferences were migrated September 2020 in for R61 - replace with standard preference code after a few months
-	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "AutoBanBlackList", false);
-	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "AutoBanGhostList", true);
-	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "DisableAnimations", false);
-	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "SearchShowsFullRooms", true);
-	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "SearchFriendsFirst", false);
-	PreferenceMigrate(C.GameplaySettings, C.OnlineSettings, "EnableAfkTimer", true);
-	PreferenceMigrate(C.GameplaySettings, C.OnlineSettings, "EnableWardrobeIcon", false);
 
 	// Sets the default audio settings
 	if (!C.AudioSettings) C.AudioSettings = { Volume: 1, PlayBeeps: false, PlayItem: false, PlayItemPlayerOnly: false };
@@ -239,7 +234,21 @@ function PreferenceInit(C) {
 	if (typeof C.GameplaySettings.BlindDisableExamine !== "boolean") C.GameplaySettings.BlindDisableExamine = false;
 	if (typeof C.GameplaySettings.DisableAutoRemoveLogin !== "boolean") C.GameplaySettings.DisableAutoRemoveLogin = false;
 	if (typeof C.GameplaySettings.EnableSafeword !== "boolean") C.GameplaySettings.EnableSafeword = true;
+	if (typeof C.GameplaySettings.DisableAutoMaid !== "boolean") C.GameplaySettings.DisableAutoMaid = false;
 
+	if (!C.OnlineSettings) C.OnlineSettings = {};
+	if (!C.OnlineSharedSettings) C.OnlineSharedSettings = {};
+	if (C.OnlineSharedSettings.AllowFullWardrobeAccess == null) C.OnlineSharedSettings.AllowFullWardrobeAccess = false;
+	if (C.OnlineSharedSettings.BlockBodyCosplay == null) C.OnlineSharedSettings.BlockBodyCosplay = false;
+	// TODO: The following preferences were migrated September 2020 in for R61 - replace with standard preference code after a few months
+	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "AutoBanBlackList", false);
+	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "AutoBanGhostList", true);
+	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "DisableAnimations", false);
+	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "SearchShowsFullRooms", true);
+	PreferenceMigrate(C.ChatSettings, C.OnlineSettings, "SearchFriendsFirst", false);
+	PreferenceMigrate(C.GameplaySettings, C.OnlineSettings, "EnableAfkTimer", true);
+	PreferenceMigrate(C.GameplaySettings, C.OnlineSettings, "EnableWardrobeIcon", false);
+	
 	// Validates the player preference, they must match with the assets activities & zones, default factor is 2 (normal love)
 	if (Player.AssetFamily == "Female3DCG") {
 
@@ -284,7 +293,7 @@ function PreferenceInit(C) {
 	}
 
 	// Enables the AFK timer for the current player only
-	AfkTimerSetEnabled((C.ID == 0) && C.GameplaySettings && (C.GameplaySettings.EnableAfkTimer != false));
+	AfkTimerSetEnabled((C.ID == 0) && C.OnlineSettings && (C.OnlineSettings.EnableAfkTimer != false));
 
 	PreferenceInitSpamFilter(C.SpamFilter);
 }
@@ -313,7 +322,6 @@ function PreferenceLoad() {
 
 	// Sets up the player label color
 	if (!CommonIsColor(Player.LabelColor)) Player.LabelColor = "#ffffff";
-	PreferenceMainScreenLoad();
 	PreferenceInit(Player);
 
 	// Sets the chat themes
@@ -353,19 +361,28 @@ function PreferenceLoad() {
  * @returns {void} - Nothing
  */
 function PreferenceRun() {
-
 	// If a subscreen is active, draw that instead
-	if (PreferenceSubscreen == "Chat") return PreferenceSubscreenChatRun();
-	if (PreferenceSubscreen == "Audio") return PreferenceSubscreenAudioRun();
-	if (PreferenceSubscreen == "Arousal") return PreferenceSubscreenArousalRun();
-	if (PreferenceSubscreen == "Security") return PreferenceSubscreenSecurityRun();
-	if (PreferenceSubscreen == "Visibility") return PreferenceSubscreenVisibilityRun();
-	if (PreferenceSubscreen == "Online") return PreferenceSubscreenOnlineRun();
+	if (PreferenceSubscreen != "") return CommonDynamicFunction("PreferenceSubscreen" + PreferenceSubscreen + "Run()");
+	
+	// Draw the player & controls
+	DrawCharacter(Player, 50, 50, 0.9);
+	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 	if (PreferenceSubscreen == "SpamFilter") return PreferenceSubscreenSpamFilterRun();
 
-	// Draw the online preferences
 	MainCanvas.textAlign = "left";
 	DrawText(TextGet("Preferences"), 500, 125, "Black", "Gray");
+	MainCanvas.textAlign = "center";
+
+	for (let A = 0; A < PreferenceSubscreenList.length; A++) {
+		DrawButton(500 + 420 * Math.floor(A / 7), 160 + 110 * (A % 7), 400, 90, "", "White", "Icons/" + PreferenceSubscreenList[A] + ".png");
+		DrawTextFit(TextGet("Homepage" + PreferenceSubscreenList[A]), 745 + 420 * Math.floor(A / 7), 205 + 110 * (A % 7), 310, "Black");
+	}
+}
+
+function PreferenceSubscreenGeneralRun() {
+	// Draw the online preferences
+	MainCanvas.textAlign = "left";
+	DrawText(TextGet("GeneralPreferences"), 500, 125, "Black", "Gray");
 	if (PreferenceMessage != "") DrawText(TextGet(PreferenceMessage), 865, 125, "Red", "Black");
 	DrawText(TextGet("CharacterLabelColor"), 500, 225, "Black", "Gray");
 	ElementPosition("InputCharacterLabelColor", 990, 212, 250);
@@ -381,7 +398,8 @@ function PreferenceRun() {
 	DrawCheckbox(500, 472, 64, 64, TextGet("BlindDisableExamine"), Player.GameplaySettings.BlindDisableExamine);
 	DrawCheckbox(500, 552, 64, 64, TextGet("DisableAutoRemoveLogin"), Player.GameplaySettings.DisableAutoRemoveLogin);
 	DrawCheckbox(500, 632, 64, 64, TextGet("ForceFullHeight"), Player.VisualSettings.ForceFullHeight);
-	DrawCheckbox(500, 712, 64, 64, TextGet("EnableSafeword"), Player.GameplaySettings.EnableSafeword);
+	DrawCheckbox(500, 712, 64, 64, TextGet(PreferenceSafewordConfirm ? "ConfirmSafeword" : "EnableSafeword"), Player.GameplaySettings.EnableSafeword);
+	DrawCheckbox(500, 792, 64, 64, TextGet("DisableAutoMaid"), !Player.GameplaySettings.DisableAutoMaid);
 
 	MainCanvas.textAlign = "center";
 	DrawBackNextButton(500, 392, 250, 64, TextGet(Player.GameplaySettings.SensDepChatLog), "White", "",
@@ -395,12 +413,6 @@ function PreferenceRun() {
 		ColorPickerDraw(1250, 185, 675, 830, document.getElementById(PreferenceColorPick));
 	} else {
 		ColorPickerHide();
-		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Chat.png");
-		DrawButton(1815, 305, 90, 90, "", "White", "Icons/Audio.png");
-		DrawButton(1815, 420, 90, 90, "", "White", "Icons/Activity.png");
-		DrawButton(1815, 535, 90, 90, "", "White", "Icons/Lock.png");
-		DrawButton(1815, 650, 90, 90, "", "White", "Icons/Private.png");
-		DrawButton(1815, 765, 90, 90, "", "White", "Icons/Online.png");
 	}
 }
 
@@ -409,56 +421,30 @@ function PreferenceRun() {
  * @returns {void} - Nothing
  */
 function PreferenceClick() {
+	// Pass the click into the opened subscreen
+	if (PreferenceSubscreen != "") return CommonDynamicFunction("PreferenceSubscreen" + PreferenceSubscreen + "Click()");
 
-	// If a subscreen is active, process that instead
-	if (PreferenceSubscreen == "Chat") return PreferenceSubscreenChatClick();
-	if (PreferenceSubscreen == "Audio") return PreferenceSubscreenAudioClick();
-	if (PreferenceSubscreen == "Arousal") return PreferenceSubscreenArousalClick();
-	if (PreferenceSubscreen == "Security") return PreferenceSubscreenSecurityClick();
-	if (PreferenceSubscreen == "Visibility") return PreferenceSubscreenVisibilityClick();
-	if (PreferenceSubscreen == "Online") return PreferenceSubscreenOnlineClick();
-	if (PreferenceSubscreen == "SpamFilter") return PreferenceSubscreenSpamFilterClick();
+	// Exit button
+	if (MouseIn(1815, 75, 90, 90)) {
+		PreferenceExit();
+	}
 
+	// Open the selected subscreen
+	for (let A = 0; A < PreferenceSubscreenList.length; A++) {
+		if (MouseIn(500 + 500 * Math.floor(A / 7), 160 + 110 * (A % 7), 400, 90)) {
+			if (typeof window["PreferenceSubscreen" + PreferenceSubscreenList[A] + "Load"] === "function") {
+				CommonDynamicFunction("PreferenceSubscreen" + PreferenceSubscreenList[A] + "Load()");
+			}
+			PreferenceSubscreen = PreferenceSubscreenList[A];
+			break;
+		}
+	}
+}
+
+function PreferenceSubscreenGeneralClick() {
 	// If the user clicks on "Exit"
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) PreferenceExit();
-
-	// If the user clicks on the chat settings button
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 190) && (MouseY < 280) && (PreferenceColorPick == "")) {
-		PreferenceMainScreenExit();
-		PreferenceSubscreen = "Chat";
-	}
-
-	// If the user clicks on the audio settings button
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 305) && (MouseY < 395) && (PreferenceColorPick == "")) {
-		PreferenceMainScreenExit();
-		PreferenceSubscreen = "Audio";
-	}
-
-	// If the user clicks on the arousal settings button
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 420) && (MouseY < 510) && (PreferenceColorPick == "")) {
-		PreferenceMainScreenExit();
-		PreferenceSubscreen = "Arousal";
-	}
-
-	// If the user clicks on the security settings button
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 535) && (MouseY < 625) && (PreferenceColorPick == "")) {
-		PreferenceMainScreenExit();
-		ElementCreateInput("InputEmailOld", "text", "", "100");
-		ElementCreateInput("InputEmailNew", "text", "", "100");
-		ServerSend("AccountQuery", { Query: "EmailStatus" });
-		PreferenceSubscreen = "Security";
-	}
-
-	// If the user clicks on the visibility settings button
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 650) && (MouseY < 740) && (PreferenceColorPick == "")) {
-		PreferenceMainScreenExit();
-		PreferenceSubscreen = "Visibility";
-	}
-
-	// If the user clicks on the online settings button
-	if (MouseIn(1815, 765, 90, 90) && (PreferenceColorPick == "")) {
-		PreferenceMainScreenExit();
-		PreferenceSubscreen = "Online";
+	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) {
+		PreferenceSubscreenGeneralExit();
 	}
 
 	// If we must change the restrain permission level
@@ -483,9 +469,25 @@ function PreferenceClick() {
 	if (MouseIn(500, 552, 64, 64)) Player.GameplaySettings.DisableAutoRemoveLogin = !Player.GameplaySettings.DisableAutoRemoveLogin;
 	if (MouseIn(500, 632, 64, 64)) Player.VisualSettings.ForceFullHeight = !Player.VisualSettings.ForceFullHeight;
 	if (MouseIn(500, 712, 64, 64)) {
-		if (!Player.GameplaySettings.EnableSafeword && !Player.IsRestrained() && !Player.IsChaste()) Player.GameplaySettings.EnableSafeword = true;
-		else if (Player.GameplaySettings.EnableSafeword) Player.GameplaySettings.EnableSafeword = false;
+		if (!Player.GameplaySettings.EnableSafeword && !Player.IsRestrained() && !Player.IsChaste()) { 
+			if (PreferenceSafewordConfirm) {
+				Player.GameplaySettings.EnableSafeword = true;
+				PreferenceSafewordConfirm = false; 
+			} else {
+				PreferenceSafewordConfirm = true; 
+			}
+		} else if (Player.GameplaySettings.EnableSafeword) {
+			if (PreferenceSafewordConfirm) {
+				Player.GameplaySettings.EnableSafeword = false;
+				PreferenceSafewordConfirm = false; 
+			} else {
+				PreferenceSafewordConfirm = true; 
+			}
+		}
+	} else {
+		PreferenceSafewordConfirm = false;
 	}
+	if (MouseIn(500, 792, 64, 64)) Player.GameplaySettings.DisableAutoMaid = !Player.GameplaySettings.DisableAutoMaid;
 }
 
 /**
@@ -494,23 +496,20 @@ function PreferenceClick() {
  * @returns {void} - Nothing
  */
 function PreferenceExit() {
-	if (CommonIsColor(ElementValue("InputCharacterLabelColor"))) {
-		Player.LabelColor = ElementValue("InputCharacterLabelColor");
-		var P = {
-			ItemPermission: Player.ItemPermission,
-			LabelColor: Player.LabelColor,
-			ChatSettings: Player.ChatSettings,
-			VisualSettings: Player.VisualSettings,
-			AudioSettings: Player.AudioSettings,
-			GameplaySettings: Player.GameplaySettings,
-			ArousalSettings: Player.ArousalSettings,
-			OnlineSettings: Player.OnlineSettings,
-		};
-		ServerSend("AccountUpdate", P);
-		PreferenceMessage = "";
-		PreferenceMainScreenExit();
-		CommonSetScreen("Character", "InformationSheet");
-	} else PreferenceMessage = "ErrorInvalidColor";
+	var P = {
+		ItemPermission: Player.ItemPermission,
+		LabelColor: Player.LabelColor,
+		ChatSettings: Player.ChatSettings,
+		VisualSettings: Player.VisualSettings,
+		AudioSettings: Player.AudioSettings,
+		GameplaySettings: Player.GameplaySettings,
+		ArousalSettings: Player.ArousalSettings,
+		OnlineSettings: Player.OnlineSettings,
+		OnlineSharedSettings: Player.OnlineSharedSettings
+	};
+	ServerSend("AccountUpdate", P);
+	PreferenceMessage = "";
+	CommonSetScreen("Character", "InformationSheet");
 }
 
 /**
@@ -548,6 +547,8 @@ function PreferenceSubscreenChatRun() {
 	DrawCheckbox(500, 732, 64, 64, TextGet("ColorEmotes"), Player.ChatSettings.ColorEmotes);
 	DrawCheckbox(500, 812, 64, 64, TextGet("ShowActivities"), Player.ChatSettings.ShowActivities);
 	DrawCheckbox(1200, 492, 64, 64, TextGet("ShowAutomaticMessages"), Player.ChatSettings.ShowAutomaticMessages);
+	DrawCheckbox(1200, 572, 64, 64, TextGet("PreserveWhitespace"), Player.ChatSettings.WhiteSpace == "Preserve");
+	DrawCheckbox(1200, 652, 64, 64, TextGet("ColorActivities"), Player.ChatSettings.ColorActivities);
 	MainCanvas.textAlign = "center";
 	DrawBackNextButton(1000, 190, 350, 70, TextGet(PreferenceChatColorThemeSelected), "White", "",
 		() => TextGet((PreferenceChatColorThemeIndex == 0) ? PreferenceChatColorThemeList[PreferenceChatColorThemeList.length - 1] : PreferenceChatColorThemeList[PreferenceChatColorThemeIndex - 1]),
@@ -572,9 +573,12 @@ function PreferenceSubscreenOnlineRun() {
 	DrawCheckbox(500, 545, 64, 64, TextGet("DisableAnimations"), Player.OnlineSettings.DisableAnimations);
 	DrawCheckbox(500, 625, 64, 64, TextGet("EnableAfkTimer"), Player.OnlineSettings.EnableAfkTimer);
 	DrawCheckbox(500, 705, 64, 64, TextGet("EnableWardrobeIcon"), Player.OnlineSettings.EnableWardrobeIcon);
+	DrawCheckbox(500, 785, 64, 64, TextGet("AllowFullWardrobeAccess"), Player.OnlineSharedSettings.AllowFullWardrobeAccess);
+	DrawCheckbox(500, 865, 64, 64, TextGet("BlockBodyCosplay"), Player.OnlineSharedSettings.BlockBodyCosplay);
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 	DrawButton(1815, 190, 90, 90, "", "White", "Icons/SpamFilter.png");
 	DrawCharacter(Player, 50, 50, 0.9);
+	MainCanvas.textAlign = "center";
 }
 
 function PreferenceSubscreenSpamFilterRun() {
@@ -645,14 +649,15 @@ function PreferenceSubscreenArousalRun() {
 		DrawBackNextButton(900, 633, 300, 64, TextGet("ArousalActivityLove" + PreferenceArousalActivityFactorSelf), PreferenceGetFactorColor(PreferenceGetActivityFactor(Player, PreferenceArousalActivityList[PreferenceArousalActivityIndex], true)), "", () => "", () => "");
 		DrawBackNextButton(1605, 633, 300, 64, TextGet("ArousalActivityLove" + PreferenceArousalActivityFactorOther), PreferenceGetFactorColor(PreferenceGetActivityFactor(Player, PreferenceArousalActivityList[PreferenceArousalActivityIndex], false)), "", () => "", () => "");
 
+		// Fetish elements
+		DrawBackNextButton(900, 463, 500, 64, TextGet("ArousalFetish" + PreferenceArousalFetishList[PreferenceArousalFetishIndex]), "White", "", () => "", () => "");
+		DrawBackNextButton(1455, 463, 450, 64, TextGet("ArousalFetishLove" + PreferenceArousalFetishFactor), PreferenceGetFactorColor(PreferenceGetFetishFactor(Player, PreferenceArousalFetishList[PreferenceArousalFetishIndex], false)), "", () => "", () => "");
 	}
 
 	// We always draw the active & stutter control
 	MainCanvas.textAlign = "center";
 	DrawBackNextButton(750, 193, 450, 64, TextGet("ArousalActive" + PreferenceArousalActiveList[PreferenceArousalActiveIndex]), "White", "", () => "", () => "");
 	DrawBackNextButton(900, 378, 500, 64, TextGet("ArousalStutter" + PreferenceArousalAffectStutterList[PreferenceArousalAffectStutterIndex]), "White", "", () => "", () => "");
-	DrawBackNextButton(900, 463, 500, 64, TextGet("ArousalFetish" + PreferenceArousalFetishList[PreferenceArousalFetishIndex]), "White", "", () => "", () => "");
-	DrawBackNextButton(1455, 463, 450, 64, TextGet("ArousalFetishLove" + PreferenceArousalFetishFactor), PreferenceGetFactorColor(PreferenceGetFetishFactor(Player, PreferenceArousalFetishList[PreferenceArousalFetishIndex], false)), "", () => "", () => "");
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 
 }
@@ -680,9 +685,6 @@ function PreferenceSubscreenSecurityRun() {
  * @returns {void} - Nothing
  */
 function PreferenceSubscreenVisibilityRun() {
-	// Load the full asset list on the first call
-	if (PreferenceVisibilityGroupList.length == 0) PreferenceVisibilityLoad();
-
 	DrawCharacter(Player, 50, 50, 0.9);
 
 	// Exit buttons
@@ -722,9 +724,8 @@ function PreferenceSubscreenVisibilityRun() {
 function PreferenceSubscreenAudioClick() {
 
 	// If the user clicked the exit icon to return to the main screen
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) {
+	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165)) {
 		PreferenceSubscreen = "";
-		PreferenceMainScreenLoad();
 	}
 
 	// Volume increase/decrease control
@@ -750,15 +751,17 @@ function PreferenceSubscreenAudioClick() {
 function PreferenceSubscreenChatClick() {
 
 	// If the user clicked one of the check-boxes
-	if ((MouseX >= 500) && (MouseX <= 564)) {
-		if ((MouseY >= 492) && (MouseY <= 556)) Player.ChatSettings.DisplayTimestamps = !Player.ChatSettings.DisplayTimestamps;
-		if ((MouseY >= 572) && (MouseY <= 636)) Player.ChatSettings.ColorNames = !Player.ChatSettings.ColorNames;
-		if ((MouseY >= 652) && (MouseY <= 716)) Player.ChatSettings.ColorActions = !Player.ChatSettings.ColorActions;
-		if ((MouseY >= 732) && (MouseY <= 796)) Player.ChatSettings.ColorEmotes = !Player.ChatSettings.ColorEmotes;
-		if ((MouseY >= 812) && (MouseY <= 876)) Player.ChatSettings.ShowActivities = !Player.ChatSettings.ShowActivities;
+	if (MouseXIn(500, 64)) {
+		if (MouseYIn(492, 64)) Player.ChatSettings.DisplayTimestamps = !Player.ChatSettings.DisplayTimestamps;
+		if (MouseYIn(572, 64)) Player.ChatSettings.ColorNames = !Player.ChatSettings.ColorNames;
+		if (MouseYIn(652, 64)) Player.ChatSettings.ColorActions = !Player.ChatSettings.ColorActions;
+		if (MouseYIn(732, 64)) Player.ChatSettings.ColorEmotes = !Player.ChatSettings.ColorEmotes;
+		if (MouseYIn(812, 64)) Player.ChatSettings.ShowActivities = !Player.ChatSettings.ShowActivities;
 	}
 
 	if (MouseIn(1200, 492, 64, 64)) Player.ChatSettings.ShowAutomaticMessages = !Player.ChatSettings.ShowAutomaticMessages;
+	if (MouseIn(1200, 572, 64, 64)) Player.ChatSettings.WhiteSpace = Player.ChatSettings.WhiteSpace == "Preserve" ? "" : "Preserve";
+	if (MouseIn(1200, 652, 64, 64)) Player.ChatSettings.ColorActivities = !Player.ChatSettings.ColorActivities;
 
 	// If the user used one of the BackNextButtons
 	if ((MouseX >= 1000) && (MouseX < 1350) && (MouseY >= 190) && (MouseY < 270)) {
@@ -783,16 +786,15 @@ function PreferenceSubscreenChatClick() {
 	// If the user clicked the exit icon to return to the main screen
 	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) {
 		PreferenceSubscreen = "";
-		PreferenceMainScreenLoad();
 	}
 
 }
 
 function PreferenceSubscreenOnlineClick() {
 	const OnlineSettings = Player.OnlineSettings;
-	if (MouseIn(1815, 75, 90, 90) && PreferenceColorPick == "") {
+	const OnlineSharedSettings = Player.OnlineSharedSettings;
+	if (MouseIn(1815, 75, 90, 90)) {
 		PreferenceSubscreen = "";
-		PreferenceMainScreenLoad();
 	}
 	else if (MouseIn(1815, 190, 90, 90) && PreferenceColorPick == "") PreferenceSubscreen = "SpamFilter";
 	else if (MouseIn(500, 225, 64, 64)) OnlineSettings.AutoBanBlackList = !OnlineSettings.AutoBanBlackList;
@@ -805,6 +807,8 @@ function PreferenceSubscreenOnlineClick() {
 		AfkTimerSetEnabled(OnlineSettings.EnableAfkTimer);
 	}
 	else if (MouseIn(500, 705, 64, 64)) OnlineSettings.EnableWardrobeIcon = !OnlineSettings.EnableWardrobeIcon;
+	else if (MouseIn(500, 785, 64, 64)) OnlineSharedSettings.AllowFullWardrobeAccess = !OnlineSharedSettings.AllowFullWardrobeAccess;
+	else if (MouseIn(500, 865, 64, 64)) OnlineSharedSettings.BlockBodyCosplay = !OnlineSharedSettings.BlockBodyCosplay;
 }
 
 function PreferenceSubscreenSpamFilterClick() {
@@ -842,10 +846,9 @@ function PreferenceSubscreenSpamFilterClick() {
 function PreferenceSubscreenArousalClick() {
 
 	// If the user clicked the exit icon to return to the main screen
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) {
+	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165)) {
 		PreferenceSubscreen = "";
 		Player.FocusGroup = null;
-		PreferenceMainScreenLoad();
 	}
 
 	// Arousal active control
@@ -949,11 +952,10 @@ function PreferenceSubscreenArousalClick() {
 function PreferenceSubscreenSecurityClick() {
 
 	// If the user clicked the exit icon to return to the main screen
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) {
+	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165)) {
 		PreferenceSubscreen = "";
 		ElementRemove("InputEmailOld");
 		ElementRemove("InputEmailNew");
-		PreferenceMainScreenLoad();
 	}
 
 	// If we must update the email
@@ -1036,7 +1038,7 @@ function PreferenceSubscreenVisibilityClick() {
 }
 
 /** Load the full list of items and clothes along with the player settings for them */
-function PreferenceVisibilityLoad() {
+function PreferenceSubscreenVisibilityLoad() {
 	PreferenceVisibilityHiddenList = Player.HiddenItems.slice();
 	PreferenceVisibilityBlockList = Player.BlockItems.slice();
 
@@ -1132,14 +1134,13 @@ function PreferenceVisibilityExit(SaveChanges) {
 	PreferenceVisibilityHiddenList = [];
 	PreferenceVisibilityBlockList = [];
 	PreferenceSubscreen = "";
-	PreferenceMainScreenLoad();
 }
 
 /**
- * Loads the Preferences screen. Is called dynamically, when the player enters the preferences dialog for the first time
+ * Loads the Preferences screen.
  * @returns {void} - Nothing
  */
-function PreferenceMainScreenLoad() {
+function PreferenceSubscreenGeneralLoad() {
 	ElementCreateInput("InputCharacterLabelColor", "text", Player.LabelColor);
 }
 
@@ -1147,8 +1148,23 @@ function PreferenceMainScreenLoad() {
  * Exists the preference screen. Cleans up elements that are not needed anymore
  * @returns {void} - Nothing
  */
-function PreferenceMainScreenExit() {
-	ElementRemove("InputCharacterLabelColor");
+function PreferenceSubscreenGeneralExit() {
+	if (CommonIsColor(ElementValue("InputCharacterLabelColor"))) {
+		Player.LabelColor = ElementValue("InputCharacterLabelColor");
+		PreferenceMessage = "";
+		ElementRemove("InputCharacterLabelColor");
+		PreferenceSubscreen = "";
+	} else PreferenceMessage = "ErrorInvalidColor";
+}
+
+/**
+ * Loads the Preferences screen.
+ * @returns {void} - Nothing
+ */
+function PreferenceSubscreenSecurityLoad() {
+	ElementCreateInput("InputEmailOld", "text", "", "100");
+	ElementCreateInput("InputEmailNew", "text", "", "100");
+	ServerSend("AccountQuery", { Query: "EmailStatus" });
 }
 
 /**
