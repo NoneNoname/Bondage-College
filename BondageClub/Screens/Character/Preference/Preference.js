@@ -583,9 +583,9 @@ function PreferenceSubscreenSpamFilterRun() {
 	MainCanvas.textAlign = "left";
 	let T = 125;
 	DrawText(TextGet("SpamFilterPreferences"), 500, T, "Black", "Gray");
-	DrawText(TextGet("SpamFilterDetails"), 500, T += 70, "Black", "Gray");
-	DrawCheckbox(500, T += 70, 64, 64, TextGet("SpamFilterEnabled"), Player.SpamFilter.Enabled);
-	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAddToGhostList"), Player.SpamFilter.OnBlockAddToGhostList, !Player.SpamFilter.Enabled);
+	DrawCheckbox(500, T += 38, 64, 64, TextGet("SpamFilterEnabled"), Player.SpamFilter.Enabled);
+	DrawText(TextGet("SpamFilterDetails"), 500, T += 112, "Black", "Gray");
+	DrawCheckbox(500, T += 38, 64, 64, TextGet("OnBlockAddToGhostList"), Player.SpamFilter.OnBlockAddToGhostList, !Player.SpamFilter.Enabled);
 	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAddToBlackList"), Player.SpamFilter.OnBlockAddToBlackList, !Player.SpamFilter.Enabled);
 	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAdminKick"), Player.SpamFilter.OnBlockAdminKick, !Player.SpamFilter.Enabled);
 	DrawCheckbox(500, T += 80, 64, 64, TextGet("OnBlockAdminBan"), Player.SpamFilter.OnBlockAdminBan, !Player.SpamFilter.Enabled);
@@ -808,15 +808,14 @@ function PreferenceSubscreenOnlineClick() {
 }
 
 function PreferenceSubscreenSpamFilterClick() {
-	let T = 195;
+	let T = 125;
 	if (MouseIn(1815, 75, 90, 90)) {
 		Player.SpamFilter.Save();
 		PreferenceSubscreen = "";
 	}
-	
-	else if (MouseIn(500, T += 70, 64, 64)) Player.SpamFilter.Enabled = !Player.SpamFilter.Enabled;
+	else if (MouseIn(500, T += 38, 64, 64)) Player.SpamFilter.Enabled = !Player.SpamFilter.Enabled;
 	else if (!Player.SpamFilter.Enabled) return;
-	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.OnBlockAddToGhostList = !Player.SpamFilter.OnBlockAddToGhostList;
+	else if (MouseIn(500, T += 150, 64, 64)) Player.SpamFilter.OnBlockAddToGhostList = !Player.SpamFilter.OnBlockAddToGhostList;
 	else if (MouseIn(500, T += 80, 64, 64)) Player.SpamFilter.OnBlockAddToBlackList = !Player.SpamFilter.OnBlockAddToBlackList;
 	else if (MouseIn(500, T += 80, 64, 64)) {
 		Player.SpamFilter.OnBlockAdminKick = !Player.SpamFilter.OnBlockAdminKick;
