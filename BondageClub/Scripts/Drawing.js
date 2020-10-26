@@ -17,6 +17,7 @@ const DrawRunMap = new Map();
 let DrawRun = () => {};
 /** @type {string} */
 let DrawScreen;
+var DialogLeaveDueToItem = false
 
 // A bank of all the chached images
 const DrawCacheImage = new Map;
@@ -210,10 +211,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		}
 
 		// Run any existing asset scripts
-		if (
-			(!C.AccountName.startsWith('Online-') || !(Player.OnlineSettings && Player.OnlineSettings.DisableAnimations))
-			&& (!Player.GhostList || Player.GhostList.indexOf(C.MemberNumber) == -1)
-		) {
+		if (C.RunScripts && C.HasScriptedAssets) {
 			var DynamicAssets = C.Appearance.filter(CA => CA.Asset.DynamicScriptDraw);
 			DynamicAssets.forEach(Item =>
 				window["Assets" + Item.Asset.Group.Name + Item.Asset.Name + "ScriptDraw"]({
@@ -793,6 +791,22 @@ function DrawCheckbox(Left, Top, Width, Height, Text, IsChecked) {
 }
 
 /**
+ * Draws a checkbox component
+ * @param {number} Left - Position of the component from the left of the canvas
+ * @param {number} Top - Position of the component from the top of the canvas
+ * @param {number} Width - Width of the component
+ * @param {number} Height - Height of the component
+ * @param {string} Text - Label associated with the checkbox
+ * @param {boolean} IsChecked - Whether or not the checkbox is checked
+ * @param {string} Color - Color of the text
+ * @returns {void} - Nothing
+ */
+function DrawCheckboxColor(Left, Top, Width, Height, Text, IsChecked, Color) {
+	DrawText(Text, Left + 100, Top + 33, Color, "Gray");
+	DrawButton(Left, Top, Width, Height, "", "White", IsChecked ? "Icons/Checked.png" : "");
+}
+
+/**
  * Draw a back & next button component
  * @param {number} Left - Position of the component from the left of the canvas
  * @param {number} Top - Position of the component from the top of the canvas
@@ -1043,6 +1057,14 @@ function DrawProcess() {
 
 	// Draws the 3D objects
 	Draw3DProcess();
+	
+	// Leave dialogs AFTER drawing everything
+	// If needed
+	// Used to support items that remove you from the dialog during the draw phase
+	if (DialogLeaveDueToItem) {
+		DialogLeaveDueToItem = false
+		DialogLeave()
+	}
 
 }
 
