@@ -56,10 +56,10 @@ function CommandCombine(add) {
 function CommandParse(msg) {
     if (msg.indexOf(CommandsKey) == 0) {
         CommandExecute(msg);
+        return;
     } else if (msg.indexOf("*") == 0) {
         ChatRoomSendEmote(msg);
-        ElementValue("InputChat", "");
-    } else {
+    } else if (m.indexOf("(") != 0 || !Player.ImmersionSettings || !Player.ImmersionSettings.BlockGaggedOOC || Player.CanTalk()) {
         if (ChatRoomTargetMemberNumber == null) ServerSend("ChatRoomChat", { Content: msg, Type: "Chat" });
         else {
             ServerSend("ChatRoomChat", { Content: msg, Type: "Whisper", Target: ChatRoomTargetMemberNumber });
@@ -82,8 +82,12 @@ function CommandParse(msg) {
                 if (Refocus) ElementFocus("InputChat");
             }
         }
-        ElementValue("InputChat", "");
+    } else {
+        // Throw an error message
+        ChatRoomMessage({ Content: "ChatRoomBlockGaggedOOC", Type: "Action", Sender: Player.MemberNumber });
     }
+    // Clears the chat text message
+    ElementValue("InputChat", "");
 }
 
 /**
