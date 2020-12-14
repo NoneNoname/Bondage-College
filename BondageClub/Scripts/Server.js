@@ -204,6 +204,25 @@ function ServerPlayerSkillSync() {
 }
 
 /**
+ * Syncs player's relations and related info to the server.
+ * @returns {void} - Nothing
+ */
+function ServerPlayerRelationsSync() {
+	const D = {};
+	D.FriendList = Player.FriendList;
+	D.GhostList = Player.GhostList;
+	D.WhiteList = Player.WhiteList;
+	D.BlackList = Player.BlackList;
+	Array.from(Player.FriendNames.keys()).forEach(k => {
+		if (!Player.FriendList.includes(k) && !Player.SubmissivesList.has(k))
+			Player.FriendNames.delete(k);
+	})
+	D.FriendNames = LZString.compressToUTF16(JSON.stringify(Array.from(Player.FriendNames)));
+	D.SubmissivesList = LZString.compressToUTF16(JSON.stringify(Array.from(Player.SubmissivesList)));
+	ServerSend("AccountUpdate", D);
+}
+
+/** 
  * Prepares an appearance bundle so we can push it to the server. It minimizes it by keeping only the necessary information. (Asset name, group name, color, properties and difficulty)
  * @param {AppearanceArray} Appearance - The appearance array to bundle
  * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array
@@ -233,7 +252,6 @@ function ServerAppearanceBundle(Appearance) {
  * @returns {void} - Nothing
  */
 function ServerValidateProperties(C, Item, Validation) {
-
 	// No validations for NPCs
 	if ((C.AccountName.substring(0, 4) == "NPC_") || (C.AccountName.substring(0, 4) == "NPC-")) return;
 
@@ -250,12 +268,23 @@ function ServerValidateProperties(C, Item, Validation) {
 	if ((Item.Property != null) && (Item.Property.Effect != null)) {
 		for (let E = Item.Property.Effect.length - 1; E >= 0; E--) {
 
-			// Make sure the item can be locked, remove any lock that's invalid
+			// Make sure the item or its subtype can be locked, remove any lock that's invalid
 			var Effect = Item.Property.Effect[E];
-			if ((Effect == "Lock") && ((Item.Asset.AllowLock == null) || (Item.Asset.AllowLock == false) || (InventoryGetLock(Item) == null) || (InventoryIsPermissionBlocked(C, Item.Property.LockedBy, "ItemMisc")))) {
+			if ((Effect == "Lock") &&
+			    (
+			        !Item.Asset.AllowLock ||
+				    (InventoryGetLock(Item) == null) ||
+				    (InventoryIsPermissionBlocked(C, Item.Property.LockedBy, "ItemMisc")) ||
+				    (Item.Property && Item.Property.AllowLock === false) ||
+				    // Check if a lock on the items sub type is allowed
+				    (Item.Property && Item.Asset.AllowLockType && !Item.Asset.AllowLockType.includes(Item.Property.Type))
+			    )) {
 				delete Item.Property.LockedBy;
 				delete Item.Property.LockMemberNumber;
 				delete Item.Property.CombinationNumber;
+				delete Item.Property.Password;
+				delete Item.Property.Hint;
+				delete Item.Property.LockSet;
 				delete Item.Property.RemoveTimer;
 				delete Item.Property.MaxTimer;
 				delete Item.Property.RemoveItem;
@@ -276,6 +305,15 @@ function ServerValidateProperties(C, Item, Validation) {
 						Item.Property.CombinationNumber = "0000";
 					}
 				} else delete Item.Property.CombinationNumber;
+				
+				// Make sure the password on the lock is valid, 6 letters only
+				var Lock = InventoryGetLock(Item);
+				if ((Item.Property.Password != null) && (typeof Item.Property.Password == "string")) {
+					var Regex = /^[A-Z]+$/;
+					if (!Item.Property.Password.toUpperCase().match(Regex) || (Item.Property.Password.length > 8)) {
+						Item.Property.Password = "UNLOCK";
+					}
+				} else delete Item.Property.Password;
 
 				// Make sure the remove timer on the lock is valid
 				if ((Lock.Asset.RemoveTimer != null) && (Lock.Asset.RemoveTimer != 0)) {
@@ -294,6 +332,9 @@ function ServerValidateProperties(C, Item, Validation) {
 					delete Item.Property.LockedBy;
 					delete Item.Property.LockMemberNumber;
 					delete Item.Property.CombinationNumber;
+					delete Item.Property.Password;
+					delete Item.Property.Hint;
+					delete Item.Property.LockSet;
 					delete Item.Property.RemoveTimer;
 					delete Item.Property.MaxTimer;
 					delete Item.Property.RemoveItem;
@@ -307,6 +348,9 @@ function ServerValidateProperties(C, Item, Validation) {
 					delete Item.Property.LockedBy;
 					delete Item.Property.LockMemberNumber;
 					delete Item.Property.CombinationNumber;
+					delete Item.Property.Password;
+					delete Item.Property.Hint;
+					delete Item.Property.LockSet;
 					delete Item.Property.RemoveTimer;
 					delete Item.Property.MaxTimer;
 					delete Item.Property.RemoveItem;
@@ -529,6 +573,9 @@ function ServerItemCopyProperty(C, Item, NewProperty) {
 		if (Item.Property.MemberNumberList != null) NewProperty.MemberNumberList = Item.Property.MemberNumberList; else delete NewProperty.MemberNumberList;
 		if (Item.Property.RemoveTimer != null) NewProperty.RemoveTimer = Math.round(Item.Property.RemoveTimer); else delete NewProperty.RemoveTimer;
 	}
+	if (Item.Property.Password != null) NewProperty.Password = Item.Property.Password; else delete NewProperty.Password;
+	if (Item.Property.Hint != null) NewProperty.Hint = Item.Property.Hint; else delete NewProperty.Hint;
+	if (Item.Property.LockSet != null) NewProperty.LockSet = Item.Property.LockSet; else delete NewProperty.LockSet;
 	Item.Property = NewProperty;
 	ServerValidateProperties(C, Item);
 	if (Item.Property.LockedBy == "OwnerPadlock") InventoryLock(C, Item, { Asset: AssetGet(C.AssetFamily, "ItemMisc", "OwnerPadlock") }, NewProperty.LockMemberNumber);
@@ -616,21 +663,44 @@ function ServerAccountQueryResult(data) {
  */
 function ServerAccountBeep(data) {
 	if ((data != null) && (typeof data === "object") && !Array.isArray(data) && (data.MemberNumber != null) && (typeof data.MemberNumber === "number") && (data.MemberName != null) && (typeof data.MemberName === "string")) {
-		ServerBeep.MemberNumber = data.MemberNumber;
-		ServerBeep.MemberName = data.MemberName;
-		ServerBeep.ChatRoomName = data.ChatRoomName;
-		ServerBeep.Timer = CurrentTime + 10000;
-		if (Player.AudioSettings && Player.AudioSettings.PlayBeeps) {
-			ServerBeepAudio.volume = Player.AudioSettings.Volume;
-			ServerBeepAudio.play();
+		if (!data.BeepType || data.BeepType == "") {
+			ServerBeep.MemberNumber = data.MemberNumber;
+			ServerBeep.MemberName = data.MemberName;
+			ServerBeep.ChatRoomName = data.ChatRoomName;
+			ServerBeep.Timer = CurrentTime + 10000;
+			if (Player.AudioSettings && Player.AudioSettings.PlayBeeps) {
+				ServerBeepAudio.volume = Player.AudioSettings.Volume;
+				ServerBeepAudio.play();
+			}
+			ServerBeep.Message = DialogFind(Player, "BeepFrom") + " " + ServerBeep.MemberName + " (" + ServerBeep.MemberNumber.toString() + ")";
+			if (ServerBeep.ChatRoomName != null)
+				ServerBeep.Message = ServerBeep.Message + " " + DialogFind(Player, "InRoom") + " \"" + ServerBeep.ChatRoomName + "\" " + (data.ChatRoomSpace === "Asylum" ? DialogFind(Player, "InAsylum") : '');
+			FriendListBeepLog.push({ MemberNumber: data.MemberNumber, MemberName: data.MemberName, ChatRoomName: data.ChatRoomName, ChatRoomSpace: data.ChatRoomSpace, Sent: false, Time: new Date() });
+			if (CurrentScreen == "FriendList") ServerSend("AccountQuery", { Query: "OnlineFriends" });
+		} else if (data.BeepType == "Leash" && ChatRoomLeashPlayer == data.MemberNumber) {
+			if (Player.OnlineSharedSettings && Player.OnlineSharedSettings.AllowPlayerLeashing != false && ( CurrentScreen != "ChatRoom" || !ChatRoomData || (CurrentScreen == "ChatRoom" && ChatRoomData.Name != data.ChatRoomName))) {
+				if (ChatRoomCanBeLeashed(Player)) {
+					
+					ChatRoomJoinLeash = data.ChatRoomName
+					
+					DialogLeave()
+					if (CurrentScreen == "ChatRoom") {
+						ElementRemove("InputChat");
+						ElementRemove("TextAreaChatLog");
+						ServerSend("ChatRoomLeave", "");
+						CommonSetScreen("Online", "ChatSearch");
+					}
+					else ChatRoomStart("", "", "MainHall", "IntroductionDark", BackgroundsTagList) //CommonSetScreen("Room", "ChatSearch")
+					
+				} else {
+					ChatRoomLeashPlayer = null
+				}
+			}
 		}
-		ServerBeep.Message = DialogFind(Player, "BeepFrom") + " " + ServerBeep.MemberName + " (" + ServerBeep.MemberNumber.toString() + ")";
-		if (ServerBeep.ChatRoomName != null)
-			ServerBeep.Message = ServerBeep.Message + " " + DialogFind(Player, "InRoom") + " \"" + ServerBeep.ChatRoomName + "\" " + (data.ChatRoomSpace === "Asylum" ? DialogFind(Player, "InAsylum") : data.ChatRoomSpace === "LARP" ? DialogFind(Player, "InLarp") : '');
-		FriendListBeepLog.push({ MemberNumber: data.MemberNumber, MemberName: data.MemberName, ChatRoomName: data.ChatRoomName, ChatRoomSpace: data.ChatRoomSpace, Sent: false, Time: new Date() });
-		if (CurrentScreen == "FriendList") ServerSend("AccountQuery", { Query: "OnlineFriends" });
 	}
 }
+
+
 
 /** Draws the last beep sent by the server if the timer is still valid, used during the drawing process */
 function ServerDrawBeep() {

@@ -336,13 +336,14 @@ function CharacterAppearanceSortLayers(C) {
 }
 
 /**
- * Determines wether an item or a whole item group is visible or not
+ * Determines whether an item or a whole item group is visible or not
  * @param {Character} C - The character whose assets are checked
  * @param {string} AssetName - The name of the asset to check
  * @param {string} GroupName - The name of the item group to check
+ * @param {boolean} Recursive - If TRUE, then other items which are themselves hidden will not hide this item. Parameterising this prevents infinite loops.
  * @returns {boolean} - Returns TRUE if we can show the item or the item group
  */
-function CharacterAppearanceVisible(C, AssetName, GroupName) {
+function CharacterAppearanceVisible(C, AssetName, GroupName, Recursive = true) {
 	if (CharacterAppearanceItemIsHidden(AssetName, GroupName)) {
 		C.HasHiddenItems = true;
 		return false;
@@ -350,10 +351,19 @@ function CharacterAppearanceVisible(C, AssetName, GroupName) {
 
 	for (let A = 0; A < C.Appearance.length; A++) {
 		if (CharacterAppearanceItemIsHidden(C.Appearance[A].Asset.Name, C.Appearance[A].Asset.Group.Name)) continue;
-		if ((C.Appearance[A].Asset.Hide != null) && (C.Appearance[A].Asset.Hide.indexOf(GroupName) >= 0)) return false;
-		if ((C.Appearance[A].Property != null) && (C.Appearance[A].Property.Hide != null) && (C.Appearance[A].Property.Hide.indexOf(GroupName) >= 0)) return false;
-		if ((C.Appearance[A].Asset.HideItem != null) && (C.Appearance[A].Asset.HideItem.indexOf(GroupName + AssetName) >= 0)) return false;
-		if ((C.Appearance[A].Property != null) && (C.Appearance[A].Property.HideItem != null) && (C.Appearance[A].Property.HideItem.indexOf(GroupName + AssetName) >= 0)) return false;
+		let HidingItem = false;
+		if ((C.Appearance[A].Asset.Hide != null) && (C.Appearance[A].Asset.Hide.indexOf(GroupName) >= 0)) HidingItem = true;
+		else if ((C.Appearance[A].Property != null) && (C.Appearance[A].Property.Hide != null) && (C.Appearance[A].Property.Hide.indexOf(GroupName) >= 0)) HidingItem = true;
+		else if ((C.Appearance[A].Asset.HideItem != null) && (C.Appearance[A].Asset.HideItem.indexOf(GroupName + AssetName) >= 0)) HidingItem = true;
+		else if ((C.Appearance[A].Property != null) && (C.Appearance[A].Property.HideItem != null) && (C.Appearance[A].Property.HideItem.indexOf(GroupName + AssetName) >= 0)) HidingItem = true;
+		if (HidingItem) {
+			if (Recursive) {
+				if (CharacterAppearanceVisible(C, C.Appearance[A].Asset.Name, C.Appearance[A].Asset.Group.Name, false)) {
+					return false;
+				}
+			}
+			else return false;
+		}
 	}
 
 	if (C.Pose != null)
@@ -484,7 +494,6 @@ function AppearanceRun() {
 	DrawCharacter(C, 750, 0, 1);
 	DrawText(CharacterAppearanceHeaderText, 400, 40, "White", "Black");
 
-	
 	// When there is an extended item
 	if (DialogFocusItem != null) {
 		CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Draw()");
@@ -562,7 +571,7 @@ function AppearanceRun() {
 		// Draw the wardrobe top controls & buttons
 		if (!DialogItemPermissionMode && InventoryGet(C, C.FocusGroup.Name) && InventoryGet(C, C.FocusGroup.Name).Asset.Extended) DrawButton(1183, 25, 90, 90, "", "White", "Icons/Use.png", DialogFind(Player, "Use"));
 		if (C.ID == 0 && !DialogItemPermissionMode) DrawButton(1300, 25, 90, 90, "", "White", "Icons/WearRandom.png", TextGet("WearRandom"));
-		if (C.ID == 0) DrawButton(1417, 25, 90, 90, "", "White", DialogItemPermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, DialogItemPermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
+		if (C.ID == 0) DrawButton(1417, 25, 90, 90, "", (Player.GetDifficulty() >= 3) ? "Pink" : "White", DialogItemPermissionMode ? "Icons/DialogNormalMode.png" : "Icons/DialogPermissionMode.png", DialogFind(Player, DialogItemPermissionMode ? "DialogNormalMode" : "DialogPermissionMode"));
 		if (!DialogItemPermissionMode) DrawButton(1534, 25, 90, 90, "", "White", "Icons/Naked.png", TextGet("Naked"));
 		if (DialogInventory.length > 9) DrawButton(1651, 25, 90, 90, "", "White", "Icons/Next.png", TextGet("Next"));
 		
@@ -875,7 +884,7 @@ function AppearanceClick() {
 	if (CharacterAppearanceMode == "Cloth") {
 
 		// Extends the current item
-		if (MouseIn(1183, 25, 90, 90)) { 
+		if (MouseIn(1183, 25, 90, 90)) {
 			var Item = InventoryGet(C, C.FocusGroup.Name);
 			if (Item && Item.Asset.Extended) DialogExtendItem(Item);
 		}
@@ -886,11 +895,11 @@ function AppearanceClick() {
 		}
 
 		// Swaps between normal and permission mode
-		if (C.ID == 0 && MouseIn(1417, 25, 90, 90)) { 
+		if (C.ID == 0 && MouseIn(1417, 25, 90, 90) && (Player.GetDifficulty() <= 2)) {
 			DialogItemPermissionMode = !DialogItemPermissionMode;
 			DialogInventoryBuild(C);
 		}
-		
+
 		// Strips the current item
 		if (!DialogItemPermissionMode && (MouseX >= 1534) && (MouseX < 1624) && (MouseY >= 25) && (MouseY < 115))
 			CharacterAppearanceSetItem(C, C.FocusGroup.Name, null);
