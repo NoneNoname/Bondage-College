@@ -1403,12 +1403,12 @@ function ChatRoomAllowChangeLockedItem(Data, Item) {
 function ChatRoomSyncItem(data) {
 	if ((data == null) || (typeof data !== "object") || (data.Source == null) || (typeof data.Source !== "number") || (data.Item == null) || (typeof data.Item !== "object") || (data.Item.Target == null) || (typeof data.Item.Target !== "number") || (data.Item.Group == null) || (typeof data.Item.Group !== "string")) return;
 	for (let C = 0; C < ChatRoomCharacter.length; C++)
-		if (ChatRoomCharacter[C].MemberNumber == data.Item.Target) {
+		if (ChatRoomCharacter[C].MemberNumber === data.Item.Target) {
 
-			var FromSelf = data.Source == data.Item.Target;
-			var FromOwner = (ChatRoomCharacter[C].Ownership != null) && ((data.Source == ChatRoomCharacter[C].Ownership.MemberNumber) || FromSelf);
+			var FromSelf = data.Source === data.Item.Target;
+			var FromOwner = (ChatRoomCharacter[C].Ownership != null) && ((data.Source === ChatRoomCharacter[C].Ownership.MemberNumber) || FromSelf);
 			var LoverNumbers = ChatRoomCharacter[C].GetLoversNumbers();
-			var FromLoversOrOwner = (LoverNumbers.length != 0) && (LoverNumbers.includes(data.Source) || FromOwner);
+			var FromLoversOrOwner = (LoverNumbers.length !== 0) && (LoverNumbers.includes(data.Source) || FromOwner || FromSelf);
 
 			// From another user, we prevent changing the item if the current item is locked by owner/lover locks
 			if (!FromOwner) {
@@ -1417,7 +1417,7 @@ function ChatRoomSyncItem(data) {
 					if (data.Item.Property == null) return;
 					if (Item.Asset.OwnerOnly) return;
 					if (Item.Asset.LoverOnly) return;
-					if (Item.Asset.Name == data.Item.Name) {
+					if (Item.Asset.Name === data.Item.Name) {
 						ServerItemCopyProperty(ChatRoomCharacter[C], Item, data.Item.Property)
 					}
 					return;
