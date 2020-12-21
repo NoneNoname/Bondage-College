@@ -1418,7 +1418,7 @@ function ChatRoomSyncItem(data) {
 					if (Item.Asset.OwnerOnly) return;
 					if (Item.Asset.LoverOnly) return;
 					if (Item.Asset.Name == data.Item.Name) {
-						ServerItemCopyProperty(C, Item, data.Item.Property)
+						ServerItemCopyProperty(ChatRoomCharacter[C], Item, data.Item.Property)
 					}
 					return;
 				}
@@ -1433,8 +1433,8 @@ function ChatRoomSyncItem(data) {
 				if (!CommonColorIsValid(Color)) Color = "Default";
 
 				if (!FromOwner) {
-					var Item = { Asset: AssetGet(C.AssetFamily, data.Item.Group, data.Item.Name), Property: data.Item.Property };
-					if (data.Item.Property != null)	ServerValidateProperties(ChatRoomCharacter[C], ChatRoomCharacter[C], Item, { SourceMemberNumber: data.Source, FromOwner: FromOwner, FromLoversOrOwner: FromLoversOrOwner })
+					var Item = { Asset: AssetGet(ChatRoomCharacter[C].AssetFamily, data.Item.Group, data.Item.Name), Property: data.Item.Property };
+					if (data.Item.Property != null)	ServerValidateProperties(ChatRoomCharacter[C], Item, { SourceMemberNumber: data.Source, FromOwner: FromOwner, FromLoversOrOwner: FromLoversOrOwner })
 					if (InventoryOwnerOnlyItem(Item) || (!FromLoversOrOwner && InventoryLoverOnlyItem(Item))) {
 						ChatRoomAllowCharacterUpdate = true;
 						return;
