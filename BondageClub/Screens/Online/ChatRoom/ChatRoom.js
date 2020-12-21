@@ -182,7 +182,7 @@ function ChatRoomCanBeLeashed(C) {
 					neckLock = InventoryGetLock(Player.Appearance[A])
 			}
 		}
-	if ((C.Effect.indexOf("Tethered") >= 0) || (C.Effect.indexOf("Mounted") >= 0) || (C.Effect.indexOf("Enclosed") >= 0)) isTrapped = true
+	if ((C.Effect.indexOf("Tethered") >= 0) || (C.Effect.indexOf("Mounted") >= 0) || (C.Effect.indexOf("Enclose") >= 0)) isTrapped = true
 	
 	if (canLeash && !isTrapped) {
 		if (!neckLock || (!neckLock.Asset.OwnerOnly && !neckLock.Asset.LoverOnly) ||
@@ -244,6 +244,43 @@ function ChatRoomLoad() {
 	ChatRoomCreateElement();
 	ChatRoomCharacterUpdate(Player);
 	ActivityChatRoomArousalSync(Player);
+}
+
+/**
+ * Removes all elements that can be open in the chat room
+*/
+function ChatRoomClearAllElements() {
+	// Friendlist
+	ElementRemove("FriendList");
+	
+	// Admin
+	ElementRemove("InputName");
+	ElementRemove("InputDescription");
+	ElementRemove("InputSize");
+	ElementRemove("InputAdminList");
+	ElementRemove("InputBanList");
+	ElementRemove("InputBackground");
+	ElementRemove("TagDropDown");
+	
+	// Chatroom
+	ElementRemove("InputChat");
+	ElementRemove("TextAreaChatLog");
+	
+	// Dialog
+	DialogLeave()
+	
+	// Preferences
+	ElementRemove("InputEmailOld");
+	ElementRemove("InputEmailNew");
+	ElementRemove("InputCharacterLabelColor");
+	
+	// Profile
+    ElementRemove("DescriptionInput");
+	
+	// Wardrobe
+	ElementRemove("InputWardrobeName"); 
+	
+	
 }
 
 /**
@@ -488,8 +525,7 @@ function ChatRoomRun() {
 		if ((CurrentTime > ChatRoomSlowtimer) && (ChatRoomSlowtimer != 0)) {
 			ChatRoomSlowtimer = 0;
 			ChatRoomSlowStop = false;
-			ElementRemove("InputChat");
-			ElementRemove("TextAreaChatLog");
+			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
 			CommonSetScreen("Online", "ChatSearch");
 		}
@@ -568,8 +604,7 @@ function ChatRoomClick() {
 
 	// When the user leaves
 	if (MouseIn(1005, 0, 120, 62) && ChatRoomCanLeave() && !Player.IsSlow()) {
-		ElementRemove("InputChat");
-		ElementRemove("TextAreaChatLog");
+		ChatRoomClearAllElements();
 		ServerSend("ChatRoomLeave", "");
 		CommonSetScreen("Online", "ChatSearch");
 		CharacterDeleteAllOnline();
@@ -683,6 +718,8 @@ function ChatRoomKeyDown() {
 		ElementValue("InputChat", ChatRoomLastMessage[ChatRoomLastMessageIndex]);
 	}
 
+	// On escape, scroll to the bottom of the chat
+	if (KeyPress == 27) ElementScrollToEnd("TextAreaChatLog");
 }
 
 /**
@@ -1801,8 +1838,7 @@ function ChatRoomSetRule(data) {
 		if (data.Content == "OwnerRuleTimerCell60") TimerCell = 60;
 		if (TimerCell > 0) {
 			ServerSend("ChatRoomChat", { Content: "ActionGrabbedForCell", Type: "Action", Dictionary: [{ Tag: "TargetCharacterName", Text: Player.Name, MemberNumber: Player.MemberNumber }] });
-			ElementRemove("InputChat");
-			ElementRemove("TextAreaChatLog");
+			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
 			CharacterDeleteAllOnline();
 			CellLock(TimerCell);
@@ -1830,8 +1866,7 @@ function ChatRoomSetRule(data) {
 			CharacterSetActivePose(Player, null);
 			var D = TextGet("ActionGrabbedToServeDrinksIntro");
 			ServerSend("ChatRoomChat", { Content: "ActionGrabbedToServeDrinks", Type: "Action", Dictionary: [{ Tag: "TargetCharacterName", Text: Player.Name, MemberNumber: Player.MemberNumber }] });
-			ElementRemove("InputChat");
-			ElementRemove("TextAreaChatLog");
+			ChatRoomClearAllElements();
 			ServerSend("ChatRoomLeave", "");
 			CharacterDeleteAllOnline();
 			CommonSetScreen("Room", "MaidQuarters");
@@ -1942,8 +1977,7 @@ function ChatRoomSafewordRelease() {
 	CharacterReleaseTotal(Player);
 	CharacterRefresh(Player);
 	ServerSend("ChatRoomChat", { Content: "ActionActivateSafewordRelease", Type: "Action", Dictionary: [{Tag: "SourceCharacter", Text: Player.Name}] });
-	ElementRemove("InputChat");
-	ElementRemove("TextAreaChatLog");
+	ChatRoomClearAllElements();
 	ServerSend("ChatRoomLeave", "");
 	CommonSetScreen("Online","ChatSearch");
 }
