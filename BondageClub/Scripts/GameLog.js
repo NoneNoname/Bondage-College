@@ -112,10 +112,10 @@ function LogLoad(NewLog) {
 }
 
 /**
- * Searches for an existing log entry on a other character.
- * @param {string} C - Character to search on
- * @param {string} NewLogName - The name of the log to search for
- * @param {string} NewLogGroup - The name of the log's group
+ * Searches for an existing log entry on another character.
+ * @param {Character} C - Character to search on
+ * @param {string} QueryLogName - The name of the log to search for
+ * @param {string} QueryLogGroup - The name of the log's group
  * @returns {boolean} - Returns TRUE if there is an existing log matching the Name/Group with no value or a value above the current time in ms.
  */
 function LogQueryRemote(C, QueryLogName, QueryLogGroup) {
@@ -126,17 +126,17 @@ function LogQueryRemote(C, QueryLogName, QueryLogGroup) {
 }
 
 /**
- * Filters the Player's log and returns those that the owner can see
- * @param {boolean} OwnerIsLover - Ididates that the target is owner and lover of the Player
- * @returns {Rule[]} - OwnerRules and LoverRules which involve the Owner
+ * Filters the Player's log and returns the rule entries that the player's owner is allowed to see.
+ * @param {boolean} OwnerIsLover - Indicates that the requester is also the player's lover.
+ * @returns {Rule[]} - A list of rules that the player's owner is permitted to see
  */
 function LogGetOwnerReadableRules(OwnerIsLover) {
     return Log.filter(L => L.Group == "OwnerRule" || (L.Group == "LoverRule" && (OwnerIsLover || L.Name.includes("Owner"))));
 }
 
 /**
- * Filters the Player's log and returns those that the owner can see
- * @returns {Rule[]} - OwnerRules and LoverRules which involve the Owner
+ * Filters the Player's log and returns the rule entries that the player's lover is allowed to see.
+ * @returns {Rule[]} - A list of rules that the player's lover is permitted to see
  */
 function LogGetLoverReadableRules() {
     return Log.filter(L => L.Group == "LoverRule");

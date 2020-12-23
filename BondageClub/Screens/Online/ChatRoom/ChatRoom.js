@@ -1787,8 +1787,9 @@ function ChatRoomGetOwnerRule(RuleType) { return ChatRoomGetRule(RuleType, "Owne
 
 /**
  * Gets a rule from the current character
- * @param {string} RuleType - The rule selected.
+ * @param {string} RuleType - The name of the rule to retrieve.
  * @param {"Owner" | "Lover"} Sender - Type of the sender
+ * @returns {Rule} - The owner or lover rule corresponding to the requested rule name
  */
 function ChatRoomGetRule(RuleType, Sender) {
 	return LogQueryRemote(CurrentCharacter, RuleType, Sender + "Rule");
@@ -1997,8 +1998,10 @@ function ChatRoomConcatenateBanList(IncludesBlackList, IncludesGhostList, Existi
 }
 
 /**
- * Resolve a request for the Player current rules
- * @param {Character|number} C - Character must be an owner of the Player
+ * Handles a request from another player to read the player's log entries that they are permitted to read. Lovers and
+ * owners can read certain entries from the player's log.
+ * @param {Character|number} C - A character object representing the requester, or the account number of the requester.
+ * @returns {void} - Nothing
  */
 function ChatRoomGetLoadRules(C) {
 	if (typeof C === "number") {
@@ -2023,9 +2026,10 @@ function ChatRoomGetLoadRules(C) {
 }
 
 /**
- * Loads the rules for a character
+ * Handles a response from another player containing the rules that the current player is allowed to read.
  * @param {Character} C - Character to set the rules on
- * @param {Rule[]} Rule - An array of rules
+ * @param {Rule[]} Rule - An array of rules that the current player can read.
+ * @returns {void} - Nothing
  */
 function ChatRoomSetLoadRules(C, Rule) {
 	if (Array.isArray(Rule)) C.Rule = Rule;

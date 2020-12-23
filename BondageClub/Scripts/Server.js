@@ -560,6 +560,7 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
  * @param {Character} C - Character for which to apply the update
  * @param {Item} Item - The item the character has
  * @param {Property} NewProperty - The new Property we want to set on the item
+ * @returns {void} - Nothing
  */
 function ServerItemCopyProperty(C, Item, NewProperty) {
 	if (Item.Property == null) return;
