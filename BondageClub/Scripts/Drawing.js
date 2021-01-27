@@ -20,9 +20,10 @@ let DrawScreen;
 var DialogLeaveDueToItem = false;
 
 // A bank of all the chached images
+/** @type {Map<string, HTMLImageElement>} */
 const DrawCacheImage = new Map;
-var DrawCacheLoadedImages = 0;
-var DrawCacheTotalImages = 0;
+let DrawCacheLoadedImages = 0;
+let DrawCacheTotalImages = 0;
 var DrawScreenWidth = -1;
 var DrawScreenHeight = -1;
 
@@ -31,7 +32,7 @@ window.addEventListener('resize', DrawWindowResize);
 /**
  * Converts a hex color string to a RGB color
  * @param {string} color - Hex color to conver
- * @returns {string} - RGB color
+ * @returns {{ r: number, g: number, b: number }} - RGB color
  */
 function DrawHexToRGB(color) {
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
@@ -53,11 +54,11 @@ function DrawHexToRGB(color) {
 
 /**
  * Converts a RGB color to a hex color string
- * @param {string} color - RGB color to conver
+ * @param {number[]} color - RGB color to conver
  * @returns {string} - Hex color string
  */
-function DrawRGBToHex(rgb) {
-	var rgb = rgb[2] | (rgb[1] << 8) | (rgb[0] << 16);
+function DrawRGBToHex(color) {
+	const  rgb = color[2] | (color[1] << 8) | (color[0] << 16);
 	return '#' + (0x1000000 + rgb).toString(16).slice(1);
 };
 
@@ -108,7 +109,7 @@ function DrawGetImage(Source) {
 		if (IsAsset) {
 			++DrawCacheTotalImages;
 			Img.addEventListener("load", function () {
-				DrawGetImageOnLoad(Img);
+				DrawGetImageOnLoad();
 			});
 		}
 
@@ -135,7 +136,7 @@ function DrawGetImageOnLoad() {
 
 /**
  * Attempts to redownload an image if it previously failed to load
- * @param {HTMLImageElement} Img - Image tag that failed to load
+ * @param {HTMLImageElement & { errorcount?: number }} Img - Image tag that failed to load
  * @param {boolean} IsAsset - Whether or not the image is part of an asset
  * @returns {void} - Nothing
  */
@@ -147,7 +148,7 @@ function DrawGetImageOnError(Img, IsAsset) {
 	} else {
 		// Load failed. Display the error in the console and mark it as done.
 		console.log("Error loading image " + Img.src);
-		if (IsAsset) DrawGetImageOnLoad(Img);
+		if (IsAsset) DrawGetImageOnLoad();
 	}
 }
 
@@ -363,7 +364,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
  * @param {string} FillColor - If non-empty, the color to fill the rectangle with
  * @returns {void} - Nothing
  */
-function DrawAssetGroupZone(C, Zone, Zoom, X, Y, HeightRatio, Color, Thickness = 3, FillColor) {
+function DrawAssetGroupZone(C, Zone, Zoom, X, Y, HeightRatio, Color, Thickness = 3, FillColor = undefined) {
 	for (let Z = 0; Z < Zone.length; Z++) {
 		let CZ = DialogGetCharacterZone(C, Zone[Z], X, Y, Zoom, HeightRatio);
 
@@ -405,7 +406,7 @@ function DrawAlpha(Canvas, Alpha) {
  * @param {number} Y - Position of the image on the Y axis
  * @param {number} Width - Width of the image
  * @param {number} Height - Height of the image
- * @param {boolean} Invert - Flips the image vertically
+ * @param {boolean} [Invert] - Flips the image vertically
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Width, Height, Invert) {
@@ -450,10 +451,10 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity) {
 	if (!Img.naturalWidth) return true;
 	let SourceImage = Img;
 	if (AlphaMasks && AlphaMasks.length) {
-		TempCanvas.width = Img.width;
-		TempCanvas.height = Img.height;
+		TempCanvas.canvas.width = Img.width;
+		TempCanvas.canvas.height = Img.height;
 		TempCanvas.drawImage(Img, 0, 0);
-		AlphaMasks.forEach(([x, y, w, h]) => ctx.clearRect(x - X, y - Y, w, h));
+		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
 		Canvas.drawImage(TempCanvas, X, Y);
 	}
 	Opacity = typeof Opacity === "number" ? Opacity : 1;
@@ -476,8 +477,8 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity) {
  */
 function DrawCanvas(Img, Canvas, X, Y, AlphaMasks) {
 	if (AlphaMasks && AlphaMasks.length) {
-		TempCanvas.width = Img.width;
-		TempCanvas.height = Img.height;
+		TempCanvas.canvas.width = Img.width;
+		TempCanvas.canvas.height = Img.height;
 		TempCanvas.drawImage(Img, 0, 0);
 		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
 		Canvas.drawImage(TempCanvas, X, Y);
@@ -524,7 +525,7 @@ function DrawImageZoomMirror(Source, X, Y, Width, Height) {
  * @param {string} Source - URL of the image
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
- * @param {boolean} Invert - Flips the image vertically
+ * @param {boolean} [Invert] - Flips the image vertically
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImage(Source, X, Y, Invert) {
@@ -628,7 +629,7 @@ function DrawImageMirror(Source, X, Y) {
 /**
  * Flips an image vertically
  * @param {HTMLImageElement} Img - The image to be inverted
- * @returns {HTMLCanvasElement} - Canvas with the inverted image
+ * @returns {CanvasRenderingContext2D} - Canvas with the inverted image
  */
 function DrawInvertImage(Img) {
 	TempCanvas.canvas.width = Img.width;
@@ -692,7 +693,7 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 		MainCanvas.fillStyle = BackColor;
 		MainCanvas.fillRect(X, Y, Width, Height);
 		MainCanvas.fill();
-		MainCanvas.lineWidth = '2';
+		MainCanvas.lineWidth = 2;
 		MainCanvas.strokeStyle = ForeColor;
 		MainCanvas.stroke();
 		MainCanvas.closePath();
@@ -753,7 +754,7 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
  * @param {number} Y - Position of the text on the Y axis
  * @param {number} Width - Width in which the text has to fit
  * @param {string} Color - Color of the text
- * @param {string} BackColor - Color of the background
+ * @param {string} [BackColor] - Color of the background
  * @returns {void} - Nothing
  */
 function DrawTextFit(Text, X, Y, Width, Color, BackColor) {
@@ -820,7 +821,7 @@ function DrawButton(Left, Top, Width, Height, Label, Color, Image, HoveringText,
 	MainCanvas.fillStyle = ((MouseX >= Left) && (MouseX <= Left + Width) && (MouseY >= Top) && (MouseY <= Top + Height) && !CommonIsMobile && !Disabled) ? "Cyan" : Color;
 	MainCanvas.fillRect(Left, Top, Width, Height);
 	MainCanvas.fill();
-	MainCanvas.lineWidth = '2';
+	MainCanvas.lineWidth = 2;
 	MainCanvas.strokeStyle = 'black';
 	MainCanvas.stroke();
 	MainCanvas.closePath();
@@ -875,8 +876,8 @@ function DrawCheckboxColor(Left, Top, Width, Height, Text, IsChecked, Color) {
  * @param {string} Label - Text inside the component
  * @param {string} Color - Color of the component
  * @param {string} [Image] - Image URL to draw in the component
- * @param {string} BackText - Text for the back button tooltip
- * @param {string} NextText - Text for the next button tooltip
+ * @param {string} [BackText] - Text for the back button tooltip
+ * @param {string} [NextText] - Text for the next button tooltip
  * @param {boolean} [Disabled] - Disables the hovering options if set to true
  * @returns {void} - Nothing
  */
@@ -896,7 +897,7 @@ function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image, BackT
 			MainCanvas.fillRect(Left, Top, Width / 2, Height);
 		}
 	}
-	MainCanvas.lineWidth = '2';
+	MainCanvas.lineWidth = 2;
 	MainCanvas.strokeStyle = 'black';
 	MainCanvas.stroke();
 	MainCanvas.closePath();
@@ -950,7 +951,7 @@ function DrawButtonHover(Left, Top, Width, Height, HoveringText) {
 		MainCanvas.fillStyle = "#FFFF88";
 		MainCanvas.fillRect(Left, Top, 450, 65);
 		MainCanvas.fill();
-		MainCanvas.lineWidth = '2';
+		MainCanvas.lineWidth = 2;
 		MainCanvas.strokeStyle = 'black';
 		MainCanvas.stroke();
 		MainCanvas.closePath();
@@ -971,7 +972,7 @@ function DrawButtonHover(Left, Top, Width, Height, HoveringText) {
 function DrawEmptyRect(Left, Top, Width, Height, Color, Thickness = 3) {
 	MainCanvas.beginPath();
 	MainCanvas.rect(Left, Top, Width, Height);
-	MainCanvas.lineWidth = Thickness.toString();
+	MainCanvas.lineWidth = Thickness;
 	MainCanvas.strokeStyle = Color;
 	MainCanvas.stroke();
 }
