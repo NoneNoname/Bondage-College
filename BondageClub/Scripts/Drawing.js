@@ -632,13 +632,12 @@ function DrawImageMirror(Source, X, Y) {
  * @returns {HTMLCanvasElement} - Canvas with the inverted image
  */
 function DrawInvertImage(Img) {
-	let ImgCanvas = document.createElement("canvas");
-	ImgCanvas.width = Img.width;
-	ImgCanvas.height = Img.height;
-	ImgCanvas.getContext("2d").scale(1, -1);
-	ImgCanvas.getContext("2d").translate(0, -ImgCanvas.height);
-	ImgCanvas.getContext("2d").drawImage(Img, 0, 0);
-	return ImgCanvas;
+	TempCanvas.canvas.width = Img.width;
+	TempCanvas.canvas.height = Img.height;
+	TempCanvas.scale(1, -1);
+	TempCanvas.translate(0, -Img.height);
+	TempCanvas.drawImage(Img, 0, 0);
+	return TempCanvas;
 }
 
 /**
