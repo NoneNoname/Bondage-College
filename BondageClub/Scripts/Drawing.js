@@ -84,6 +84,8 @@ function DrawLoad() {
 	DrawWindowResize();
 	setTimeout(DrawWindowResize, 1000);
 	setTimeout(DrawWindowResize, 3000);
+	setTimeout(DrawWindowResize, 5000);
+	if (CommonIsMobile) setTimeout(DrawWindowResize, 10000);
 
 	// Loads the 3D engine as well
 	Draw3DLoad();
