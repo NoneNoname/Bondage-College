@@ -409,7 +409,7 @@ function DrawAlpha(Canvas, Alpha) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Width, Height, Invert) {
-	const Img = DrawGetImage(Source);
+	let Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	if (Invert) Img = DrawInvertImage(Img);
@@ -528,7 +528,7 @@ function DrawImageZoomMirror(Source, X, Y, Width, Height) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImage(Source, X, Y, Invert) {
-	const Img = DrawGetImage(Source);
+	let Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	if (Invert) Img = DrawInvertImage(Img);
