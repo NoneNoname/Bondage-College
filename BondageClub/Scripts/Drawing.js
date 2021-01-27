@@ -1037,38 +1037,30 @@ function DrawWindowResize() {
 	if ((DrawScreenWidth != W) || (DrawScreenHeight != H)) {
 		DrawScreenWidth = W;
 		DrawScreenHeight = H;
+		let Scale;
 		if (W <= H * 2) {
 			MainCanvas.width = W;
 			MainCanvas.height = MainCanvas.width / 2;
 			MainCanvas.canvas.style.width = "100%";
 			MainCanvas.canvas.style.height = "";
-			const MainCanvasRect = document.getElementById("MainCanvas").getBoundingClientRect();
-			MouseMove = function MouseMove(event) {
-				MouseX = Math.round((event.clientX - MainCanvasRect.left) * 2000 / W);
-				MouseY = Math.round((event.clientY - MainCanvasRect.top) * 2000 / W);
-			}
-			Touch = function Touch(event) {
-				if (!CommonIsMobile) return;
-				MouseX = Math.round((event.touches[0].clientX - MainCanvasRect.left) * 2000 / W);
-				MouseY = Math.round((event.touches[0].clientY - MainCanvasRect.top) * 2000 / W);
-				CommonClick();
-			}
+			Scale = 2000 / W;
 		} else {
 			MainCanvas.height = H;
 			MainCanvas.width = MainCanvas.height * 2;
 			MainCanvas.canvas.style.width = "";
 			MainCanvas.canvas.style.height = "100%";
-			const MainCanvasRect = document.getElementById("MainCanvas").getBoundingClientRect();
-			MouseMove = function MouseMove(event) {
-				MouseX = Math.round((event.clientX - MainCanvasRect.left) * 1000 / H);
-				MouseY = Math.round((event.clientY - MainCanvasRect.top) * 1000 / H);
-			}
-			Touch = function Touch(event) {
-				if (!CommonIsMobile) return;
-				MouseX = Math.round((event.touches[0].clientX - MainCanvasRect.left) * 1000 / H);
-				MouseY = Math.round((event.touches[0].clientY - MainCanvasRect.top) * 1000 / H);
-				CommonClick();
-			}
+			Scale = 1000 / H;
+		}
+		const MainCanvasRect = document.getElementById("MainCanvas").getBoundingClientRect();
+		MouseMove = function MouseMove(event) {
+			MouseX = Math.round((event.clientX - MainCanvasRect.left) * Scale);
+			MouseY = Math.round((event.clientY - MainCanvasRect.top) * Scale);
+		}
+		Touch = function Touch(event) {
+			if (!CommonIsMobile) return;
+			MouseX = Math.round((event.touches[0].clientX - MainCanvasRect.left) * Scale);
+			MouseY = Math.round((event.touches[0].clientY - MainCanvasRect.top) * Scale);
+			CommonClick();
 		}
 	}
 }
