@@ -83,6 +83,8 @@ function DrawLoad() {
 	MainCanvas.textBaseline = "middle";
 
 	DrawWindowResize();
+
+	// Deferred resize is necessary since some rare cases canvas gets oversized without this (especially on mobile)
 	setTimeout(DrawWindowResize, 1000);
 	setTimeout(DrawWindowResize, 3000);
 	setTimeout(DrawWindowResize, 5000);
