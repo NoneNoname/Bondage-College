@@ -1027,6 +1027,7 @@ function DrawProgressBar(X, Y, W, H, Progress) {
 }
 
 function DrawWindowResize() {
+	if (!MainCanvas) return;
 
 	// Gets the Width and Height differently on mobile and regular browsers
 	const W = (CommonIsMobile) ? document.documentElement.clientWidth : window.innerWidth;
