@@ -78,7 +78,7 @@ function ShopRun() {
 		for (let A = ShopItemOffset; (A < ShopCart.length && A < ShopItemOffset + 12); A++) {
 			DrawRect(X, Y, 225, 275, ((MouseX >= X) && (MouseX < X + 225) && (MouseY >= Y) && (MouseY < Y + 275) && !CommonIsMobile) ? "cyan" : "white");
 			if (!CharacterAppearanceItemIsHidden(ShopCart[A].Name, ShopCart[A].Group.Name)) 
-                DrawImageResize("Assets/" + ShopCart[A].Group.Family + "/" + ShopCart[A].Group.Name + "/Preview/" + ShopCart[A].Name + ".png", X + 2, Y + 2, 221, 221);
+                DrawImageResize("Assets/" + ShopCart[A].Group.Family + "/" + ShopCart[A].DynamicGroupName + "/Preview/" + ShopCart[A].Name + ".png", X + 2, Y + 2, 221, 221);
 			else 
                 DrawImageResize("Icons/HiddenItem.png", X + 2, Y + 2, 221, 221);
 			DrawTextFit(ShopCart[A].Description + " " + ShopCart[A].Value.toString() + " $", X + 112, Y + 250, 221, (InventoryAvailable(Player, ShopCart[A].Name, ShopCart[A].Group.Name)) ? "green" : "red");
@@ -149,13 +149,14 @@ function ShopClick() {
 			if ((MouseX >= 500) && (MouseX < 1000) && (MouseY >= 0) && (MouseY < 1000))
 				for (let A = 0; A < AssetGroup.length; A++)
 					if ((AssetGroup[A].Category == "Item") && (AssetGroup[A].Zone != null))
-						for (let Z = 0; Z < AssetGroup[A].Zone.length; Z++)
-							if ((MouseX - 500 >= AssetGroup[A].Zone[Z][0]) && (MouseY >= AssetGroup[A].Zone[Z][1] - ShopVendor.HeightModifier) && (MouseX - 500 <= AssetGroup[A].Zone[Z][0] + AssetGroup[A].Zone[Z][2]) && (MouseY <= AssetGroup[A].Zone[Z][1] + AssetGroup[A].Zone[Z][3] - ShopVendor.HeightModifier)) {
+						for (let Z = 0; Z < AssetGroup[A].Zone.length; Z++) {
+							if (DialogClickedInZone(ShopVendor, AssetGroup[A].Zone[Z], 1, 500, 0, 1)) {
 								ShopItemOffset = 0;
 								ShopVendor.FocusGroup = AssetGroup[A];
 								ShopSelectAsset = ShopAssetFocusGroup;
 								ShopCartBuild();
 							}
+						}
 
 		// For each items in the assets with a value
 		var X = 1000;
@@ -166,7 +167,7 @@ function ShopClick() {
 				// If the item isn't already owned and the player has enough money, we buy it
 				if (InventoryAvailable(Player, ShopCart[A].Name, ShopCart[A].Group.Name)) ShopText = TextGet("AlreadyOwned");
 				else if (ShopCart[A].Value > Player.Money) ShopText = TextGet("NotEnoughMoney");
-				else if (LogQuery("BlockKey", "OwnerRule") && (Player.Ownership != null) && (Player.Ownership.Stage == 1) && ((ShopCart[A].Name == "MetalCuffsKey") || (ShopCart[A].Name == "MetalPadlockKey") || (ShopCart[A].Name == "IntricatePadlockKey"))) ShopText = TextGet("CannotSellKey");
+				else if (LogQuery("BlockKey", "OwnerRule") && (Player.Ownership != null) && (Player.Ownership.Stage == 1) && ((ShopCart[A].Name == "Lockpicks") || (ShopCart[A].Name == "MetalCuffsKey") || (ShopCart[A].Name == "MetalPadlockKey") || (ShopCart[A].Name == "IntricatePadlockKey") || (ShopCart[A].Name == "HighSecurityPadlockKey"))) ShopText = TextGet("CannotSellKey");
 				else if (LogQuery("BlockRemote", "OwnerRule") && (Player.Ownership != null) && (Player.Ownership.Stage == 1) && (ShopCart[A].Name == "VibratorRemote" || ShopCart[A].Name == "LoversVibratorRemote")) ShopText = TextGet("CannotSellRemote");
 				else {
 
@@ -296,7 +297,7 @@ function ShopJobRestrain() {
 	DialogChangeReputation("Dominant", -1);
 	while (true) {
 		ShopDemoItemGroup = CommonRandomItemFromList("", ShopDemoItemGroupList);
-		if (InventoryGet(Player, ShopDemoItemGroup) == null) break;
+		if ((InventoryGet(Player, ShopDemoItemGroup) == null) && !InventoryGroupIsBlocked(Player, ShopDemoItemGroup)) break;
 	}
 
 	// Add a random item on that body part and creates a customer

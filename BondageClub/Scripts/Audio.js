@@ -45,6 +45,7 @@ var AudioActions = [
 	{ Action: "ActionAddLock", Sound: "LockSmall" },
 	{ Action: "TimerRelease", Sound: "Unlock" },
 	{ Action: "ActionUnlock", Sound: "Unlock" },
+	{ Action: "ActionPick", Sound: "Unlock" },
 	{ Action: "ActionUnlockAndRemove", Sound: "Unlock" },
 	{ Action: "FuturisticCollarTriggerLockdown", Sound: "HydraulicLock" },
 	{ Action: "FuturisticCollarTriggerUnlock", Sound: "HydraulicUnlock" },
@@ -183,9 +184,10 @@ function AudioPlayContent(data) {
 	if (Target.MemberNumber == Player.MemberNumber) NoiseModifier += 3;
 	else if (data.Sender != Player.MemberNumber) NoiseModifier -= 3;
 
-	if (Player.Effect.indexOf("BlindHeavy") >= 0) NoiseModifier += 4;
-	else if (Player.Effect.indexOf("BlindNormal") >= 0) NoiseModifier += 2;
-	else if (Player.Effect.indexOf("BlindLight") >= 0) NoiseModifier += 1;
+	const blindLevel = Player.GetBlindLevel();
+	if (blindLevel >= 3) NoiseModifier += 4;
+	else if (blindLevel == 2) NoiseModifier += 2;
+	else if (blindLevel == 1) NoiseModifier += 1;
 
 	NoiseModifier -= (3 * Player.GetDeafLevel());
 

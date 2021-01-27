@@ -5,7 +5,7 @@
  */
 "use strict";
 /** @type {CanvasRenderingContext2D} */
-var MainCanvas;
+let MainCanvas;
 /** @type {CanvasRenderingContext2D} */
 let TempCanvas;
 /** @type {CanvasRenderingContext2D} */
@@ -17,7 +17,7 @@ const DrawRunMap = new Map();
 let DrawRun = () => {};
 /** @type {string} */
 let DrawScreen;
-var DialogLeaveDueToItem = false
+var DialogLeaveDueToItem = false;
 
 // A bank of all the chached images
 const DrawCacheImage = new Map;
@@ -77,7 +77,7 @@ function DrawLoad() {
 	document.addEventListener("keydown", DocumentKeyDown);
 
 	// Font is fixed for now, color can be set
-	MainCanvas.font = "36px Arial";
+	MainCanvas.font = CommonGetFont(36);
 	MainCanvas.textAlign = "center";
 	MainCanvas.textBaseline = "middle";
 
@@ -150,6 +150,31 @@ function DrawGetImageOnError(Img, IsAsset) {
 }
 
 /**
+ * Draws the glow under the arousal meter under the screen
+ * @param {number} X - Position of the meter on the X axis
+ * @param {number} Y - Position of the meter on the Y axis
+ * @param {number} Zoom - Zoom factor
+ * @param {number} Level - Current vibration level on a scale of 0 to 4. Must be INTEGER
+ * @param {boolean} Animated - Whether or not animations should be played
+ * @param {boolean} Orgasm - Whether or not the meter is in recover from orgasm mode
+ * @returns {void} - Nothing
+ */
+function DrawArousalGlow(X, Y, Zoom, Level, Animated, AnimFactor, Orgasm) {
+	if (!Orgasm) {
+		let Rx = 0
+		let Ry = 0
+
+		if (Level > 0 && Animated) {
+			Rx = -(1 + AnimFactor * Level/2) + (2 + AnimFactor * Level) * Math.random()
+			Ry = -(1 + AnimFactor * Level/2) + (2 + AnimFactor * Level) * Math.random()
+		}
+		if (!Animated || (Level > 0 || CommonTime() % 1000 > 500))
+			DrawImageZoomCanvas("Screens/Character/Player/ArousalMeter_Glow_" + Math.max(0, Math.min(Math.floor(Level), 4)) + ".png", MainCanvas, 0, 0, 300, 700, X-100*Zoom+Rx, Y-100*Zoom+Ry, 300 * Zoom, 700 * Zoom);
+	}
+}
+
+
+/**
  * Draws the arousal meter on screen
  * @param {number} X - Position of the meter on the X axis
  * @param {number} Y - Position of the meter on the Y axis
@@ -177,11 +202,27 @@ function DrawArousalMeter(C, X, Y, Zoom) {
 		if ((C.ID == 0) || ((C.ArousalSettings.Visible != null) && (C.ArousalSettings.Visible == "Access") && C.AllowItem) || ((C.ArousalSettings.Visible != null) && (C.ArousalSettings.Visible == "All")))
 			if ((C.ID == 0) || (Player.ArousalSettings.ShowOtherMeter == null) || Player.ArousalSettings.ShowOtherMeter) {
 				ActivitySetArousal(C, C.ArousalSettings.Progress);
+
+
+
+				if (C.ArousalSettings != null && Player.ArousalSettings.VFX != "VFXInactive" && C.ArousalSettings.Progress > 0 && ((C.ArousalSettings.Active == "Automatic") || (C.ArousalSettings.Active == "Hybrid"))) {
+					let Progress = 0
+					if (!((C.ArousalSettings.VibratorLevel == null) || (typeof C.ArousalSettings.VibratorLevel !== "number") || isNaN(C.ArousalSettings.VibratorLevel))) {
+						Progress = C.ArousalSettings.VibratorLevel
+					}
+
+					if (Progress > 0) // -1 is disabled
+						const max_time = 5000 // 5 seconds
+						DrawArousalGlow(X + ((C.ArousalZoom ? 50 : 90) * Zoom), Y + ((C.ArousalZoom ? 200 : 400) * Zoom), C.ArousalZoom ? Zoom : Zoom * 0.2, Progress, Player.ArousalSettings.VFX == "VFXAnimated" || (Player.ArousalSettings.VFX == "VFXAnimatedTemp" && C.ArousalSettings.ChangeTime != null && CommonTime() - C.ArousalSettings.ChangeTime < max_time), Math.max(0, (max_time + C.ArousalSettings.ChangeTime - CommonTime())/ max_time), ((C.ArousalSettings.OrgasmTimer != null) && (typeof C.ArousalSettings.OrgasmTimer === "number") && !isNaN(C.ArousalSettings.OrgasmTimer) && (C.ArousalSettings.OrgasmTimer > 0)));
+				}
+
 				DrawArousalThermometer(X + ((C.ArousalZoom ? 50 : 90) * Zoom), Y + ((C.ArousalZoom ? 200 : 400) * Zoom), C.ArousalZoom ? Zoom : Zoom * 0.2, C.ArousalSettings.Progress, (C.ArousalSettings.Active == "Automatic"), ((C.ArousalSettings.OrgasmTimer != null) && (typeof C.ArousalSettings.OrgasmTimer === "number") && !isNaN(C.ArousalSettings.OrgasmTimer) && (C.ArousalSettings.OrgasmTimer > 0)));
+
+
 				if (C.ArousalZoom && (typeof C.ArousalSettings.OrgasmCount === "number") && (C.ArousalSettings.OrgasmCount >= 0) && (C.ArousalSettings.OrgasmCount <= 9999)) {
-					MainCanvas.font = Math.round(36 * Zoom).toString() + "px Arial";
+					MainCanvas.font = CommonGetFont(Math.round(36 * Zoom).toString());
 					DrawText(((C.ArousalSettings.OrgasmCount != null) ? C.ArousalSettings.OrgasmCount : 0).toString(), X + 100 * Zoom, Y + 655 * Zoom, "Black", "Gray");
-					MainCanvas.font = "36px Arial";
+					MainCanvas.font = CommonGetFont(36);
 				}
 			}
 }
@@ -196,7 +237,7 @@ function DrawArousalMeter(C, X, Y, Zoom) {
  * @returns {void} - Nothing
  */
 function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
-	if ((C != null) && ((C.ID == 0) || (Player.Effect.indexOf("BlindHeavy") < 0) || (CurrentScreen == "InformationSheet"))) {
+	if ((C != null) && ((C.ID == 0) || (Player.GetBlindLevel() < 3) || (CurrentScreen == "InformationSheet"))) {
 
 		// If there's a fixed image to draw instead of the character
 		if (C.FixedImage != null) {
@@ -212,9 +253,9 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 
 		// Run any existing asset scripts
 		if (C.RunScripts && C.HasScriptedAssets) {
-			var DynamicAssets = C.Appearance.filter(CA => CA.Asset.DynamicScriptDraw);
+			const DynamicAssets = C.Appearance.filter(CA => CA.Asset.DynamicScriptDraw);
 			DynamicAssets.forEach(Item =>
-				window["Assets" + Item.Asset.Group.Name + Item.Asset.Name + "ScriptDraw"]({
+				CommonCallFunctionByNameWarn(`Assets${Item.Asset.Group.Name}${Item.Asset.Name}ScriptDraw`, {
 					C, Item, PersistentData: () => AnimationPersistentDataGet(C, Item.Asset)
 				})
 			);
@@ -235,18 +276,6 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		// There's 2 different canvas, one blinking and one that doesn't
 		let Canvas = (Math.round(CurrentTime / 400) % C.BlinkFactor == 0) ? C.CanvasBlink : C.Canvas;
 
-		// Applies an offset to X and Y based on the HeightRatio.  If the player prefers full height, we always use 1.0
-		let HeightRatio = 1.0;
-		if ((IsHeightResizeAllowed == undefined) || IsHeightResizeAllowed) HeightRatio = CharacterAppearanceGetCurrentValue(C, "Height", "Zoom");
-		if ((Player != null) && (Player.VisualSettings != null) && (Player.VisualSettings.ForceFullHeight != null) && Player.VisualSettings.ForceFullHeight) HeightRatio = 1.0;
-		if (Zoom == null) Zoom = 1;
-		X += Zoom * Canvas.width * (1 - HeightRatio) / 2;
-		if ((C.Pose.indexOf("Suspension") < 0) && (C.Pose.indexOf("SuspensionHogtied") < 0)) Y += Zoom * Canvas.height * (1 - HeightRatio);
-
-		// Initialize the working canvas
-		CharacterCanvas.canvas.width = Canvas.width;
-		CharacterCanvas.canvas.height = Canvas.height;
-
 		// If we must dark the Canvas characters
 		if ((C.ID != 0) && Player.IsBlind() && (CurrentScreen != "InformationSheet")) {
 			let DarkFactor = (Player.Effect.indexOf("BlindNormal") >= 0) ? 0.3 : 0.6;
@@ -263,7 +292,8 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		}
 
 		// If we must flip the canvas vertically
-		if (C.Pose.indexOf("Suspension") >= 0) {
+		let IsInverted = CharacterAppearsInverted(C);
+		if (IsInverted) {
 			CharacterCanvas.rotate(Math.PI);
 			CharacterCanvas.translate(-Canvas.width, -Canvas.height);
 			CharacterCanvas.globalCompositeOperation = "copy";
@@ -271,41 +301,49 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 			Canvas = CharacterCanvas.canvas;
 		}
 
-		// Draw the character and applies the zoom ratio, the canvas to draw can be shrunk based on the height modifier
-		Zoom *= HeightRatio;
-		let H = Canvas.height + (((C.HeightModifier != null) && (C.HeightModifier < 0)) ? C.HeightModifier : 0);
-		MainCanvas.drawImage(Canvas, 0, 0, Canvas.width, H, X, Y - (C.HeightModifier * Zoom), Canvas.width * Zoom, H * Zoom);
+		// Get the height ratio and X & Y offsets based on it
+		let HeightRatio = (IsHeightResizeAllowed == null || IsHeightResizeAllowed == true) ? C.HeightRatio : 1;
+		let XOffset = CharacterAppearanceXOffset(C, HeightRatio);
+		let YOffset = CharacterAppearanceYOffset(C, HeightRatio);
 
-		// Applies a Y offset if the character is suspended
-		if (C.Pose.indexOf("Suspension") >= 0) Y += (Zoom * Canvas.height * (1 - HeightRatio) / HeightRatio);
+		// Calculate the vertical parameters. In certain cases, cut off anything above the Y value.
+		let YCutOff = YOffset >= 0 || CurrentScreen == "ChatRoom";
+		let YStart = CanvasUpperOverflow + (YCutOff ? -YOffset / HeightRatio : 0);
+		let SourceHeight = 1000 / HeightRatio + (YCutOff ? 0 : -YOffset / HeightRatio);
+		let SourceY = IsInverted ? Canvas.height - (YStart + SourceHeight) : YStart;
+		let DestY = (IsInverted || YCutOff) ? 0 : YOffset;
+
+		// Draw the character
+		MainCanvas.drawImage(Canvas, 0, SourceY, Canvas.width, SourceHeight, X + XOffset * Zoom, Y + DestY * Zoom, 500 * HeightRatio * Zoom, (1000 - DestY) * Zoom);
 
 		// Draw the arousal meter & game images on certain conditions
-		DrawArousalMeter(C, X - Zoom * Canvas.width * (1 - HeightRatio) / 2, Y - Zoom * Canvas.height * (1 - HeightRatio), Zoom / HeightRatio);
-		OnlineGameDrawCharacter(C, X - Zoom * Canvas.width * (1 - HeightRatio) / 2, Y - Zoom * Canvas.height * (1 - HeightRatio), Zoom / HeightRatio);
+		DrawArousalMeter(C, X, Y, Zoom);
+		OnlineGameDrawCharacter(C, X, Y, Zoom);
 		if (C.HasHiddenItems) DrawImageZoomCanvas("Screens/Character/Player/HiddenItem.png", MainCanvas, 0, 0, 86, 86, X + 54 * Zoom, Y + 880 * Zoom, 70 * Zoom, 70 * Zoom);
 
 		// Draws the character focus zones if we need too
-		if ((C.FocusGroup != null) && (C.FocusGroup.Zone != null) && (CurrentScreen != "Preference")) {
+		if ((C.FocusGroup != null) && (C.FocusGroup.Zone != null) && (CurrentScreen != "Preference") && (DialogColor == null)) {
 
 			// Draw all the possible zones in transparent colors (gray if free, yellow if occupied, red if blocker)
 			for (let A = 0; A < AssetGroup.length; A++)
 				if (AssetGroup[A].Zone != null && AssetGroup[A].Name != C.FocusGroup.Name) {
-					var Color = "#80808040";
+					let Color = "#80808040";
 					if (InventoryGroupIsBlocked(C, AssetGroup[A].Name)) Color = "#88000580";
 					else if (InventoryGet(C, AssetGroup[A].Name) != null) Color = "#D5A30080";
-					DrawAssetGroupZone(C, AssetGroup[A].Zone, HeightRatio, X, Y, Color, 5);
+					DrawAssetGroupZone(C, AssetGroup[A].Zone, Zoom, X, Y, HeightRatio, Color, 5);
 				}
 
 			// Draw the focused zone in cyan
-			DrawAssetGroupZone(C, C.FocusGroup.Zone, HeightRatio, X, Y, "cyan");
+			DrawAssetGroupZone(C, C.FocusGroup.Zone, Zoom, X, Y, HeightRatio, "cyan");
 		}
 
 		// Draw the character name below herself
 		if ((C.Name != "") && ((CurrentModule == "Room") || (CurrentModule == "Online") || ((CurrentScreen == "Wardrobe") && (C.ID != 0))) && (CurrentScreen != "Private"))
-			if (!Player.IsBlind()) {
-				MainCanvas.font = "30px Arial";
-				DrawText(C.Name, X + 255 * Zoom, Y + 980 * ((C.Pose.indexOf("SuspensionHogtied") < 0) ? Zoom : Zoom / HeightRatio), (CommonIsColor(C.LabelColor)) ? C.LabelColor : "White", "Black");
-				MainCanvas.font = "36px Arial";
+			if (!Player.IsBlind() || (Player.GameplaySettings && Player.GameplaySettings.SensDepChatLog == "SensDepLight")) {
+				MainCanvas.font = CommonGetFont(30);
+				let NameOffset = CurrentScreen == "ChatRoom" && ChatRoomCharacter.length > 5 && CurrentCharacter == null ? -4 : 0;
+				DrawText(C.Name, X + 255 * Zoom, Y + 980 * Zoom + NameOffset, (CommonIsColor(C.LabelColor)) ? C.LabelColor : "White", "Black");
+				MainCanvas.font = CommonGetFont(36);
 			}
 
 	}
@@ -315,37 +353,22 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
  * Draws an asset group zone outline over the character
  * @param {Character} C - Character for which to draw the zone
  * @param {number[][]} Zone - Zone to be drawn
- * @param {number} HeightRatio - Height ratio of the character
+ * @param {number} Zoom - Height ratio of the character
  * @param {number} X - Position of the character on the X axis
  * @param {number} Y - Position of the character on the Y axis
+ * @param {number} HeightRatio - The displayed height ratio of the character
  * @param {string} Color - Color of the zone outline
  * @param {number} [Thickness=3] - Thickness of the outline
+ * @param {string} FillColor - If non-empty, the color to fill the rectangle with
  * @returns {void} - Nothing
  */
-function DrawAssetGroupZone(C, Zone, HeightRatio, X, Y, Color, Thickness = 3) {
-	for (let Z = 0; Z < Zone.length; Z++)
-		if (C.Pose.indexOf("Suspension") >= 0)
-			DrawEmptyRect((HeightRatio * Zone[Z][0]) + X, (1000 - (HeightRatio * (Zone[Z][1] + Y + Zone[Z][3]))) - C.HeightModifier, (HeightRatio * Zone[Z][2]), (HeightRatio * Zone[Z][3]), Color, Thickness);
-		else
-			DrawEmptyRect((HeightRatio * Zone[Z][0]) + X, HeightRatio * (Zone[Z][1] - C.HeightModifier) + Y, (HeightRatio * Zone[Z][2]), (HeightRatio * Zone[Z][3]), Color, Thickness);
-}
+function DrawAssetGroupZone(C, Zone, Zoom, X, Y, HeightRatio, Color, Thickness = 3, FillColor) {
+	for (let Z = 0; Z < Zone.length; Z++) {
+		let CZ = DialogGetCharacterZone(C, Zone[Z], X, Y, Zoom, HeightRatio);
 
-/**
- * Draws an asset group zone background over the character
- * @param {Character} C - Character for which to draw the zone
- * @param {number[][]} Zone - Zone to be drawn
- * @param {number} HeightRatio - Height ratio of the character
- * @param {number} X - Position of the character on the X axis
- * @param {number} Y - Position of the character on the Y axis
- * @param {string} Color - Color of the zone background
- * @returns {void} - Nothing
- */
-function DrawAssetGroupZoneBackground(C, Zone, HeightRatio, X, Y, Color) {
-	for (let Z = 0; Z < Zone.length; Z++)
-		if (C.Pose.indexOf("Suspension") >= 0)
-			DrawRect((HeightRatio * Zone[Z][0]) + X, (1000 - (HeightRatio * (Zone[Z][1] + Y + Zone[Z][3]))) - C.HeightModifier, (HeightRatio * Zone[Z][2]), (HeightRatio * Zone[Z][3]), Color);
-		else
-			DrawRect((HeightRatio * Zone[Z][0]) + X, HeightRatio * (Zone[Z][1] - C.HeightModifier) + Y, (HeightRatio * Zone[Z][2]), (HeightRatio * Zone[Z][3]), Color);
+		if (FillColor != null) DrawRect(CZ[0], CZ[1], CZ[2], CZ[3], FillColor);
+		DrawEmptyRect(CZ[0], CZ[1], CZ[2], CZ[3], Color, Thickness);
+	}
 }
 
 /**
@@ -381,12 +404,14 @@ function DrawAlpha(Canvas, Alpha) {
  * @param {number} Y - Position of the image on the Y axis
  * @param {number} Width - Width of the image
  * @param {number} Height - Height of the image
+ * @param {boolean} Invert - Flips the image vertically
  * @returns {boolean} - whether the image was complete or not
  */
-function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Width, Height) {
-	var Img = DrawGetImage(Source);
+function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Width, Height, Invert) {
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
+	if (Invert) Img = DrawInvertImage(Img);
 	Canvas.drawImage(Img, SX, SY, Math.round(SWidth), Math.round(SHeight), X, Y, Width, Height);
 	return true;
 }
@@ -415,21 +440,26 @@ function DrawImageResize(Source, X, Y, Width, Height) {
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
  * @param {number[][]} AlphaMasks - A list of alpha masks to apply to the asset
+ * @param {number} Opacity - The opacity at which to draw the image
  * @returns {boolean} - whether the image was complete or not
  */
-function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks) {
+function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity) {
 	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
+	let SourceImage = Img;
 	if (AlphaMasks && AlphaMasks.length) {
 		TempCanvas.width = Img.width;
 		TempCanvas.height = Img.height;
 		TempCanvas.drawImage(Img, 0, 0);
-		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
+		AlphaMasks.forEach(([x, y, w, h]) => ctx.clearRect(x - X, y - Y, w, h));
 		Canvas.drawImage(TempCanvas, X, Y);
-	} else {
-		Canvas.drawImage(Img, X, Y);
 	}
+	Opacity = typeof Opacity === "number" ? Opacity : 1;
+	Canvas.save();
+	Canvas.globalAlpha = Opacity;
+	Canvas.drawImage(SourceImage, X, Y);
+	Canvas.restore();
 	return true;
 }
 
@@ -493,12 +523,14 @@ function DrawImageZoomMirror(Source, X, Y, Width, Height) {
  * @param {string} Source - URL of the image
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
+ * @param {boolean} Invert - Flips the image vertically
  * @returns {boolean} - whether the image was complete or not
  */
-function DrawImage(Source, X, Y) {
+function DrawImage(Source, X, Y, Invert) {
 	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
+	if (Invert) Img = DrawInvertImage(Img);
 	MainCanvas.drawImage(Img, X, Y);
 	return true;
 }
@@ -513,9 +545,10 @@ function DrawImage(Source, X, Y) {
  * @param {string} HexColor - Color of the image to draw
  * @param {boolean} FullAlpha - Whether or not it is drawn in full alpha mode
  * @param {number[][]} AlphaMasks - A list of alpha masks to apply to the asset
+ * @param {number} Opacity - The opacity at which to draw the image
  * @returns {boolean} - whether the image was complete or not
  */
-function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha, AlphaMasks) {
+function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha, AlphaMasks, Opacity) {
 
 	// Make sure that the starting image is loaded
 	const Img = DrawGetImage(Source);
@@ -564,7 +597,11 @@ function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha
 	if (AlphaMasks && AlphaMasks.length) {
 		AlphaMasks.forEach(([x, y, w, h]) => ColorCanvas.clearRect(x - X, y - Y, w, h));
 	}
-	Canvas.drawImage(ColorCanvas.canvas, 0, 0, width, height, X, Y, width * Zoom, height * Zoom);
+	Opacity = typeof Opacity === "number" ? Opacity : 1;
+	Canvas.save();
+	Canvas.globalAlpha = Opacity;
+	Canvas.drawImage(ColorCanvas.canvas, 0, 0, Img.width, Img.height, X, Y, Img.width * Zoom, Img.height * Zoom);
+	Canvas.restore();
 
 	return true;
 }
@@ -588,6 +625,21 @@ function DrawImageMirror(Source, X, Y) {
 }
 
 /**
+ * Flips an image vertically
+ * @param {HTMLImageElement} Img - The image to be inverted
+ * @returns {HTMLCanvasElement} - Canvas with the inverted image
+ */
+function DrawInvertImage(Img) {
+	let ImgCanvas = document.createElement("canvas");
+	ImgCanvas.width = Img.width;
+	ImgCanvas.height = Img.height;
+	ImgCanvas.getContext("2d").scale(1, -1);
+	ImgCanvas.getContext("2d").translate(0, -ImgCanvas.height);
+	ImgCanvas.getContext("2d").drawImage(Img, 0, 0);
+	return ImgCanvas;
+}
+
+/**
  * Reduces the font size progressively until the text fits the wrap size
  * @param {string} Text - Text that will be drawn
  * @param {number} Width - Width in which the text must fit
@@ -605,7 +657,7 @@ function GetWrapTextSize(Text, Width, MaxLine) {
 	// Find the number of lines
 	let LineCount = 1;
 	for (let n = 0; n < words.length; n++) {
-		var testLine = line + words[n] + ' ';
+		const testLine = line + words[n] + ' ';
 		if (MainCanvas.measureText(testLine).width > Width && n > 0) {
 			line = words[n] + ' ';
 			LineCount++;
@@ -701,19 +753,27 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
  * @param {number} Y - Position of the text on the Y axis
  * @param {number} Width - Width in which the text has to fit
  * @param {string} Color - Color of the text
+ * @param {string} BackColor - Color of the background
  * @returns {void} - Nothing
  */
-function DrawTextFit(Text, X, Y, Width, Color) {
+function DrawTextFit(Text, X, Y, Width, Color, BackColor) {
 
 	for (let S = 36; S >= 10; S = S - 2) {
-		MainCanvas.font = S.toString() + "px Arial";
+		MainCanvas.font = CommonGetFont(S.toString());
 		const metrics = MainCanvas.measureText(Text);
 		if (metrics.width <= Width)
 			break;
 	}
+
+	// Draw a back color relief text if needed
+	if ((BackColor != null) && (BackColor != "")) {
+		MainCanvas.fillStyle = BackColor;
+		MainCanvas.fillText(Text, X + 1, Y + 1);
+	}
+
 	MainCanvas.fillStyle = Color;
 	MainCanvas.fillText(Text, X, Y);
-	MainCanvas.font = "36px Arial";
+	MainCanvas.font = CommonGetFont(36);
 }
 
 /**
@@ -1026,12 +1086,16 @@ function DrawProcess() {
 	if ((B != null) && (B != "")) {
 		let DarkFactor = 1.0;
 		if ((CurrentModule != "Character") && (B != "Sheet")) {
-			if (Player.Effect.indexOf("BlindHeavy") >= 0) DarkFactor = 0.0;
-			else if (Player.Effect.indexOf("BlindNormal") >= 0) DarkFactor = 0.15;
-			else if (Player.Effect.indexOf("BlindLight") >= 0) DarkFactor = 0.3;
+			const blindLevel = Player.GetBlindLevel();
+			if (blindLevel >= 3) DarkFactor = 0.0;
+			else if (blindLevel == 2) DarkFactor = 0.15;
+			else if (blindLevel == 1) DarkFactor = 0.3;
 			else if (CurrentCharacter != null || ShopStarted) DarkFactor = 0.5;
 		}
-		if (DarkFactor > 0.0) DrawImage("Backgrounds/" + B + ".jpg", 0, 0);
+		if (DarkFactor > 0.0) {
+			let Invert = Player.GraphicsSettings && Player.GraphicsSettings.InvertRoom && Player.IsInverted();
+			DrawImage("Backgrounds/" + B + ".jpg", 0, 0, Invert);
+		}
 		if (DarkFactor < 1.0) DrawRect(0, 0, 2000, 1000, "rgba(0,0,0," + (1.0 - DarkFactor) + ")");
 	}
 
@@ -1057,7 +1121,7 @@ function DrawProcess() {
 
 	// Draws the 3D objects
 	Draw3DProcess();
-	
+
 	// Leave dialogs AFTER drawing everything
 	// If needed
 	// Used to support items that remove you from the dialog during the draw phase

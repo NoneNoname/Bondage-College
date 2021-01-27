@@ -3,7 +3,7 @@
 // Loads the item extension properties
 function InventoryItemLegsFuturisticLegCuffsLoad() {
  	var C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
-	if (!InventoryItemMouthFuturisticPanelGagValidate(C)) {
+	if (InventoryItemMouthFuturisticPanelGagValidate(C) !== "") {
 		InventoryItemMouthFuturisticPanelGagLoadAccessDenied()
 	} else
 		if (DialogFocusItem.Property == null) DialogFocusItem.Property = { Restrain: null };
@@ -12,7 +12,7 @@ function InventoryItemLegsFuturisticLegCuffsLoad() {
 // Draw the item extension screen
 function InventoryItemLegsFuturisticLegCuffsDraw() {
 	var C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
-	if (!InventoryItemMouthFuturisticPanelGagValidate(C)) {
+	if (InventoryItemMouthFuturisticPanelGagValidate(C) !== "") {
 		InventoryItemMouthFuturisticPanelGagDrawAccessDenied()
 	} else {
 	
@@ -37,7 +37,7 @@ function InventoryItemLegsFuturisticLegCuffsDraw() {
 function InventoryItemLegsFuturisticLegCuffsClick() {
 	
 	var C = (Player.FocusGroup != null) ? Player : CurrentCharacter;
-	if (!InventoryItemMouthFuturisticPanelGagValidate(C)) {
+	if (InventoryItemMouthFuturisticPanelGagValidate(C) !== "") {
 		InventoryItemMouthFuturisticPanelGagClickAccessDenied()
 	} else {
 		if ((MouseX >= 1885) && (MouseX <= 1975) && (MouseY >= 25) && (MouseY <= 110)) InventoryItemLegsFuturisticLegCuffsExit()
@@ -70,10 +70,12 @@ function InventoryItemLegsFuturisticLegCuffsSetPose(NewPose) {
 		delete DialogFocusItem.Property.SetPose;
 		delete DialogFocusItem.Property.Effect;
 		delete DialogFocusItem.Property.Difficulty;
+		delete DialogFocusItem.Property.FreezeActivePose;
 	} else if (NewPose == "Closed") {
 		DialogFocusItem.Property.SetPose = ["LegsClosed"];
 		DialogFocusItem.Property.Effect = ["Prone", "KneelFreeze"];
 		DialogFocusItem.Property.Difficulty = 6;
+		DialogFocusItem.Property.FreezeActivePose = ["BodyLower"];
 	}
 
 	// Adds the lock effect back if it was padlocked
