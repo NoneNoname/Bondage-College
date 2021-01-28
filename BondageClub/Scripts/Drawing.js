@@ -300,7 +300,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		}
 
 		// If we must flip the canvas vertically
-		let IsInverted = CharacterAppearsInverted(C);
+		const IsInverted = CharacterAppearsInverted(C);
 		if (IsInverted) {
 			CharacterCanvas.rotate(Math.PI);
 			CharacterCanvas.translate(-Canvas.width, -Canvas.height);
@@ -310,16 +310,16 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		}
 
 		// Get the height ratio and X & Y offsets based on it
-		let HeightRatio = (IsHeightResizeAllowed == null || IsHeightResizeAllowed == true) ? C.HeightRatio : 1;
-		let XOffset = CharacterAppearanceXOffset(C, HeightRatio);
-		let YOffset = CharacterAppearanceYOffset(C, HeightRatio);
+		const HeightRatio = (IsHeightResizeAllowed == null || IsHeightResizeAllowed == true) ? C.HeightRatio : 1;
+		const XOffset = CharacterAppearanceXOffset(C, HeightRatio);
+		const YOffset = CharacterAppearanceYOffset(C, HeightRatio);
 
 		// Calculate the vertical parameters. In certain cases, cut off anything above the Y value.
-		let YCutOff = YOffset >= 0 || CurrentScreen == "ChatRoom";
-		let YStart = CanvasUpperOverflow + (YCutOff ? -YOffset / HeightRatio : 0);
-		let SourceHeight = 1000 / HeightRatio + (YCutOff ? 0 : -YOffset / HeightRatio);
-		let SourceY = IsInverted ? Canvas.height - (YStart + SourceHeight) : YStart;
-		let DestY = (IsInverted || YCutOff) ? 0 : YOffset;
+		const YCutOff = YOffset >= 0 || CurrentScreen == "ChatRoom";
+		const YStart = CanvasUpperOverflow + (YCutOff ? -YOffset / HeightRatio : 0);
+		const SourceHeight = 1000 / HeightRatio + (YCutOff ? 0 : -YOffset / HeightRatio);
+		const SourceY = IsInverted ? Canvas.height - (YStart + SourceHeight) : YStart;
+		const DestY = (IsInverted || YCutOff) ? 0 : YOffset;
 
 		// Draw the character
 		MainCanvas.drawImage(Canvas, 0, SourceY, Canvas.width, SourceHeight, X + XOffset * Zoom, Y + DestY * Zoom, 500 * HeightRatio * Zoom, (1000 - DestY) * Zoom);
@@ -349,7 +349,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		if ((C.Name != "") && ((CurrentModule == "Room") || (CurrentModule == "Online") || ((CurrentScreen == "Wardrobe") && (C.ID != 0))) && (CurrentScreen != "Private"))
 			if (!Player.IsBlind() || (Player.GameplaySettings && Player.GameplaySettings.SensDepChatLog == "SensDepLight")) {
 				MainCanvas.font = CommonGetFont(30);
-				let NameOffset = CurrentScreen == "ChatRoom" && ChatRoomCharacter.length > 5 && CurrentCharacter == null ? -4 : 0;
+				const NameOffset = CurrentScreen == "ChatRoom" && ChatRoomCharacter.length > 5 && CurrentCharacter == null ? -4 : 0;
 				DrawText(C.Name, X + 255 * Zoom, Y + 980 * Zoom + NameOffset, (CommonIsColor(C.LabelColor)) ? C.LabelColor : "White", "Black");
 				MainCanvas.font = CommonGetFont(36);
 			}
