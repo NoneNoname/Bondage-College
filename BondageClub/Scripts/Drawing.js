@@ -457,7 +457,7 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity) {
 		TempCanvas.canvas.height = Img.height;
 		TempCanvas.drawImage(Img, 0, 0);
 		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
-		Canvas.drawImage(TempCanvas, X, Y);
+		Canvas.drawImage(TempCanvas.canvas, X, Y);
 	}
 	Opacity = typeof Opacity === "number" ? Opacity : 1;
 	Canvas.save();
@@ -483,7 +483,7 @@ function DrawCanvas(Img, Canvas, X, Y, AlphaMasks) {
 		TempCanvas.canvas.height = Img.height;
 		TempCanvas.drawImage(Img, 0, 0);
 		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
-		Canvas.drawImage(TempCanvas, X, Y);
+		Canvas.drawImage(TempCanvas.canvas, X, Y);
 	} else {
 		Canvas.drawImage(Img, X, Y);
 	}
@@ -631,7 +631,7 @@ function DrawImageMirror(Source, X, Y) {
 /**
  * Flips an image vertically
  * @param {HTMLImageElement} Img - The image to be inverted
- * @returns {CanvasRenderingContext2D} - Canvas with the inverted image
+ * @returns {HTMLCanvasElement} - Canvas with the inverted image
  */
 function DrawInvertImage(Img) {
 	TempCanvas.canvas.width = Img.width;
@@ -639,7 +639,7 @@ function DrawInvertImage(Img) {
 	TempCanvas.scale(1, -1);
 	TempCanvas.translate(0, -Img.height);
 	TempCanvas.drawImage(Img, 0, 0);
-	return TempCanvas;
+	return TempCanvas.canvas;
 }
 
 /**
