@@ -280,6 +280,10 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		// There's 2 different canvas, one blinking and one that doesn't
 		let Canvas = (Math.round(CurrentTime / 400) % C.BlinkFactor == 0) ? C.CanvasBlink : C.Canvas;
 
+		// Initialize the working canvas
+		CharacterCanvas.canvas.width = Canvas.width;
+		CharacterCanvas.canvas.height = Canvas.height;
+
 		// If we must dark the Canvas characters
 		if ((C.ID != 0) && Player.IsBlind() && (CurrentScreen != "InformationSheet")) {
 			let DarkFactor = (Player.Effect.indexOf("BlindNormal") >= 0) ? 0.3 : 0.6;
