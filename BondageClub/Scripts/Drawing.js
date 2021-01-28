@@ -656,7 +656,7 @@ function DrawInvertImage(Img) {
 function GetWrapTextSize(Text, Width, MaxLine) {
 
 	// Don't bother if it fits on one line
-	if (MainCanvas.measureText(Text).width > Width) return;
+	if (MainCanvas.measureText(Text).width <= Width) return;
 
 	const words = Text.split(' ');
 	let line = '';
