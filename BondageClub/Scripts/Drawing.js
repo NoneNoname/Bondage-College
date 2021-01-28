@@ -14,7 +14,7 @@ let ColorCanvas;
 let CharacterCanvas;
 /** @type {Map<string, () => {}>} */
 const DrawRunMap = new Map();
-let DrawRun = () => {};
+let DrawRun = () => { };
 /** @type {string} */
 let DrawScreen;
 var DialogLeaveDueToItem = false;
@@ -35,12 +35,12 @@ window.addEventListener('resize', DrawWindowResize);
  * @returns {{ r: number, g: number, b: number }} - RGB color
  */
 function DrawHexToRGB(color) {
-	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+	const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	color = color.replace(shorthandRegex, function (m, r, g, b) {
 		return r + r + g + g + b + b;
 	});
 
-	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+	const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
 	return result ? {
 		r: parseInt(result[1], 16),
 		g: parseInt(result[2], 16),
@@ -58,7 +58,7 @@ function DrawHexToRGB(color) {
  * @returns {string} - Hex color string
  */
 function DrawRGBToHex(color) {
-	const  rgb = color[2] | (color[1] << 8) | (color[0] << 16);
+	const rgb = color[2] | (color[1] << 8) | (color[0] << 16);
 	return '#' + (0x1000000 + rgb).toString(16).slice(1);
 };
 
@@ -170,11 +170,11 @@ function DrawArousalGlow(X, Y, Zoom, Level, Animated, AnimFactor, Orgasm) {
 		let Ry = 0
 
 		if (Level > 0 && Animated) {
-			Rx = -(1 + AnimFactor * Level/2) + (2 + AnimFactor * Level) * Math.random()
-			Ry = -(1 + AnimFactor * Level/2) + (2 + AnimFactor * Level) * Math.random()
+			Rx = -(1 + AnimFactor * Level / 2) + (2 + AnimFactor * Level) * Math.random();
+			Ry = -(1 + AnimFactor * Level / 2) + (2 + AnimFactor * Level) * Math.random();
 		}
 		if (!Animated || (Level > 0 || CommonTime() % 1000 > 500))
-			DrawImageZoomCanvas("Screens/Character/Player/ArousalMeter_Glow_" + Math.max(0, Math.min(Math.floor(Level), 4)) + ".png", MainCanvas, 0, 0, 300, 700, X-100*Zoom+Rx, Y-100*Zoom+Ry, 300 * Zoom, 700 * Zoom);
+			DrawImageZoomCanvas("Screens/Character/Player/ArousalMeter_Glow_" + Math.max(0, Math.min(Math.floor(Level), 4)) + ".png", MainCanvas, 0, 0, 300, 700, X - 100 * Zoom + Rx, Y - 100 * Zoom + Ry, 300 * Zoom, 700 * Zoom);
 	}
 }
 
@@ -216,7 +216,7 @@ function DrawArousalMeter(C, X, Y, Zoom) {
 
 					if (Progress > 0) { // -1 is disabled
 						const max_time = 5000 // 5 seconds
-						DrawArousalGlow(X + ((C.ArousalZoom ? 50 : 90) * Zoom), Y + ((C.ArousalZoom ? 200 : 400) * Zoom), C.ArousalZoom ? Zoom : Zoom * 0.2, Progress, Player.ArousalSettings.VFX == "VFXAnimated" || (Player.ArousalSettings.VFX == "VFXAnimatedTemp" && C.ArousalSettings.ChangeTime != null && CommonTime() - C.ArousalSettings.ChangeTime < max_time), Math.max(0, (max_time + C.ArousalSettings.ChangeTime - CommonTime())/ max_time), ((C.ArousalSettings.OrgasmTimer != null) && (typeof C.ArousalSettings.OrgasmTimer === "number") && !isNaN(C.ArousalSettings.OrgasmTimer) && (C.ArousalSettings.OrgasmTimer > 0)));
+						DrawArousalGlow(X + ((C.ArousalZoom ? 50 : 90) * Zoom), Y + ((C.ArousalZoom ? 200 : 400) * Zoom), C.ArousalZoom ? Zoom : Zoom * 0.2, Progress, Player.ArousalSettings.VFX == "VFXAnimated" || (Player.ArousalSettings.VFX == "VFXAnimatedTemp" && C.ArousalSettings.ChangeTime != null && CommonTime() - C.ArousalSettings.ChangeTime < max_time), Math.max(0, (max_time + C.ArousalSettings.ChangeTime - CommonTime()) / max_time), ((C.ArousalSettings.OrgasmTimer != null) && (typeof C.ArousalSettings.OrgasmTimer === "number") && !isNaN(C.ArousalSettings.OrgasmTimer) && (C.ArousalSettings.OrgasmTimer > 0)));
 					}
 				}
 
@@ -674,7 +674,7 @@ function GetWrapTextSize(Text, Width, MaxLine) {
 	// If there's too many lines, we launch the function again with size minus 2
 	if (LineCount > MaxLine) {
 		MainCanvas.font = (parseInt(MainCanvas.font.substring(0, 2)) - 2).toString() + "px arial";
-			GetWrapTextSize(Text, Width, MaxLine);
+		GetWrapTextSize(Text, Width, MaxLine);
 	}
 }
 
@@ -715,7 +715,7 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 	// Split the text if it wouldn't fit in the rectangle
 	MainCanvas.fillStyle = ForeColor;
 	if (MainCanvas.measureText(Text).width > Width) {
-		let words = Text.split(' ');
+		const words = Text.split(' ');
 		let line = '';
 
 		// Find the number of lines
@@ -729,7 +729,6 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 		}
 
 		// Splits the words and draw the text
-		words = Text.split(' ');
 		line = '';
 		Y = Y - ((LineCount - 1) * 23) + (Height / 2);
 		for (let n = 0; n < words.length; n++) {
@@ -882,8 +881,8 @@ function DrawCheckboxColor(Left, Top, Width, Height, Text, IsChecked, Color) {
  * @param {string} Label - Text inside the component
  * @param {string} Color - Color of the component
  * @param {string} [Image] - Image URL to draw in the component
- * @param {string} [BackText] - Text for the back button tooltip
- * @param {string} [NextText] - Text for the next button tooltip
+ * @param {() => string} [BackText] - Text for the back button tooltip
+ * @param {() => string} [NextText] - Text for the next button tooltip
  * @param {boolean} [Disabled] - Disables the hovering options if set to true
  * @returns {void} - Nothing
  */
@@ -1080,7 +1079,7 @@ function DrawProcess() {
 			else if (CurrentCharacter != null || ShopStarted) DarkFactor = 0.5;
 		}
 		if (DarkFactor > 0.0) {
-			let Invert = Player.GraphicsSettings && Player.GraphicsSettings.InvertRoom && Player.IsInverted();
+			const Invert = Player.GraphicsSettings && Player.GraphicsSettings.InvertRoom && Player.IsInverted();
 			DrawImage("Backgrounds/" + B + ".jpg", 0, 0, Invert);
 		}
 		if (DarkFactor < 1.0) DrawRect(0, 0, 2000, 1000, "rgba(0,0,0," + (1.0 - DarkFactor) + ")");
@@ -1097,7 +1096,7 @@ function DrawProcess() {
 				DrawRunMap.set(CurrentScreen, DrawRun);
 			} else {
 				console.log("Trying to launch invalid function: " + CurrentScreen + "Run()");
-				DrawRun = () => {};
+				DrawRun = () => { };
 			}
 		}
 		DrawRun();
