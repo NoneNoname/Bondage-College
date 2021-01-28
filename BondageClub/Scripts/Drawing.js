@@ -1038,20 +1038,7 @@ function DrawWindowResize() {
 	if ((DrawScreenWidth != W) || (DrawScreenHeight != H)) {
 		DrawScreenWidth = W;
 		DrawScreenHeight = H;
-		let Scale;
-		if (W <= H * 2) {
-			MainCanvas.width = W;
-			MainCanvas.height = MainCanvas.width / 2;
-			MainCanvas.canvas.style.width = "100%";
-			MainCanvas.canvas.style.height = "";
-			Scale = 2000 / W;
-		} else {
-			MainCanvas.height = H;
-			MainCanvas.width = MainCanvas.height * 2;
-			MainCanvas.canvas.style.width = "";
-			MainCanvas.canvas.style.height = "100%";
-			Scale = 1000 / H;
-		}
+		const Scale = (W <= H * 2) ? 2000 / W : 1000 / H;
 		const MainCanvasRect = document.getElementById("MainCanvas").getBoundingClientRect();
 		MouseMove = function MouseMove(event) {
 			MouseX = Math.round((event.clientX - MainCanvasRect.left) * Scale);
