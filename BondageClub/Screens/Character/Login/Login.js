@@ -264,6 +264,14 @@ function LoginAsylumItems() {
 }
 
 /**
+ * Adds items if specific cheats are enabled
+ * @returns {void} - Nothing
+ */
+function LoginCheatItems() {
+	if (CheatFactor("FreeCollegeOutfit", 0) == 0) InventoryAdd(Player, "CollegeOutfit1", "Cloth");
+}
+
+/**
  * Checks every owned item to see if its BuyGroup contains an item the player does not have. This allows the player to
  * collect any items that have been added to the game which are in a BuyGroup that they have already purchased.
  * @returns {void} Nothing
@@ -421,6 +429,7 @@ function LoginResponse(C) {
 			Player.ArousalSettings = C.ArousalSettings;
 			Player.OnlineSettings = C.OnlineSettings;
 			Player.OnlineSharedSettings = C.OnlineSharedSettings;
+			Player.ControllerSettings = C.ControllerSettings;
 			Player.GraphicsSettings = C.GraphicsSettings;
 			Player.NotificationSettings = C.NotificationSettings;
 			Player.WhiteList = ((C.WhiteList == null) || !Array.isArray(C.WhiteList)) ? [] : C.WhiteList;
@@ -484,6 +493,7 @@ function LoginResponse(C) {
 			LoginStableItems();
 			LoginLoversItems();
 			LoginAsylumItems();
+			LoginCheatItems();
 			LoginValideBuyGroups();
 			LoginValidateArrays();
 			if (InventoryBeforeFixes != InventoryStringify(Player)) ServerPlayerInventorySync();
