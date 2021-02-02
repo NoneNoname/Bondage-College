@@ -82,17 +82,11 @@ function DrawLoad() {
 	MainCanvas.textAlign = "center";
 	MainCanvas.textBaseline = "middle";
 
-	DrawWindowResize();
-
 	// Deferred resize is necessary since some rare cases canvas gets oversized without this (especially on mobile)
 	setTimeout(DrawWindowResize, 1000);
 	setTimeout(DrawWindowResize, 3000);
 	setTimeout(DrawWindowResize, 5000);
 	if (CommonIsMobile) setTimeout(DrawWindowResize, 10000);
-
-	// Loads the 3D engine as well
-	Draw3DLoad();
-
 }
 
 /**
@@ -253,12 +247,6 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 			return;
 		}
 
-		// Shortcuts drawing the character to 3D if needed
-		if (Draw3DEnabled) {
-			Draw3DCharacter(C, X, Y, Zoom, IsHeightResizeAllowed);
-			return;
-		}
-
 		// Run any existing asset scripts
 		if (C.RunScripts && C.HasScriptedAssets) {
 			const DynamicAssets = C.Appearance.filter(CA => CA.Asset.DynamicScriptDraw);
@@ -290,7 +278,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 
 		// If we must dark the Canvas characters
 		if ((C.ID != 0) && Player.IsBlind() && (CurrentScreen != "InformationSheet")) {
-			let DarkFactor = (Player.Effect.indexOf("BlindNormal") >= 0) ? 0.3 : 0.6;
+			const DarkFactor = Math.min(CharacterGetDarkFactor(Player) * 2, 1);
 			CharacterCanvas.globalCompositeOperation = "copy";
 			CharacterCanvas.drawImage(Canvas, 0, 0);
 			// Overlay black rectangle.
@@ -355,7 +343,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 		if ((C.Name != "") && ((CurrentModule == "Room") || (CurrentModule == "Online" && !(CurrentScreen == "ChatRoom" && ChatRoomHideIconState >= 3)) || ((CurrentScreen == "Wardrobe") && (C.ID != 0))) && (CurrentScreen != "Private"))
 			if (!Player.IsBlind() || (Player.GameplaySettings && Player.GameplaySettings.SensDepChatLog == "SensDepLight")) {
 				MainCanvas.font = CommonGetFont(30);
-				const NameOffset = CurrentScreen == "ChatRoom" && ChatRoomCharacter.length > 5 && CurrentCharacter == null ? -4 : 0;
+				const NameOffset = CurrentScreen == "ChatRoom" && (ChatRoomCharacter.length > 5 || (ChatRoomCharacter.length == 5 && CommonPhotoMode)) && CurrentCharacter == null ? -4 : 0;
 				DrawText(C.Name, X + 255 * Zoom, Y + 980 * Zoom + NameOffset, (CommonIsColor(C.LabelColor)) ? C.LabelColor : "White", "Black");
 				MainCanvas.font = CommonGetFont(36);
 			}
@@ -1102,11 +1090,8 @@ function DrawProcess() {
 	if ((B != null) && (B != "")) {
 		let DarkFactor = 1.0;
 		if ((CurrentModule != "Character") && (B != "Sheet")) {
-			const blindLevel = Player.GetBlindLevel();
-			if (blindLevel >= 3) DarkFactor = 0.0;
-			else if (blindLevel == 2) DarkFactor = 0.15;
-			else if (blindLevel == 1) DarkFactor = 0.3;
-			else if (CurrentCharacter != null || ShopStarted) DarkFactor = 0.5;
+			DarkFactor = CharacterGetDarkFactor(Player);
+			if (DarkFactor == 1 && (CurrentCharacter != null || ShopStarted) && !CommonPhotoMode) DarkFactor = 0.5;
 		}
 		if (DarkFactor > 0.0) {
 			const Invert = Player.GraphicsSettings && Player.GraphicsSettings.InvertRoom && Player.IsInverted();
@@ -1134,9 +1119,6 @@ function DrawProcess() {
 
 	// Draws beep from online player sent by the server
 	ServerDrawBeep();
-
-	// Draws the 3D objects
-	Draw3DProcess();
 
 	// Leave dialogs AFTER drawing everything
 	// If needed
