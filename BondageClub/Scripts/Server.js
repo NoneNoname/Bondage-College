@@ -23,6 +23,7 @@ var ServerReconnectCount = 0;
 
 /** Loads the server by attaching the socket events and their respective callbacks */
 function ServerInit() {
+	return;
 	ServerSocket = io(ServerURL);
 	ServerSocket.on("connect", ServerConnect);
 	ServerSocket.on("reconnecting", ServerReconnecting);
