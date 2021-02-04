@@ -1192,8 +1192,8 @@ function CharacterCanKneel(C) {
 	return C.CanChangeToPose("Kneel");
 }
 
-function CharacterGetDarkFactor(C) {
-	let DarkFactor = CurrentDarkFactor;
+function CharacterGetDarkFactor(C, Factor = 1.0) {
+	let DarkFactor = Factor;
 	if (C.GetBlindLevel() >= 3) DarkFactor = 0.0;
 	else if (CommonPhotoMode) DarkFactor = 1.0;
 	else if (C.GetBlindLevel() == 2) DarkFactor *= 0.15;

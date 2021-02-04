@@ -459,7 +459,7 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity) {
 		TempCanvas.canvas.height = Img.height;
 		TempCanvas.drawImage(Img, 0, 0);
 		AlphaMasks.forEach(([x, y, w, h]) => TempCanvas.clearRect(x - X, y - Y, w, h));
-		Canvas.drawImage(TempCanvas.canvas, X, Y);
+		SourceImage = TempCanvas.canvas;
 	}
 	Opacity = typeof Opacity === "number" ? Opacity : 1;
 	Canvas.save();
@@ -1090,7 +1090,7 @@ function DrawProcess() {
 	if ((B != null) && (B != "")) {
 		let DarkFactor = CurrentDarkFactor;
 		if ((CurrentModule != "Character") && (B != "Sheet")) {
-			DarkFactor = CharacterGetDarkFactor(Player);
+			DarkFactor = CharacterGetDarkFactor(Player, DarkFactor);
 			if (DarkFactor == 1 && (CurrentCharacter != null || ShopStarted) && !CommonPhotoMode) DarkFactor = 0.5;
 		}
 		if (DarkFactor > 0.0) {
