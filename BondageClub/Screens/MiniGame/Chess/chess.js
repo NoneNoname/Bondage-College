@@ -322,15 +322,7 @@ function MiniGameChessStart(Depth) {
 	board.clear();
 	board.start();
 	game.reset();
-	MiniGameChessResize();
 	MiniGameChessBoard = board;
 	MiniGameChessGame = game;
 
-}
-
-// Resizes the chess board to fit the screen
-function MiniGameChessResize() {
-	DivChessBoard.removeAttribute("style");
-	document.querySelectorAll('#DivChessBoard div').forEach(e => e.removeAttribute("style"));
-	document.querySelectorAll('#DivChessBoard img').forEach(e => e.removeAttribute("style"));
 }
