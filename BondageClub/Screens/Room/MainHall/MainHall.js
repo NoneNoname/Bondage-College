@@ -160,7 +160,7 @@ function MainHallRun() {
 		if (Player.ImmersionSettings && Player.LastChatRoom && Player.LastChatRoom != "" && MainHallMaid.Stage == "0") {
 			if (MainHallFirstFrame) {
 				if (Player.ImmersionSettings.ReturnToChatRoom) {
-					ChatRoomStart("", "", "MainHall", "IntroductionDark", BackgroundsTagList);
+					ChatRoomStart("", "", "MainHall", "Introduction", BackgroundsTagList);
 					return;
 				} else ChatRoomSetLastChatRoom("");
 			} else MainHallFirstFrame = true;
