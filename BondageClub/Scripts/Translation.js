@@ -115,17 +115,22 @@ var TranslationDictionary = [
 		EnglishName: "French",
 		Files: [
 			"Assets/Female3DCG/Female3DCG_FR.txt",
+			"Assets/Female3DCG/ColorGroups_FR.txt",
+			"Assets/Female3DCG/LayerNames_FR.txt",
 			"Screens/Character/Appearance/Text_Appearance_FR.txt",
 			"Screens/Character/BackgroundSelection/Text_BackgroundSelection_FR.txt",
 			"Screens/Character/Cheat/Text_Cheat_FR.txt",
+			"Screens/Character/Relog/Text_Relog_FR.txt",
 			"Screens/Character/Creation/Text_Creation_FR.txt",
 			"Screens/Character/FriendList/Text_FriendList_FR.txt",
 			"Screens/Character/InformationSheet/Text_InformationSheet_FR.txt",
 			"Screens/Character/Login/Text_Login_FR.txt",
 			"Screens/Character/OnlineProfile/Text_OnlineProfile_FR.txt",
+			"Screens/Character/ItemColor/ItemColor_FR.txt",
 			"Screens/Character/PasswordReset/Text_PasswordReset_FR.txt",
 			"Screens/Character/Player/Dialog_Player_FR.txt",
 			"Screens/Character/Preference/Text_Preference_FR.txt",
+			"Screens/Character/Preference/ActivityDictionary_FR.txt",
 			"Screens/Character/Title/Text_Title_FR.txt",
 			"Screens/Character/Wardrobe/Text_Wardrobe_FR.txt",
 			"Screens/Cutscene/NPCCollaring/Text_NPCCollaring_FR.txt",
@@ -141,6 +146,8 @@ var TranslationDictionary = [
 			"Screens/MiniGame/SlaveAuction/Text_SlaveAuction_FR.txt",
 			"Screens/MiniGame/Tennis/Text_Tennis_FR.txt",
 			"Screens/MiniGame/Therapy/Text_Therapy_FR.txt",
+			"Screens/MiniGame/DojoStruggle/Text_DojoStruggle_FR.txt",
+			"Screens/MiniGame/PuppyWalker/Text_PuppyWalker_FR.txt",
 			"Screens/Online/ChatCreate/Text_ChatCreate_FR.txt",
 			"Screens/Online/ChatAdmin/Text_ChatAdmin_FR.txt",
 			"Screens/Online/ChatRoom/Dialog_Online_FR.txt",
@@ -164,6 +171,9 @@ var TranslationDictionary = [
 			"Screens/Room/CollegeTennis/Text_CollegeTennis_FR.txt",
 			"Screens/Room/CollegeTheater/Text_CollegeTheater_FR.txt",
 			"Screens/Room/Introduction/Dialog_NPC_Introduction_Sub_FR.txt",
+			"Screens/Room/LARP/Text_LARP_FR.txt",
+			"Screens/Room/DailyJob/Dialog_NPC_DailyJob_DojoTeacher_FR.txt",
+			"Screens/Room/DailyJob/Dialog_NPC_DailyJob_PuppyMistress_FR.txt",
 			"Screens/Room/MaidQuarters/Dialog_NPC_MaidQuarters_InitiationMaids_FR.txt",
 			"Screens/Room/MainHall/Dialog_NPC_MainHall_Maid_FR.txt",
 			"Screens/Room/MainHall/Text_MainHall_FR.txt",
@@ -298,17 +308,18 @@ function TranslationAvailable(FullPath) {
  * @returns {string[]} - Array of strings with each line divided. For each translated line, the english string precedes the translated one in the array.
  */
 function TranslationParseTXT(str) {
-		
-    var arr = [];
-	var c;
 
-    // iterate over each character, keep track of current row (of the returned array)
-    for (let row = c = 0; c < str.length; c++) {
-        var cc = str[c], nc = str[c+1];        // current character, next character
-        arr[row] = arr[row] || [];             // create a new row if necessary        
-        if (cc == '\n') { ++row; continue; }   // If it's a newline, move on to the next row
-        arr[row] += cc;                        // Otherwise, append the current character to the row
-    }
+	const arr = [];
+	let c;
+	str = str.replace(/\r\n/g, '\n').trim();
+
+	// iterate over each character, keep track of current row (of the returned array)
+	for (let row = c = 0; c < str.length; c++) {
+		let cc = str[c];        // current character, next character
+		arr[row] = arr[row] || "";             // create a new row if necessary
+		if (cc == '\n') { ++row; continue; }   // If it's a newline, move on to the next row
+		arr[row] += cc;                        // Otherwise, append the current character to the row
+	}
 
 	// Removes any comment rows (starts with ###)
 	for (let row = arr.length - 1; row >= 0; row--)
@@ -317,9 +328,9 @@ function TranslationParseTXT(str) {
 		}
 
 	// Trims the full translated array
-    for (let row = 0; row < arr.length; row++)
+	for (let row = 0; row < arr.length; row++)
 		arr[row] = arr[row].trim();
-    return arr;
+	return arr;
 }
 
 /**

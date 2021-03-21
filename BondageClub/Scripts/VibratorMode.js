@@ -152,8 +152,7 @@ function VibratorModeLoad(Options) {
 	if (!Property || !Property.Mode) {
 		Options = (Options && Options.length) ? Options : [VibratorModeSet.STANDARD];
 		var FirstOption = VibratorModeOptions[Options[0]][0] || VibratorModeOptions[VibratorModeSet.STANDARD][0];
-		DialogFocusItem.Property = Object.assign({}, Property, FirstOption.Property);
-		VibratorModeSetDynamicProperties(DialogFocusItem.Property);
+		VibratorModeSetProperty(DialogFocusItem, FirstOption.Property);
 		var C = CharacterGetCurrent();
 		CharacterRefresh(C);
 		ChatRoomCharacterItemUpdate(C, DialogFocusItem.Asset.Group.Name);
@@ -175,18 +174,9 @@ function VibratorModeDraw(Options) {
  * @returns {void} - Nothing
  */
 function VibratorModeDrawHeader() {
-	var Asset = DialogFocusItem.Asset;
-	var AssetPath = "Assets/" + Asset.Group.Family + "/" + Asset.Group.Name + "/Preview/" + Asset.Name + ".png";
-
-	var X = 1389;
-	var Y = 102;
-	if (DialogFocusItem.Property.Intensity >= 0) {
-		X += Math.floor(Math.random() * 3) - 1;
-		Y += Math.floor(Math.random() * 3) - 1;
-	}
-	DrawRect(1387, 100, 225, 275, "white");
-	DrawImageResize(AssetPath, X, Y, 221, 221);
-	DrawTextFit(Asset.Description, 1500, 350, 221, "black");
+	const Asset = DialogFocusItem.Asset;
+	const Vibrating = DialogFocusItem.Property && DialogFocusItem.Property.Intensity != null && DialogFocusItem.Property.Intensity >= 0;
+	DrawAssetPreview(1387, 100, Asset, { Vibrating });
 }
 
 /**
@@ -199,7 +189,8 @@ function VibratorModeDrawControls(Options, Y) {
 	Y = typeof Y === "number" ? Y : 450;
 	Options = Options || [VibratorModeSet.STANDARD];
 	var Property = DialogFocusItem.Property;
-	var ItemIntensity = DialogFind(Player, "Intensity" + Property.Intensity.toString()).replace("Item", DialogFocusItem.Asset.Description);
+	if (Property == null) return;
+	var ItemIntensity = DialogFindPlayer("Intensity" + Property.Intensity.toString()).replace("Item", DialogFocusItem.Asset.Description);
 	DrawText(ItemIntensity, 1500, Y, "white", "gray");
 
 	Options.forEach((OptionName) => {
@@ -208,7 +199,7 @@ function VibratorModeDrawControls(Options, Y) {
 			var X = 1175 + (I % 3) * 225;
 			if (I % 3 === 0) Y += 75;
 			var Color = Property.Mode === Option.Property.Mode ? "#888" : "White";
-			DrawButton(X, Y, 200, 55, DialogFind(Player, Option.Name), Color);
+			DrawButton(X, Y, 200, 55, DialogFindPlayer(Option.Name), Color);
 		});
 		Y += 40;
 	});
@@ -231,7 +222,7 @@ function VibratorModeClick(Options, Y) {
 			var X = 1175 + (I % 3) * 225;
 			if (I % 3 === 0) Y += 75;
 			if (MouseIn(X, Y, 200, 55)) {
-				if (Option.Property.Mode !== DialogFocusItem.Property.Mode)
+				if ((Option.Property != null) && (DialogFocusItem.Property != null) && (Option.Property.Mode !== DialogFocusItem.Property.Mode))
 					VibratorModeSetMode(Option);
 				return true;
 			}
@@ -242,6 +233,33 @@ function VibratorModeClick(Options, Y) {
 }
 
 /**
+ * Gets a vibrator mode from VibratorModeOptions
+ * @param {VibratorMode} ModeName - The name of the mode from VibratorMode, e.g. VibratorMode.OFF
+ * @returns {ExtendedItemOption} - The option gotten
+ */
+function VibratorModeGetOption(ModeName) {
+	var result = null;
+	
+	[VibratorModeSet.STANDARD, VibratorModeSet.ADVANCED].some((OptionName) => {
+		var OptionGroup = VibratorModeOptions[OptionName];
+		var Handled = OptionGroup.some((Option, I) => {
+			if ((Option.Property != null) && (Option.Property.Mode == ModeName)) {
+				result = Option
+				return true
+			}
+			return false;
+		});
+		return Handled;
+	});
+	
+	if (result) return result	
+	return VibratorModeOptions.Standard[0]
+	
+}
+
+
+
+/**
  * Sets a new mode for a vibrating item and publishes a corresponding chatroom message
  * @param {ExtendedItemOption} Option - The extended item option defining the new mode to be set
  * @returns {void} - Nothing
@@ -250,8 +268,7 @@ function VibratorModeSetMode(Option) {
 	var C = CharacterGetCurrent();
 	DialogFocusItem = InventoryGet(C, C.FocusGroup.Name);
 	var OldIntensity = DialogFocusItem.Property.Intensity;
-	var Property = DialogFocusItem.Property = Object.assign({}, DialogFocusItem.Property, Option.Property);
-	VibratorModeSetDynamicProperties(Property);
+	VibratorModeSetProperty(DialogFocusItem, Option.Property);
 	CharacterRefresh(C);
 	ChatRoomCharacterItemUpdate(C, C.FocusGroup.Name);
 
@@ -261,9 +278,9 @@ function VibratorModeSetMode(Option) {
 		{ Tag: "AssetName", AssetName: DialogFocusItem.Asset.Name },
 	];
 
-	if (Property.Intensity !== OldIntensity) {
-		var Direction = Property.Intensity > OldIntensity ? "Increase" : "Decrease";
-		Message = "Vibe" + Direction + "To" + Property.Intensity;
+	if (DialogFocusItem.Property.Intensity !== OldIntensity) {
+		var Direction = DialogFocusItem.Property.Intensity > OldIntensity ? "Increase" : "Decrease";
+		Message = "Vibe" + Direction + "To" + DialogFocusItem.Property.Intensity;
 	} else {
 		Message = "VibeModeChange";
 		Dictionary.push({ Tag: "SourceCharacter", Text: Player.Name, MemberNumber: Player.MemberNumber });
@@ -272,14 +289,19 @@ function VibratorModeSetMode(Option) {
 	ChatRoomPublishCustomAction(Message, false, Dictionary);
 }
 
+
+
 /**
  * Helper function to set dynamic properties on an item
  * @param {object} Property - The Property object to initialise
  * @returns {void} - Nothing
  */
 function VibratorModeSetDynamicProperties(Property) {
-	if (typeof Property.Intensity === "function") Property.Intensity = Property.Intensity();
-	if (typeof Property.Effect === "function") Property.Effect = Property.Effect(Property.Intensity);
+	const NewProperty = Object.assign({}, Property);
+	if (typeof NewProperty.Intensity === "function") NewProperty.Intensity = NewProperty.Intensity();
+	if (typeof NewProperty.Effect === "function") NewProperty.Effect = NewProperty.Effect(NewProperty.Intensity);
+	else NewProperty.Effect = JSON.parse(JSON.stringify(Property.Effect || []))
+	return NewProperty;
 }
 
 /**
@@ -322,7 +344,7 @@ function VibratorModeUpdateRandom(Item, C, PersistentData) {
 	var OldIntensity = Item.Property.Intensity;
 	var Intensity = CommonRandomItemFromList(OldIntensity, [-1, 0, 1, 2, 3]);
 	var Effect = Intensity === -1 ? ["Egged"] : ["Egged", "Vibrating"];
-	Object.assign(Item.Property, { Intensity, Effect });
+	VibratorModeSetProperty(Item, { Intensity, Effect });
 	// Next update in 1-3 minutes
 	PersistentData.ChangeTime = Math.floor(CommonTime() + OneMinute + Math.random() * 2 * OneMinute);
 	VibratorModePublish(C, Item, OldIntensity, Intensity);
@@ -341,7 +363,7 @@ function VibratorModeUpdateEscalate(Item, C, PersistentData) {
 	// As intensity increases, time between updates decreases
 	var TimeFactor = Math.pow((5 - Intensity), 1.8);
 	var TimeToNextUpdate = (8000 + Math.random() * 4000) * TimeFactor;
-	Object.assign(Item.Property, { Intensity, Effect: ["Egged", "Vibrating"] });
+	VibratorModeSetProperty(Item, { Intensity, Effect: ["Egged", "Vibrating"] });
 	PersistentData.ChangeTime = Math.floor(CommonTime() + TimeToNextUpdate);
 	VibratorModePublish(C, Item, OldIntensity, Intensity);
 }
@@ -381,7 +403,7 @@ function VibratorModeUpdateEdge(Item, C, PersistentData) {
 	var OneMinute = 60000;
 	var OldIntensity = Item.Property.Intensity;
 	var Intensity = Math.min(Item.Property.Intensity + 1, 3);
-	Object.assign(Item.Property, { Intensity, Effect: ["Egged", "Vibrating", "Edged"] });
+	VibratorModeSetProperty(Item, { Intensity, Effect: ["Egged", "Vibrating", "Edged"] });
 	if (Intensity === 3) {
 		// If we've hit max intensity, no more changes needed
 		PersistentData.ChangeTime = Infinity;
@@ -425,7 +447,7 @@ function VibratorModeUpdateStateBased(Item, C, PersistentData, TransitionsFromDe
 	if (State === VibratorModeState.DENY || Item.Property.Mode === VibratorMode.DENY) Effect.push("Edged");
 	if (Intensity !== -1) Effect.push("Vibrating");
 
-	Object.assign(Item.Property, { State, Intensity, Effect });
+	VibratorModeSetProperty(Item, { State, Intensity, Effect });
 	Object.assign(PersistentData, {
 		ChangeTime: CommonTime() + 5000,
 		LastChange: Intensity !== OldIntensity ? CommonTime() : PersistentData.LastChange,
@@ -528,6 +550,25 @@ function VibratorModeStateUpdateRest(C, Arousal, TimeSinceLastChange, OldIntensi
 }
 
 /**
+ * Correctly sets the Property on a vibrator according to the new property. This function preserves persistent effects on the item like lock
+ * effects.
+ * @param {Item[]} Item - The item on which to set the new properties
+ * @param {object} Property - The new properties to set. The Property object may include dynamic setter functions
+ * @returns {void} - Nothing
+ */
+function VibratorModeSetProperty(Item, Property) {
+	Property = VibratorModeSetDynamicProperties(Property);
+	if (Item.Property && Array.isArray(Item.Property.Effect)) {
+		Item.Property.Effect.forEach(Effect => {
+			if (!["Egged", "Vibrating", "Edged"].includes(Effect)) {
+				Property.Effect.push(Effect);
+			}
+		});
+	}
+	Item.Property = Object.assign({}, Item.Property, Property);
+}
+
+/**
  * Publishes a chatroom message for an automatic change in vibrator intensity. Does nothing if the vibrator's intensity
  * did not change.
  * @param {Character} C - The character that the vibrator is equipped on
@@ -549,6 +590,7 @@ function VibratorModePublish(C, Item, OldIntensity, Intensity) {
 	if (Item.Property.ItemMemberNumber) Dictionary.push({ Tag: "ItemMemberNumber", MemberNumber: Item.Property.ItemMemberNumber });
 	if (CurrentScreen == "ChatRoom") {
 		ServerSend("ChatRoomChat", { Content: "Vibe" + Direction + "To" + Intensity, Type: "Action", Dictionary });
+		CharacterLoadEffect(C);
 		ChatRoomCharacterItemUpdate(C, Item.Asset.Group.Name);
 		ActivityChatRoomArousalSync(C);
 	}

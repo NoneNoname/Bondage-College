@@ -20,6 +20,14 @@ var GamblingAppearancePlayer = null;
 var GamblingIllegalChange = false; // Sub Player lost Cloth although forbidden by Mistress
 var GamblingToothpickCount = 0; // available Toothpicks
 
+// Returns TRUE if the player has maids disabled
+/**
+ * Checks if the player is helpless (maids disabled) or not.
+ * @returns {boolean} - Returns true if the player still has time remaining after asking the maids to stop helping in the maid quarters
+ */
+function GamblingIsMaidsDisabled() {  var expire = LogValue("MaidsDisabled", "Maid") - CurrentTime ; return (expire > 0)  }
+
+
 // Returns TRUE if a dialog is permitted
 /**
  * Checks if any of the subs in the gambling hall are currentyl restrained
@@ -178,7 +186,7 @@ function GamblingRun() {
 	if ((ReputationGet("Gambling") > 20) || MaidQuartersCurrentRescue == "Gambling") DrawCharacter(GamblingSecondSub, 1250, 0, 1);
 	if (Player.CanWalk()) DrawButton(1885, 25, 90, 90, "", "White", "Icons/Exit.png");
 	DrawButton(1885, 145, 90, 90, "", "White", "Icons/Character.png");
-	if (Player.CanInteract()) DrawButton(1885, 265, 90, 90, "", "White", "Icons/Dress.png"); //Only Dess Back after loose Game
+	if (Player.CanInteract()) DrawButton(1885, 265, 90, 90, "", "White", "Icons/DressReset.png"); //Only Dess Back after loose Game
 	//BadGirlsClub
 	if (GamblingCanStealDice()) DrawButton(1885, 385, 90, 90, "", "White", "Icons/DiceTheft.png", TextGet("DiceTheft"));
 }
@@ -796,9 +804,13 @@ function GamblingReleasePlayerGame(ReleaseState) {
 			GamblingFirstSub.Stage = "ActivitySpank";
 			GamblingNpcSubState++;
 		} else if (GamblingNpcDice == 6) {
-			CharacterRelease(Player);
+			if (GamblingIsMaidsDisabled()) {
+				GamblingFirstSub.CurrentDialog = DialogFind(GamblingFirstSub, "ActivityReleaseIntroNoMaids");
+			} else {
+				CharacterRelease(Player);
+				GamblingFirstSub.CurrentDialog = DialogFind(GamblingFirstSub, "ActivityReleaseIntro");
+			}
 			GamblingNpcSubState = 0;
-			GamblingFirstSub.CurrentDialog = DialogFind(GamblingFirstSub, "ActivityReleaseIntro");
 			GamblingFirstSub.Stage = "ActivityRelease";
 		}
 	}

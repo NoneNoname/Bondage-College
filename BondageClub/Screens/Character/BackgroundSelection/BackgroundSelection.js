@@ -50,7 +50,7 @@ function BackGroundSelectionSort(a, b) {
  */
 function BackgroundSelectionLoad() {
 	BackgroundSelectionSelect = BackgroundSelectionList[BackgroundSelectionIndex];
-	BackgroundSelectionSelectName = DialogFind(Player, BackgroundSelectionSelect);
+	BackgroundSelectionSelectName = DialogFindPlayer(BackgroundSelectionSelect);
 	BackgroundSelectionOffset = Math.floor(BackgroundSelectionIndex / BackgroundSelectionSize) * BackgroundSelectionSize;
 	BackgroundSelectionBackground = BackgroundSelectionList[BackgroundSelectionIndex] || "Introduction";
 	BackgroundSelectionView = BackgroundSelectionAll.slice(0).sort(BackGroundSelectionSort);
@@ -100,7 +100,7 @@ function BackgroundSelectionTagChanged() {
 function BackgroundSelectionRun() {
 
 	DrawText(TextGet("Selection").replace("SelectedBackground", BackgroundSelectionSelectName), 300, 65, "White", "Black");
-	if (BackgroundSelectionTagList.length >= 2) ElementPositionFix("TagDropDown", 36, 575, 35, 300, 65);
+	if (BackgroundSelectionTagList.length >= 2) ElementPositionFix("TagDropDown", 36, 550, 35, 300, 65);
 	DrawText(TextGet("Filter").replace("Filtered", BackgroundSelectionView.length).replace("Total", BackgroundSelectionAll.length), 1000, 65, "White", "Black");
 
 	DrawButton(1585, 25, 90, 90, "", "White", "Icons/Prev.png", TextGet("Prev"));
@@ -168,7 +168,7 @@ function BackgroundSelectionClick() {
 			if (BackgroundSelectionIndex >= BackgroundSelectionView.length) BackgroundSelectionIndex = 0;
 			if (BackgroundSelectionIndex < 0) BackgroundSelectionIndex = BackgroundSelectionView.length - 1;
 			BackgroundSelectionSelect = BackgroundSelectionView[BackgroundSelectionIndex].Name;
-			BackgroundSelectionSelectName = DialogFind(Player, BackgroundSelectionSelect);
+			BackgroundSelectionSelectName = DialogFindPlayer(BackgroundSelectionSelect);
 			BackgroundSelectionBackground = BackgroundSelectionSelect;
 		}
 		X += 450 + 35;
