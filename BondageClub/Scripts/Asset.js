@@ -11,6 +11,7 @@ var Pose = [];
 
 // Adds a new asset group to the main list
 function AssetGroupAdd(NewAssetFamily, NewAsset) {
+	/** @type {AssetGroup} */
 	var A = {
 		Family: NewAssetFamily,
 		Name: NewAsset.Group,
@@ -54,6 +55,7 @@ function AssetGroupAdd(NewAssetFamily, NewAsset) {
 
 // Adds a new asset to the main list
 function AssetAdd(NewAsset, ExtendedConfig) {
+	/** @type {Asset} */
 	var A = {
 		Name: NewAsset.Name,
 		Description: NewAsset.Name,
@@ -151,6 +153,8 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		AllowExpression: NewAsset.AllowExpression,
 		MirrorExpression: NewAsset.MirrorExpression,
 		FixedPosition: typeof NewAsset.FixedPosition === 'boolean' ? NewAsset.FixedPosition : false,
+		Layer: [],
+		ColorableLayerCount: 0
 	}
 	if (A.MinOpacity > A.Opacity) A.MinOpacity = A.Opacity;
 	if (A.MaxOpacity < A.Opacity) A.MaxOpacity = A.Opacity;
@@ -212,6 +216,7 @@ function AssetBuildLayer(AssetDefinition, A) {
  * @return {AssetLayer} - A Layer object representing the drawable properties of the given layer
  */
 function AssetMapLayer(Layer, AssetDefinition, A, I) {
+	/** @type {AssetLayer} */
 	const L = {
 		Name: Layer.Name || null,
 		AllowColorize: AssetLayerAllowColorize(Layer, AssetDefinition),
@@ -237,6 +242,7 @@ function AssetMapLayer(Layer, AssetDefinition, A, I) {
 		MirrorExpression: Layer.MirrorExpression,
 		HideForPose: Array.isArray(Layer.HideForPose) ? Layer.HideForPose : [],
 		AllowModuleTypes: Layer.AllowModuleTypes,
+		ColorIndex: 0
 	};
 	if (L.MinOpacity > L.Opacity) L.MinOpacity = L.Opacity;
 	if (L.MaxOpacity < L.Opacity) L.MaxOpacity = L.Opacity;
@@ -281,7 +287,7 @@ function AssetLayerAlpha(Layer, NewAsset, I) {
 /**
  * Assigns colour indices to the layers of an asset. These determine which colours get applied to the layer. Also adds a count of colorable
  * layers to the asset definition.
- * @param {Object} A - The built asset
+ * @param {Asset} A - The built asset
  * @returns {void} - Nothing
  */
 function AssetAssignColorIndices(A) {

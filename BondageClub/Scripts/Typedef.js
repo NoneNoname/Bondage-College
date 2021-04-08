@@ -14,45 +14,66 @@
  * @property {boolean} AllowNone
  * @property {boolean} AllowColorize
  * @property {boolean} AllowCustomize
- * @property {boolean} KeepNaked
  * @property {string[]} ColorSchema
  * @property {string} ParentSize
  * @property {string} ParentColor
  * @property {boolean} Clothing
  * @property {boolean} Underwear
- * @property {number[][]} Zone
- * @property {string[]} SetPose
+ * @property {boolean} BodyCosplay
+ * @property {string[]} [Activity]
+ * @property {string[]} [AllowActivityOn]
+ * @property {string[]} [Hide]
+ * @property {string[]} [Block]
+ * @property {[number, number, number, number][]} [Zone]
+ * @property {string[]} [SetPose]
  * @property {string[]} AllowPose
- * @property {string[]} AllowExpression
- * @property {string[]} Effect
+ * @property {string[]} [AllowExpression]
+ * @property {string[]} [Effect]
+ * @property {string} MirrorGroup
+ * @property {{ Group: string; Name: string; Type?: string }[]} RemoveItemOnRemove
  * @property {number} DrawingPriority
  * @property {number} DrawingLeft
  * @property {number} DrawingTop
  * @property {boolean} DrawingFullAlpha
  * @property {boolean} DrawingBlink
- * @property {string} MirrorGroup
+ * @property {string} [InheritColor]
+ * @property {string[]} FreezeActivePose
+ * @property {[number, number, number, number][]} [PreviewZone]
  */
 
 /**
  * An object defining a drawable layer of an asset
  * @typedef {Object} AssetLayer
- * @property {string} Name - the name of the layer - may be null if the asset only contains a single default layer
+ * @property {string | null} Name - the name of the layer - may be null if the asset only contains a single default layer
  * @property {boolean} AllowColorize - whether or not this layer can be colored
- * @property {string} [CopyLayerColor] - if not null, specifies that this layer should always copy the color of the named layer
+ * @property {string | null} CopyLayerColor - if not null, specifies that this layer should always copy the color of the named layer
  * @property {string} [ColorGroup] - specifies the name of a color group that this layer belongs to. Any layers within the same color group
  * can be colored together via the item color UI
  * @property {boolean} HideColoring - whether or not this layer can be coloured in the colouring UI
- * @property {string[]} [AllowTypes] - A list of allowed extended item types that this layer permits - the layer will only be drawn if
+ * @property {string[] | null} AllowTypes - A list of allowed extended item types that this layer permits - the layer will only be drawn if
  * the item type matches one of these types. If null, the layer is considered to permit all extended types.
  * @property {boolean} HasType - whether or not the layer has separate assets per type. If not, the extended type will not be included in
  * the URL when fetching the layer's image
- * @property {string} [ParentGroupName] - The name of the parent group for this layer. If null, the layer has no parent group. If
+ * @property {string | null} [ParentGroupName] - The name of the parent group for this layer. If null, the layer has no parent group. If
  * undefined, the layer inherits its parent group from it's asset/group.
- * @property {string[]} [OverrideAllowPose] - An array of poses that this layer permits. If set, it will override the poses permitted
+ * @property {string[] | null} OverrideAllowPose - An array of poses that this layer permits. If set, it will override the poses permitted
  * by the parent asset/group.
  * @property {number} Priority - The drawing priority of this layer. Inherited from the parent asset/group if not specified in the layer
  * definition.
+ * @property {string} [InheritColor]
+ * @property {AlphaDefinition[]} Alpha
  * @property {Asset} Asset - The asset that this layer belongs to
+ * @property {number} [DrawingLeft]
+ * @property {number} [DrawingTop]
+ * @property {{ Group: string; Asset: string }} [HideAs]
+ * @property {boolean} HasImage
+ * @property {number} Opacity
+ * @property {number} MinOpacity
+ * @property {number} MaxOpacity
+ * @property {boolean} LockLayer
+ * @property {string} [MirrorExpression]
+ * @property {string[]} HideForPose
+ * @property {string[]} [AllowModuleTypes]
  * @property {number} ColorIndex - The coloring index for this layer
  */
 
@@ -63,14 +84,8 @@
  * alpha masks will be applied to every layer underneath the present one.
  * @property {string[]} [Pose] - A list of the poses that the given alpha masks should be applied to. If empty or not present, the alpha
  * masks will be applied regardless of character pose.
- * @property {number[][]} Masks - A list of alpha mask definitions. A definition is a 4-tuple of numbers defining the top left coordinate of
+ * @property {[number, number, number, number][]} Masks - A list of alpha mask definitions. A definition is a 4-tuple of numbers defining the top left coordinate of
  * a rectangle and the rectangle's width and height - e.g. [left, top, width, height]
- */
-
-/**
- * @typedef {Object} AssetBonus
- * @property {string} Type
- * @property {number} Factor
  */
 
 /**
@@ -83,56 +98,102 @@
 /**
  * @typedef {Object} Asset
  * @property {string} Name
- * @property {string} Category
  * @property {string} Description
  * @property {AssetGroup} Group
- * @property {string} ParentItem
+ * @property {string} [ParentItem]
+ * @property {string} [ParentGroupName]
  * @property {boolean} Enable
  * @property {boolean} Visible
  * @property {boolean} Wear
- * @property {string} BuyGroup
- * @property {string[]} PrerequisiteBuyGroups
- * @property {string[]} Effect
- * @property {AssetBonus} Bonus
- * @property {string[]} Block
+ * @property {string[] | string} [Activity]
+ * @property {string[]} [AllowActivity]
+ * @property {string[]} [AllowActivityOn]
+ * @property {string} [BuyGroup]
+ * @property {string[]} [PrerequisiteBuyGroups]
+ * @property {string[]} [Effect]
+ * @property {string} [Bonus]
+ * @property {string[]} [Block]
  * @property {string[]} Expose
- * @property {string[]} Hide
- * @property {string[]} HideItem
- * @property {string[]} Require
- * @property {string[]} SetPose
+ * @property {string[]} [Hide]
+ * @property {string[]} [HideItem]
+ * @property {string[]} HideItemExclude
+ * @property {string[]} [Require]
+ * @property {string[]} [SetPose]
  * @property {string[]} AllowPose
+ * @property {string[]} HideForPose
+ * @property {string[]} [OverrideAllowPose]
+ * @property {string[]} [AllowActivePose]
+ * @property {string[]} [WhitelistActivePose]
  * @property {number} Value
  * @property {number} Difficulty
  * @property {boolean} SelfBondage
  * @property {boolean} SelfUnlock
+ * @property {boolean} ExclusiveUnlock
  * @property {boolean} Random
  * @property {boolean} RemoveAtLogin
  * @property {number} WearTime
  * @property {number} RemoveTime
  * @property {number} RemoveTimer
- * @property {number} DrawingPriority
- * @property {number} HeightModifier
  * @property {number} MaxTimer
- * @property {number[][]} Alpha
- * @property {string} Prerequisite
+ * @property {number} [DrawingPriority]
+ * @property {number} [DrawingLeft]
+ * @property {number} [DrawingTop]
+ * @property {number} HeightModifier
+ * @property {number} ZoomModifier
+ * @property {AlphaDefinition[]} [Alpha]
+ * @property {string | string[]} [Prerequisite]
  * @property {boolean} Extended
+ * @property {boolean} AlwaysExtend
+ * @property {boolean} AlwaysInteract
  * @property {boolean} AllowLock
  * @property {boolean} IsLock
+ * @property {number} PickDifficulty
  * @property {boolean} OwnerOnly
  * @property {boolean} LoverOnly
- * @property {ExpressionTrigger[]} ExpressionTrigger
- * @property {AssetLayer[]} Layer
- * @property {string[]} AllowEffect
- * @property {string[]} AllowBlock
- * @property {string[]} AllowType
- * @property {any[]} RemoveItemOnRemove
- * @property {boolean} IgnoreParentGroup
+ * @property {ExpressionTrigger[]} [ExpressionTrigger]
+ * @property {{ Name: string; Group: string; Type?: string; }[]} RemoveItemOnRemove
+ * @property {string[]} [AllowEffect]
+ * @property {string[]} [AllowBlock]
+ * @property {string[]} [AllowType]
+ * @property {string | string[]} [DefaultColor]
+ * @property {number} Opacity
+ * @property {number} MinOpacity
+ * @property {number} MaxOpacity
+ * @property {string} [Audio]
+ * @property {string[]} [Category]
+ * @property {string[]} [Fetish]
+ * @property {Record<string, string>} [CustomBlindBackground]
+ * @property {string} ArousalZone
  * @property {boolean} IsRestraint
- * @property {string} DynamicGroupName
+ * @property {boolean} BodyCosplay
+ * @property {boolean} OverrideBlinking
+ * @property {number} [DialogSortOverride]
  * @property {() => string} DynamicDescription
  * @property {() => string} DynamicPreviewIcon
  * @property {() => boolean} DynamicAllowInventoryAdd
- * @property {() => any} DynamicExpressionTrigger
+ * @property {() => ExpressionTrigger} DynamicExpressionTrigger
+ * @property {() => string} DynamicName
+ * @property {string} DynamicGroupName
+ * @property {() => string[] | string | undefined} DynamicActivity
+ * @property {(() => string) | null} DynamicAudio
+ * @property {boolean} CharacterRestricted
+ * @property {boolean} AllowRemoveExclusive
+ * @property {string} [InheritColor]
+ * @property {boolean} DynamicBeforeDraw
+ * @property {boolean} DynamicAfterDraw
+ * @property {boolean} DynamicScriptDraw
+ * @property {boolean} HasType
+ * @property {string[]} [AllowLockType]
+ * @property {boolean} AllowColorizeAll
+ * @property {string[]} AvailableLocations
+ * @property {{ Height: number; Priority: number; HeightRatioProportion?: number }} [OverrideHeight]
+ * @property {string[]} FreezeActivePose
+ * @property {boolean} DrawLocks
+ * @property {string[]} [AllowExpression]
+ * @property {string} [MirrorExpression]
+ * @property {boolean} FixedPosition
+ * @property {AssetLayer[]} Layer
+ * @property {number} ColorableLayerCount
  */
 
 /**
