@@ -1,42 +1,13 @@
 "use strict";
+
+/** @type {Asset[]} */
 var Asset = [];
+/** @type {AssetGroup[]} */
 var AssetGroup = [];
+/** @type {AssetGroup} */
 var AssetCurrentGroup;
+/** @type {Pose[]} */
 var Pose = [];
-
-/**
- * An object defining a drawable layer of an asset
- * @typedef {Object} Layer
- * @property {string | null} Name - the name of the layer - may be null if the asset only contains a single default layer
- * @property {boolean} AllowColorize - whether or not this layer can be colored
- * @property {string | null} CopyLayerColor - if not null, specifies that this layer should always copy the color of the named layer
- * @property {string} [ColorGroup] - specifies the name of a color group that this layer belongs to. Any layers within the same color group
- * can be colored together via the item color UI
- * @property {boolean} HideColoring - whether or not this layer can be coloured in the colouring UI
- * @property {string[] | null} AllowTypes - A list of allowed extended item types that this layer permits - the layer will only be drawn if
- * the item type matches one of these types. If null, the layer is considered to permit all extended types.
- * @property {boolean} HasType - whether or not the layer has separate assets per type. If not, the extended type will not be included in
- * the URL when fetching the layer's image
- * @property {string | null} [ParentGroupName] - The name of the parent group for this layer. If null, the layer has no parent group. If
- * undefined, the layer inherits its parent group from it's asset/group.
- * @property {string[] | null} OverrideAllowPose - An array of poses that this layer permits. If set, it will override the poses permitted
- * by the parent asset/group.
- * @property {number} Priority - The drawing priority of this layer. Inherited from the parent asset/group if not specified in the layer
- * definition.
- * @property {Asset} Asset - The asset that this layer belongs to
- * @property {number} ColorIndex - The coloring index for this layer
- */
-
-/**
- * An object defining a group of alpha masks to be applied when drawing an asset layer
- * @typedef AlphaDefinition
- * @property {string[]} [Group] - A list of the group names that the given alpha masks should be applied to. If empty or not present, the
- * alpha masks will be applied to every layer underneath the present one.
- * @property {string[]} [Pose] - A list of the poses that the given alpha masks should be applied to. If empty or not present, the alpha
- * masks will be applied regardless of character pose.
- * @property {number[][]} Masks - A list of alpha mask definitions. A definition is a 4-tuple of numbers defining the top left coordinate of
- * a rectangle and the rectangle's width and height - e.g. [left, top, width, height]
- */
 
 // Adds a new asset group to the main list
 function AssetGroupAdd(NewAssetFamily, NewAsset) {
@@ -216,7 +187,7 @@ function AssetBuildExtended(A, ExtendedConfig) {
  * the lock). If the asset definition contains no layer definitions, a default layer definition will be created.
  * @param {Object} AssetDefinition - The raw asset definition
  * @param {Asset} A - The built asset
- * @return {Layer[]} - An array of layer objects representing the drawable layers of the asset
+ * @return {AssetLayer[]} - An array of layer objects representing the drawable layers of the asset
  */
 function AssetBuildLayer(AssetDefinition, A) {
 	var Layers = Array.isArray(AssetDefinition.Layer) ? AssetDefinition.Layer : [{}];
@@ -229,7 +200,7 @@ function AssetBuildLayer(AssetDefinition, A) {
  * @param {Object} AssetDefinition - The raw asset definition
  * @param {Asset} A - The built asset
  * @param {number} I - The index of the layer within the asset
- * @return {Layer} - A Layer object representing the drawable properties of the given layer
+ * @return {AssetLayer} - A Layer object representing the drawable properties of the given layer
  */
 function AssetMapLayer(Layer, AssetDefinition, A, I) {
 	const L = {

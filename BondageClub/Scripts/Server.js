@@ -1,18 +1,3 @@
-/**
- * An item is a pair of asset and its dynamic properties that define a worn asset.
- * @typedef {{Asset: object, Color: string, Difficulty: number, Property: object | undefined}} Item
- */
-
-/**
- * An appearance array is an array of object defining each appearance item of a character in all of its details.
- * @typedef {Array.<Item>} AppearanceArray
- */
-
-/**
- * An appearance bundle is an array of object defining each appearance item of a character. It's a minified version of the normal appearance array
- * @typedef {Array.<{Group: string, Name: string, Difficulty: number | undefined, Color: string | undefined, Property: object | undefined}>} AppearanceBundle
- */
-
 "use strict";
 /** @type {import("socket.io-client").Socket} */
 var ServerSocket = null;
@@ -261,8 +246,8 @@ function ServerPlayerRelationsSync() {
 
 /** 
  * Prepares an appearance bundle so we can push it to the server. It minimizes it by keeping only the necessary information. (Asset name, group name, color, properties and difficulty)
- * @param {AppearanceArray} Appearance - The appearance array to bundle
- * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array
+ * @param {Item[]} Appearance - The appearance array to bundle
+ * @returns {ItemBundle[]} - The appearance bundle created from the given appearance array
  */
 function ServerAppearanceBundle(Appearance) {
 	var Bundle = [];
@@ -458,7 +443,7 @@ function ServerDeleteLock(Property) {
  * Loads the appearance assets from a server bundle that only contains the main info (no asset) and validates their properties to prevent griefing and respecting permissions in multiplayer
  * @param {Character} C - Character for which to load the appearance
  * @param {string} AssetFamily - Family of assets used for the appearance array
- * @param {AppearanceBundle} Bundle - Bundled appearance
+ * @param {ItemBundle[]} Bundle - Bundled appearance
  * @param {number} SourceMemberNumber - Member number of the user who triggered the change
  * @returns {void} - Nothing
  */
