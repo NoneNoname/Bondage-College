@@ -148,7 +148,7 @@
 /**
  * @typedef {object} Pose
  * @property {string} Name
- * @property {'BodyUpper' | 'BodyLower'} [Category]
+ * @property {'BodyUpper' | 'BodyLower' | 'BodyFull'} [Category]
  * @property {true} [AllowMenu]
  * @property {{ Height: number; Priority: number; }} [OverrideHeight]
  * @property {string[]} [Hide]
