@@ -482,7 +482,7 @@ function PreferenceInitPlayer() {
 			toUpdate[prop] = C[prop];
 
 	if (Object.keys(toUpdate).length > 0) {
-		ServerSend("AccountUpdate", toUpdate);
+		ServerAccountUpdate.QueueData(toUpdate);
 	}
 }
 
@@ -927,7 +927,7 @@ function PreferenceExit() {
 		LabelColor: Player.LabelColor,
 		LimitedItems: CommonPackItemArray(Player.LimitedItems),
 	};
-	ServerSend("AccountUpdate", P);
+	ServerAccountUpdate.QueueData(P);
 	PreferenceMessage = "";
 	CommonSetScreen("Character", "InformationSheet");
 }

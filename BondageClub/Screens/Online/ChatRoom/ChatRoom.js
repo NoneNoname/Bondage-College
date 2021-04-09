@@ -906,7 +906,7 @@ function ChatRoomSetLastChatRoom(room) {
 		LastChatRoomAdmin: Player.LastChatRoomAdmin.toString(),
 		
 	};
-	ServerSend("AccountUpdate", P);
+	ServerAccountUpdate.QueueData(P);
 }
 
 /**
@@ -2945,7 +2945,7 @@ function ChatRoomSafewordRevert() {
 		ServerSend("ChatRoomChat", { Content: "ActionActivateSafewordRevert", Type: "Action", Dictionary: [{ Tag: "SourceCharacter", Text: Player.Name }] });
 		if (Player.ItemPermission < 3) {
 			Player.ItemPermission = 3;
-			ServerSend("AccountUpdate", { ItemPermission: Player.ItemPermission });
+			ServerAccountUpdate.QueueData({ ItemPermission: Player.ItemPermission }, true);
 			setTimeout(() => ChatRoomCharacterUpdate(Player), 5000);
 		}
 	}
