@@ -1390,10 +1390,8 @@ function ChatRoomSendChat() {
 	if (msg != "") {
 
 		// Keeps the chat log in memory so it can be accessed with pageup/pagedown
-		if (!CommonIsMobile) {
-			ChatRoomLastMessage.push(msg);
-			ChatRoomLastMessageIndex = ChatRoomLastMessage.length;
-		}
+		ChatRoomLastMessage.push(msg);
+		ChatRoomLastMessageIndex = ChatRoomLastMessage.length;
 		CommandParse(msg);
 
 	}

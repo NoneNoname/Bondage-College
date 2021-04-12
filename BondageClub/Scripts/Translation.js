@@ -1,7 +1,6 @@
 "use strict";
 var TranslationLanguage = "EN";
 var TranslationCache = {};
-var TranslationTextCache = {};
 
 /**
  * Dictionary for all supported languages and their files
@@ -496,12 +495,8 @@ function TranslationNextLanguage() {
 			else
 				TranslationLanguage = TranslationDictionary[0].LanguageCode;
 			localStorage.setItem("BondageClubLanguage", TranslationLanguage);
-			break;
+			return;
 		}
-	Object
-		.values(TranslationTextCache)
-		.filter(Boolean)
-		.forEach(C => C.buildCache());
 }
 
 /**
