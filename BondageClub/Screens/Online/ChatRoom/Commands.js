@@ -48,6 +48,11 @@ function CommandCombine(add) {
     Commands.sort((A, B) => (A.Tag > B.Tag) ? 1 : ((B.Tag > A.Tag) ? -1 : 0));
 }
 
+/** Return all awailable commands */
+function GetCommands() {
+    return Commands;
+}
+
 /**
  * Parse the user message
  * @param {string} msg
@@ -107,7 +112,7 @@ function CommandParse(msg) {
  */
 function CommandHelp(low, timeout) {
     ChatRoomSendLocal(TextGet("CommandHelp").replace('KeyWord', low), timeout)
-    CommandPrintHelpFor(Commands.filter(C => low == null || low == "" || C.Tag.includes(low)), timeout);
+    CommandPrintHelpFor(GetCommands().filter(C => low == null || low == "" || C.Tag.includes(low)), timeout);
 }
 
 /**
@@ -131,9 +136,9 @@ function CommandPrintHelpFor(commands, timeout) {
  */
 function CommandExecute(msg) {
     const low = msg.toLowerCase();
-    let C = Commands.filter(C => low.indexOf(CommandsKey + C.Tag) == 0);
+    let C = GetCommands().filter(C => low.indexOf(CommandsKey + C.Tag) == 0);
     C = C[0] && C.reduce(function (a, b) { return a.length > b.length ? a : b; });
-    if (C && C.Reference) C = Commands.find(D => D.Tag == C.Reference);
+    if (C && C.Reference) C = GetCommands().find(D => D.Tag == C.Reference);
     if (C == null) {
         ElementValue("InputChat", CommandsKey + "invalid " + TextGet("CommandNoSuchCommand"));
         return;
@@ -159,7 +164,7 @@ function CommandAutoComplete(msg) {
     if (low.substr(CommandsKey.length).startsWith(CommandsKey)) return;
     if (low.includes(' ')) return;
 
-    const CS = Commands.filter(C => (CommandsKey + C.Tag).indexOf(low) == 0);
+    const CS = GetCommands().filter(C => (CommandsKey + C.Tag).indexOf(low) == 0);
     if (CS.length == 0) return;
 
     if (CS.length == 1) {
@@ -338,10 +343,7 @@ const CommonCommands = [
         Tag: 'beep',
         Action: arg => {
             const T = parseInt(arg);
-            if (isFinite(T) && T >= 0) {
-                const C = ChatRoomCharacter.find(C => C.MemberNumber == T);
-                FriendListBeep(T, (C && C.Name) || ("#" + T.toString()));
-            }
+            if (isFinite(T) && T > 0) FriendListBeep(T);
         }
     },
 ];

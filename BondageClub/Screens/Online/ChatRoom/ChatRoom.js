@@ -1344,6 +1344,9 @@ function ChatRoomCanLeave() {
  */
 function ChatRoomKeyDown() {
 
+	// If a beep is active we do not consume the keydown event
+	if (document.getElementById("FriendListBeep")) return;
+
 	// If the input text is not focused and not on mobile, set the focus to it
 	if (document.activeElement.id != "InputChat") ElementFocus("InputChat");
 
@@ -1398,26 +1401,16 @@ function ChatRoomSendChat() {
 
 /**
  * Sends message to user with HTML tags
- * @param {string} msg - InnerHTML for the message
- * @param {number} [timeout] - total time to display the message in ms
+ * @param {string} Content - InnerHTML for the message
+ * @param {number} [Timeout] - total time to display the message in ms
  * @returns {void} - Nothing
  */
-function ChatRoomSendLocal(msg, timeout) {
-    const div = document.createElement("div");
-    div.setAttribute('class', 'ChatMessage');
-    div.setAttribute('data-time', ChatRoomCurrentTime());
-	div.setAttribute('data-sender', Player.MemberNumber.toString());
-	div.innerHTML = msg;
-
-	if (timeout > 0) setTimeout(() => div.remove(), timeout);
-
-    const Refocus = document.activeElement.id == "InputChat";
-    const ShouldScrollDown = ElementIsScrolledToEnd("TextAreaChatLog");
-    if (document.getElementById("TextAreaChatLog") != null) {
-        document.getElementById("TextAreaChatLog").appendChild(div);
-        if (ShouldScrollDown) ElementScrollToEnd("TextAreaChatLog");
-        if (Refocus) ElementFocus("InputChat");
-    }
+function ChatRoomSendLocal(Content, Timeout) {
+	ChatRoomMessage({
+		Sender: Player.MemberNumber,
+		Type: "LocalMessage",
+		Content, Timeout,
+	});
 }
 
 /**
@@ -1790,6 +1783,9 @@ function ChatRoomMessage(data) {
 				}
 				else if (data.Type == "Action") msg = "(" + msg + ")";
 				else if (data.Type == "ServerMessage") msg = "<b>" + msg + "</b>";
+
+				// Local messages can have HTML enbeded in them
+				else if (data.Type == "LocalMessage") msg = data.Content;
 			}
 
 			// Outputs the sexual activities text and runs the activity if the player is targeted
@@ -1838,6 +1834,8 @@ function ChatRoomMessage(data) {
 			if (data.Type == "Emote" || data.Type == "Action" || data.Type == "Activity")
 				div.setAttribute('style', 'background-color:' + ChatRoomGetTransparentColor(SenderCharacter.LabelColor) + ';');
 			div.innerHTML = msg;
+
+			if (typeof data.Timeout === 'number' && data.Timeout > 0) setTimeout(() => div.remove(), data.Timeout);
 
 			// Returns the focus on the chat box
 			var Refocus = document.activeElement.id == "InputChat";
