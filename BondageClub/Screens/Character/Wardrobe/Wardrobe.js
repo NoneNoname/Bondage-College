@@ -1,5 +1,5 @@
 "use strict";
-var WardrobeBackground = "PrivateDark";
+var WardrobeBackground = "Private";
 var WardrobeCharacter = [];
 var WardrobeSelection = -1;
 var WardrobeOffset = 0;
@@ -46,7 +46,7 @@ function WardrobeLoadCharacters(Fast) {
 		if (WardrobeCharacter.length <= P && ((W == null) || !Fast)) {
 
 			// Creates a character
-			CharacterReset(Character.length, "Female3DCG");
+			CharacterReset(CharacterNextId++, "Female3DCG");
 			var C = Character[Character.length - 1];
 			C.AccountName = "Wardrobe-" + P.toString();
 			C.Name = Player.WardrobeCharacterNames[P];
@@ -88,6 +88,7 @@ function WardrobeLoadCharacters(Fast) {
  */
 function WardrobeLoad() {
 	WardrobeSelection = -1;
+	CurrentDarkFactor = 0.5;
 	WardrobeLoadCharacters(false);
 }
 

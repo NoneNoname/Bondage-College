@@ -12,6 +12,8 @@
 	<title>Bondage Club</title>
 	<link rel="icon" type="image/png" href="Icons/Logo.png">
 	<link rel="stylesheet" href="CSS/Styles.css">
+	<link rel="stylesheet" href="CSS/chessboard-0.3.0.css">
+	<link rel="stylesheet" href="CSS/Chess.css">
 </head>
 
 <script src="Backgrounds/Backgrounds.js"></script>
@@ -22,7 +24,6 @@
 <script src="Scripts/Animation.js"></script>
 <script src="Scripts/Mouse.js"></script>
 <script src="Scripts/Drawing.js"></script>
-<script src="Scripts/Drawing3D.js"></script>
 <script src="Scripts/Timer.js"></script>
 <script src="Scripts/AfkTimer.js"></script>
 <script src="Scripts/GameLog.js"></script>
@@ -31,6 +32,8 @@
 <script src="Scripts/Character.js"></script>
 <script src="Scripts/CharacterName.js"></script>
 <script src="Scripts/ColorPicker.js"></script>
+<script src="Scripts/ControllerSupport.js"></script>
+<script src="Scripts/Struggle.js"></script>
 <script src="Scripts/Dialog.js"></script>
 <script src="Scripts/Speech.js"></script>
 <script src="Scripts/Text.js"></script>
@@ -40,19 +43,22 @@
 <script src="Scripts/Audio.js"></script>
 <script src="Scripts/MiniGame.js"></script>
 <script src="Scripts/NPC.js"></script>
+<script src="Scripts/Validation.js"></script>
 <script src="Scripts/Server.js"></script>
 <script src="Scripts/Element.js"></script>
 <script src="Scripts/Translation.js"></script>
 <script src="Scripts/Activity.js"></script>
 <script src="Scripts/ExtendedItem.js"></script>
+<script src="Scripts/ModularItem.js"></script>
+<script src="Scripts/TypedItem.js"></script>
 <script src="Screens/Character/ItemColor/ItemColor.js"></script>
 <script src="Scripts/LZString.js"></script>
 <script src="Scripts/VibratorMode.js"></script>
-<script src="Scripts/socket.io/socket.io.js"></script>
-<script src="Scripts/three/three.min.js"></script>
-<script src="Scripts/three/inflate.min.js"></script>
-<script src="Scripts/three/FBXLoader.js"></script>
+<script src="Scripts/socket.io/socket.io.min.js"></script>
+<script src="Scripts/DynamicDraw.js"></script>
+<script src="Scripts/Notification.js"></script>
 <script src="Assets/Female3DCG/Female3DCG.js"></script>
+<script src="Assets/Female3DCG/Female3DCGExtended.js"></script>
 <script src="Screens/Character/Login/Login.js"></script>
 <script src="Screens/Character/Appearance/Appearance.js"></script>
 <script src="Screens/Character/Creation/Creation.js"></script>
@@ -89,8 +95,12 @@
 <script src="Screens/Room/CollegeTheater/CollegeTheater.js"></script>
 <script src="Screens/Room/CollegeDetention/CollegeDetention.js"></script>
 <script src="Screens/Room/CollegeTeacher/CollegeTeacher.js"></script>
+<script src="Screens/Room/CollegeChess/CollegeChess.js"></script>
 <script src="Screens/Room/LARP/LARP.js"></script>
 <script src="Screens/Room/MovieStudio/MovieStudio.js"></script>
+<script src="Screens/Room/Infiltration/Infiltration.js"></script>
+<script src="Screens/Room/InfiltrationPerks/InfiltrationPerks.js"></script>
+<script src="Screens/Room/Pandora/Pandora.js"></script>
 <script src="Screens/Room/Gambling/Gambling.js"></script>
 <script src="Screens/Room/Prison/Prison.js"></script>
 <script src="Screens/Room/Photographic/Photographic.js"></script>
@@ -98,7 +108,9 @@
 <script src="Screens/Room/Magic/Magic.js"></script>
 <script src="Screens/Room/Nursery/Nursery.js"></script>
 <script src="Screens/Room/Cafe/Cafe.js"></script>
+<script src="Screens/Room/Arcade/Arcade.js"></script>
 <script src="Screens/MiniGame/HorseWalk/HorseWalk.js"></script>
+<script src="Screens/MiniGame/GetUp/GetUp.js"></script>
 <script src="Screens/MiniGame/Kidnap/Kidnap.js"></script>
 <script src="Screens/MiniGame/MaidDrinks/MaidDrinks.js"></script>
 <script src="Screens/MiniGame/MaidCleaning/MaidCleaning.js"></script>
@@ -109,6 +121,11 @@
 <script src="Screens/MiniGame/Tennis/Tennis.js"></script>
 <script src="Screens/MiniGame/PuppyWalker/PuppyWalker.js"></script>
 <script src="Screens/MiniGame/DojoStruggle/DojoStruggle.js"></script>
+<script src="Screens/MiniGame/Chess/jquery-3.2.1.min.js"></script>
+<script src="Screens/MiniGame/Chess/chess.min.js"></script>
+<script src="Screens/MiniGame/Chess/chessboard-0.3.0.js"></script>
+<script src="Screens/MiniGame/Chess/chess.js"></script>
+<script src="Screens/MiniGame/Chess/BondageChess.js"></script>
 <script src="Screens/Cutscene/PlayerCollaring/PlayerCollaring.js"></script>
 <script src="Screens/Cutscene/PlayerMistress/PlayerMistress.js"></script>
 <script src="Screens/Cutscene/NPCCollaring/NPCCollaring.js"></script>
@@ -123,6 +140,7 @@
 <script src="Screens/Online/Game/OnlineGame.js"></script>
 <script src="Screens/Online/GameLARP/GameLARP.js"></script>
 <script src="Screens/Inventory/ItemMouth/PumpGag/PumpGag.js"></script>
+<script src="Screens/Inventory/ItemHead/InteractiveVRHeadset/InteractiveVRHeadset.js"></script>
 <script src="Screens/Inventory/ItemVulva/VibratingEgg/VibratingEgg.js"></script>
 <script src="Screens/Inventory/ItemVulva/VibratingLatexPanties/VibratingLatexPanties.js"></script>
 <script src="Screens/Inventory/ItemVulva/WandBelt/WandBelt.js"></script>
@@ -136,6 +154,8 @@
 <script src="Screens/Inventory/ItemNeck/AutoShockCollar/AutoShockCollar.js"></script>
 <script src="Screens/Inventory/ItemNeckAccessories/CollarShockUnit/CollarShockUnit.js"></script>
 <script src="Screens/Inventory/ItemNeckAccessories/CollarAutoShockUnit/CollarAutoShockUnit.js"></script>
+<script src="Screens/Inventory/ItemArms/MetalCuffs/MetalCuffs.js"></script>
+<script src="Screens/Inventory/ItemArms/CeilingShackles/CeilingShackles.js"></script>
 <script src="Screens/Inventory/ItemArms/HempRope/HempRope.js"></script>
 <script src="Screens/Inventory/ItemArms/LeatherCuffs/LeatherCuffs.js"></script>
 <script src="Screens/Inventory/ItemArms/StraitJacket/StraitJacket.js"></script>
@@ -143,6 +163,7 @@
 <script src="Screens/Inventory/ItemArms/Chains/Chains.js"></script>
 <script src="Screens/Inventory/ItemArms/MermaidSuit/MermaidSuit.js"></script>
 <script src="Screens/Inventory/ItemArms/Web/Web.js"></script>
+<script src="Screens/Inventory/ItemArms/WrappedBlanket/WrappedBlanket.js"></script>
 <script src="Screens/Inventory/ItemHands/PaddedMittens/PaddedMittens.js"></script>
 <script src="Screens/Inventory/ItemHands/PawMittens/PawMittens.js"></script>
 <script src="Screens/Inventory/ItemMouth/ClothGag/ClothGag.js"></script>
@@ -155,6 +176,10 @@
 <script src="Screens/Inventory/ItemMisc/IntricatePadlock/IntricatePadlock.js"></script>
 <script src="Screens/Inventory/ItemMisc/TimerPadlock/TimerPadlock.js"></script>
 <script src="Screens/Inventory/ItemMisc/CombinationPadlock/CombinationPadlock.js"></script>
+<script src="Screens/Inventory/ItemMisc/HighSecurityPadlock/HighSecurityPadlock.js"></script>
+<script src="Screens/Inventory/ItemMisc/PasswordPadlock/PasswordPadlock.js"></script>
+<script src="Screens/Inventory/ItemMisc/SafewordPadlock/SafewordPadlock.js"></script>
+<script src="Screens/Inventory/ItemMisc/TimerPasswordPadlock/TimerPasswordPadlock.js"></script>
 <script src="Screens/Inventory/ItemMisc/MistressTimerPadlock/MistressTimerPadlock.js"></script>
 <script src="Screens/Inventory/ItemMisc/OwnerTimerPadlock/OwnerTimerPadlock.js"></script>
 <script src="Screens/Inventory/ItemMisc/OwnerPadlock/OwnerPadlock.js"></script>
@@ -170,13 +195,16 @@
 <script src="Screens/Inventory/ItemMouth/PlugGag/PlugGag.js"></script>
 <script src="Screens/Inventory/ItemMouth/FuturisticPanelGag/FuturisticPanelGag.js"></script>
 <script src="Screens/Inventory/ItemMouth/FuturisticHarnessPanelGag/FuturisticHarnessPanelGag.js"></script>
+<script src="Screens/Inventory/ItemMouth/FuturisticHarnessBallGag/FuturisticHarnessBallGag.js"></script>
 <script src="Screens/Inventory/ItemArms/FuturisticCuffs/FuturisticCuffs.js"></script>
 <script src="Screens/Inventory/ItemLegs/FuturisticLegCuffs/FuturisticLegCuffs.js"></script>
 <script src="Screens/Inventory/ItemFeet/FuturisticAnkleCuffs/FuturisticAnkleCuffs.js"></script>
 <script src="Screens/Inventory/ItemNeck/FuturisticCollar/FuturisticCollar.js"></script>
+<script src="Screens/Inventory/ItemTorso/FuturisticHarness/FuturisticHarness.js"></script>
 <script src="Screens/Inventory/ItemMouth/DildoPlugGag/DildoPlugGag.js"></script>
 <script src="Screens/Inventory/ItemHands/SpankingToys/SpankingToy.js"></script>
 <script src="Screens/Inventory/ItemTorso/HempRopeHarness/HempRopeHarness.js"></script>
+<script src="Screens/Inventory/ItemTorso/LatexCorset1/LatexCorset1.js"></script>
 <script src="Screens/Inventory/ItemTorso/NylonRopeHarness/NylonRopeHarness.js"></script>
 <script src="Screens/Inventory/ItemFeet/HempRope/HempRope.js"></script>
 <script src="Screens/Inventory/ItemArms/TightJacket/TightJacket.js"></script>
@@ -212,6 +240,10 @@
 <script src="Screens/Inventory/ItemDevices/CryoCapsule/CryoCapsule.js"></script>
 <script src="Screens/Inventory/ItemArms/LeatherStraitJacket/LeatherStraitJacket.js"></script>
 <script src="Screens/Inventory/ItemArms/FuturisticArmbinder/FuturisticArmbinder.js"></script>
+<script src="Screens/Inventory/ItemArms/FuturisticStraitjacket/FuturisticStraitjacket.js"></script>
+<script src="Screens/Inventory/ItemAddon/CeilingChain/CeilingChain.js"></script>
+<script src="Screens/Inventory/ItemAddon/CeilingRope/CeilingRope.js"></script>
+<script src="Screens/Inventory/ItemHands/FuturisticMittens/FuturisticMittens.js"></script>
 <script src="Screens/Inventory/ItemArms/CollarCuffs/CollarCuffs.js"></script>
 <script src="Screens/Inventory/ItemDevices/InflatableBodyBag/InflatableBodyBag.js"></script>
 <script src="Screens/Inventory/ItemArms/WristShackles/WristShackles.js"></script>
@@ -235,11 +267,13 @@
 <script src="Screens/Inventory/ItemFeet/OrnateAnkleCuffs/OrnateAnkleCuffs.js"></script>
 <script src="Screens/Inventory/ItemArms/FullLatexSuit/FullLatexSuit.js"></script>
 <script src="Screens/Inventory/ItemVulva/FullLatexSuitWand/FullLatexSuitWand.js"></script>
+<script src="Screens/Inventory/ItemVulva/FuturisticVibrator/FuturisticVibrator.js"></script>
 <script src="Screens/Inventory/ItemArms/LeatherArmbinder/LeatherArmbinder.js"></script>
 <script src="Screens/Inventory/ItemArms/BitchSuit/BitchSuit.js"></script>
 <script src="Screens/Inventory/ItemArms/TightJacketCrotch/TightJacketCrotch.js"></script>
 <script src="Screens/Inventory/ItemArms/InflatableStraightLeotard/InflatableStraightLeotard.js"></script>
 <script src="Screens/Inventory/ItemDevices/Locker/Locker.js"></script>
+<script src="Screens/Inventory/ItemDevices/PetBowl/PetBowl.js"></script>
 <script src="Screens/Inventory/ItemDevices/SmallLocker/SmallLocker.js"></script>
 <script src="Screens/Inventory/ItemDevices/VentlessLocker/VentlessLocker.js"></script>
 <script src="Screens/Inventory/ItemDevices/SmallVentlessLocker/SmallVentlessLocker.js"></script>
@@ -248,87 +282,163 @@
 <script src="Screens/Inventory/ItemPelvis/MetalChastityBelt/MetalChastityBelt.js"></script>
 <script src="Screens/Inventory/ItemPelvis/PolishedChastityBelt/PolishedChastityBelt.js"></script>
 <script src="Screens/Inventory/ItemPelvis/FuturisticChastityBelt/FuturisticChastityBelt.js"></script>
+<script src="Screens/Inventory/ItemPelvis/FuturisticChastityBelt2/FuturisticChastityBelt2.js"></script>
+<script src="Screens/Inventory/ItemPelvis/SciFiPleasurePanties/SciFiPleasurePanties.js"></script>
 <script src="Screens/Inventory/ItemBreast/FuturisticBra/FuturisticBra.js"></script>
+<script src="Screens/Inventory/ItemBreast/FuturisticBra2/FuturisticBra2.js"></script>
 <script src="Screens/Inventory/ItemPelvis/OrnateChastityBelt/OrnateChastityBelt.js"></script>
 <script src="Screens/Inventory/ItemPelvis/StuddedChastityBelt/StuddedChastityBelt.js"></script>
 <script src="Screens/Inventory/ItemPelvis/HempRope/HempRope.js"></script>
 <script src="Screens/Inventory/ItemBoots/FuturisticHeels/FuturisticHeels.js"></script>
-<script src="Screens/Inventory/ItemDevices/Crib/Crib.js"></script>
 <script src="Screens/Inventory/ItemMouth/MilkBottle/MilkBottle.js"></script>
 <script src="Screens/Inventory/ItemNose/NoseRing/NoseRing.js"></script>
 <script src="Screens/Inventory/ItemButt/ShockPlug/ShockPlug.js"></script>
 <script src="Screens/Inventory/ItemVulva/ShockDildo/ShockDildo.js"></script>
 <script src="Screens/Inventory/ItemNipples/ShockClamps/ShockClamps.js"></script>
+<script src="Screens/Inventory/ItemMouth/BallGag/BallGag.js"></script>
+<script src="Screens/Inventory/ItemMouth2/BallGag/BallGag.js"></script>
+<script src="Screens/Inventory/ItemMouth3/BallGag/BallGag.js"></script>
+<script src="Screens/Inventory/ItemMouth/HarnessBallGag/HarnessBallGag.js"></script>
+<script src="Screens/Inventory/ItemMouth2/HarnessBallGag/HarnessBallGag.js"></script>
+<script src="Screens/Inventory/ItemMouth3/HarnessBallGag/HarnessBallGag.js"></script>
+<script src="Screens/Inventory/ItemMouth/WiffleGag/WiffleGag.js"></script>
+<script src="Screens/Inventory/ItemMouth2/WiffleGag/WiffleGag.js"></script>
+<script src="Screens/Inventory/ItemMouth3/WiffleGag/WiffleGag.js"></script>
 <script src="Screens/Inventory/ItemMouth/CupholderGag/CupholderGag.js"></script>
 <script src="Screens/Inventory/ItemMouth2/CupholderGag/CupholderGag.js"></script>
 <script src="Screens/Inventory/ItemMouth3/CupholderGag/CupholderGag.js"></script>
 <script src="Screens/Inventory/ItemButt/BunnyTailVibePlug/BunnyTailVibePlug.js"></script>
 <script src="Screens/Inventory/ItemButt/EggVibePlugXXL/EggVibePlugXXL.js"></script>
 <script src="Screens/Inventory/ItemNipples/LactationPump/LactationPump.js"></script>
-<script src="Screens/Inventory/ItemArms/LatexButterflyLeotard/LatexButterflyLeotard.js"></script>
-<script src="Screens/Inventory/ItemArms/LatexBoxtieLeotard/LatexBoxtieLeotard.js"></script>
-<script src="Screens/Inventory/ItemArms/LatexSleevelessLeotard/LatexSleevelessLeotard.js"></script>
 <script src="Screens/Inventory/ItemArms/PrisonLockdownSuit/PrisonLockdownSuit.js"></script>
-<script src="Screens/Inventory/ItemArms/HighSecurityStraitJacket/HighSecurityStraitJacket.js"></script>
+<script src="Screens/Inventory/Corset/LatexCorset1/LatexCorset1.js"></script>
 <script src="Screens/Inventory/Necklace/NecklaceKey/NecklaceKey.js"></script>
 <script src="Screens/Inventory/Necklace/NecklaceLock/NecklaceLock.js"></script>
 <script src="Screens/Inventory/ItemNeckAccessories/CustomCollarTag.js/CustomCollarTag.js"></script>
+<script src="Screens/Inventory/ItemNeckAccessories/ElectronicTag/ElectronicTag.js"></script>
 <script src="Screens/Inventory/ItemLegs/MermaidTail/MermaidTail.js"></script>
 <script src="Screens/Inventory/ItemMisc/WoodenSign/WoodenSign.js"></script>
+<script src="Screens/Inventory/ItemHood/GwenHood/GwenHood.js"></script>
+<script src="Screens/Inventory/ItemTorso/HeavyLatexCorset/HeavyLatexCorset.js"></script>
+<script src="Screens/Inventory/ItemMouth/FunnelGag/FunnelGag.js"></script>
+<script src="Screens/Inventory/ItemEars/Headphones/Headphones.js"></script>
+<script src="Screens/Inventory/ItemEars/FuturisticEarphones/FuturisticEarphones.js"></script>
+<script src="Screens/Inventory/ItemHood/CanvasHood/CanvasHood.js"></script>
+<script src="Screens/Inventory/ItemDevices/Vacbed/Vacbed.js"></script>
+<script src="Screens/Inventory/ItemDevices/WoodenBox/WoodenBox.js"></script>
+<script src="Screens/Inventory/ItemDevices/PetBed/PetBed.js"></script>
+<script src="Screens/Inventory/ItemDevices/TransportWoodenBox/TransportWoodenBox.js"></script>
+<script src="Screens/Inventory/HairAccessory3/Halo/Halo.js"></script>
+<script src="Screens/Inventory/HairAccessory1/Halo/Halo.js"></script>
+<script src="Screens/Inventory/ItemArms/TransportJacket/TransportJacket.js"></script>
+<script src="Screens/Inventory/ItemDevices/Pole/Pole.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeon.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonGame.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonParams.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonVision.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonLoot.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonStats.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonEnemies.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonRestraints.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonFight.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonDraw.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonMagic.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonItem.js"></script>
+<script src="Screens/MiniGame/KinkyDungeon/KinkyDungeonInventory.js"></script>
+<script src="Screens/Inventory/Glasses/EyePatch1/EyePatch1.js"></script>
+<script src="Screens/Inventory/ItemFeet/SpreaderMetal/SpreaderMetal.js"></script>
+<script src="Screens/Inventory/ItemNipples/PlateClamps/PlateClamps.js"></script>
+<script src="Screens/Inventory/ClothAccessory/BunnyCollarCuffs/BunnyCollarCuffs.js"></script>
+<script src="Screens/Inventory/ItemDevices/Cushion/Cushion.js"></script>
 <script>
 
 /*
 
 	NEXT VERSION:
 
-	OK - Add categories to controversial assets so they can be filtered
-	OK - Add a new screen to filter asset categories, called from room creation and room admin screen
-	OK - Make filtered room assets invisible when drawing the character
-	OK - Prevent adding filtered room assets on a character
-	OK - LARP - Introduce a levelling system which should not impact the % that much
-	OK - LARP - Make sure the game can still run if the organiser disconnects, or pause the game if it's the case
-	OK - LARP - Allow admin to set the game timer (20 or 60 seconds timers for now)
-	OK - LARP - Allow a regular room to become a LARP room and a LARP room to become a regular room
-	IN PROGRESS - Movie Studio - Add Mistress role
-	TO DO - Movie Studio - Add Maid role
-	TO DO - Proof Read
-	TO DO - Patreon Import/Update
+	Bondage Club RPG
 
-	FUTURE VERSION:
-	
-	Each restraint will have different ways (mini-games) to try to struggle out of it:
-		1. Go Berserk (Duct Tape, Cages & Boxes, Mittens, Chastity Items, Body Harnesses, Gags with harness, Hoods) - Click the circles quickly before they disappear (Asylum)
-		2. Use Strength (Duct Tape, Yokes, Cuffs & Manacles, Belts, One Bar & Bench & Bag, Armbinders, Gags without harness) - Key Speed Game: A + S (Current)
-		3. Be Clever (Rope, Yokes, Cages & Boxes, Cuffs & Manacles, Locking Boots, Collars) - Memory Game: Simon Says
-		4. Use Dexterity (Rope, Jackets & Suits, One Bar & Bench & Bag, Mittens, Body Harnesses, Gags with harness, Collars) - Timing Game: Stop the moving object at the right position
-		5. Be Supple (Jackets & Suits, Belts, Chastity Items, Gags without harness, Armbinders, Locking Boots, Hoods) - Guess the right number between 1 and 100, a few tries, tells you if higher or lower	
-		6. Pick the Lock (For anything that locks or when a lock is added) - Precision Game - Don't touch the walls that are scrolling toward you
-	
-	Add a random punishment function to online chat room to roll a random punishment for a player or yourself, the punishment will be executed manually
-	
-	To better configure online experience in the club, add many toggles and a membership types that would allow you to use these toggles or not.  There would be two types of toggles and they would only affect the multiplayer side of the game:
-	Casual toggles: for casual players, these toggles would allow you to not be affected by blindness, by gags, by deafness, by sensory deprivation, by blocking items, by items that stops you or slow you down when leaving a room, etc.
-	Hardcore toggles: these would be extra immersion options to give you more trouble: no safeword, no rescue maid, no chastity removal with the club Mistress, automatically be dragged to your owner room when beeped, etc.
-	These toggles would be available for you or not, depending on your membership type:
-	Casual member: The casual member would have access to all toggles, all the time, without restriction.
-	Regular member (default): The regular member would only have access to the hardcore toggles.  All the casual toggles would be disabled and deactivated.
-	Hardcore member: The hardcore member wouldn’t have access to any toggle.  All casual toggles would be deactivated, and all hardcore toggles would be activated, without any user control.
-	When you check someone’s profile, you will be able to see what kind of member they are and for how long they are using that membership type.  For example: (Member type: Hardcore for 7 days).
-	In the management room, the club Mistress would allow you to change your membership type (maybe force a time delay between changes) and will explain the details of each membership type.
-	When you create an online chat room, you would be able to select (with check boxes) which type of members are accepted in that chat room, by default we would allow all membership types.  Players that are not allowed in these chat rooms would not find them when they search or be able to join them.
+	Kidnapping mini-game - BDSM system changes - BDS is divided by 2 once used, doesn't heal automatically
+
+	B - Brute force (great VS domination, weak vs sneakiness)
+	Starts at 6 +1 for items:
+	Strapon Panties, Racket, Duster gag, HarnessPonyBits
+	Divided by 2 if stripped
+
+	D - Domination (great VS sneakiness, weak vs brute force)
+	Starts at 6 +1 for items:
+	Mistress Top, Gavel, Nurse Outfit, Pillory
+	Divided by 2 if gagged
+
+	S - Sneakiness (great VS brute force, weak vs domination)
+	Starts at 6 +1 for items:
+	Camera, Sleeping pills, Long duster, Studded Blindfold
+	Divided by 2 if feet are restrained
+
+	M - Meditate (Heals BDS back to full, weak against everything)
+	This skill must be timed correctly, it doesn’t damage but restores BDS back to full to be ready to attack once again.
+
+	Create an AI to pick the best option with some randomness
+
+
+	New "Rival Club" room accessible from the main hall.
+
+	That room will contain an NPC that gives missions to infiltrate a rival club: Pandora's Box
+
+	New "Infiltration" skill, earned after each mission (successful or not)
+
+	Each level in infiltration allows the user to pick a perk to help in infiltration missions:
+
+	Strength - +2 Brute force in Pandora's box
+	Charisma - +2 Domination in Pandora's box
+	Agility - +2 Sneakiness in Pandora's box
+	Resilience - +5 willpower in Pandora's box
+	Endurance - +5 willpower in Pandora's box
+	Lockpicking - One free lockpicking without mini-game
+	Keen eye - One free switch found without mini-game
+	Running - Skip one fight free, lose the opponent
+	Mapping - 1 less rooms to find final objective
+	Forgery - Skip entry maid that checks papers
+	Begging - Less time in prison if the mission fails
+	Bribery - Pay less to get out of prison freely
+	Negotiation - A little more money after each successful mission
+
+	Perks can be assigned/trained as the user wants it, before every mission.
+
+	When ready, the mission starts, a maid in red greets the player which infiltrates Pandora's box.  The rival club will have a few unique backgrounds.
+
+	The missions can be:
+	-	Rescue a kidnapped girl
+	-	Kidnap someone for a prisoner exchange
+	-	Find a stolen item
+	-	Steal some documents
+
+	Starts in room #1 with many arrows to move to random rooms #2, #3, etc.  From #2 you could reach #4 #5, etc.  Each room has its background and NPC(s).  Some NPCs will fight the player, others will need help, some will simply chat.  Some doors will be locked, needing a mini-game to unlock it.  Some rooms will have hidden switches to find by clicking everywhere, some rooms could have traps.  Willpower is carried throughout the infiltration.  If it reaches zero, the player surrenders and gets jailed for X minutes, or can bribe her way out.  A successful mission will give some money to the player and might allow her to make new friends for her private room.
+
+	Second phase ideas: 
+	-	When the player gets jailed, another online player could take the mission to go rescue her. If she succeeds, they both end up in a multiplayer room and can roleplay together.  If she fails, she gets thrown in jail with the other girl, in a multiplayer room with a cell setting, maybe raising the time sentence for both girls.
+	-	As your infiltration skill rises, you could become famous (infamous) in the rival club and they could try to kidnap you as you wander in the regular bondage club.  They could also kidnap your friends in your private room, and you could take special missions to go rescue them.
+	-	Owned online players or lover online players could also get kidnapped, the player could receive a ransom note.  If the players pay, she could free her lover or sub right away.  If the player doesn’t pay, she could start a mission to free them or let them rot in jail for X more minutes. 
+
+	TO DO - Proof-reading
+	TO DO - Patreon Import/Update
 
 */
 
 // When the code is loaded, we start the game engine
 window.onload = function() {
-	//CheatImport();
+//	CheatImport();
 	ServerURL = "https://bondage-club-server.herokuapp.com/";
+	GameVersion = "R66Beta0";
+	console.log("Version: " + GameVersion + ", Server: " + ServerURL);
+	if (!GameVersionFormat.test(GameVersion)) console.error("GameVersion is not valid!");
 	CommonIsMobile = CommonDetectMobile();
 	TranslationLoad();
 	DrawLoad();
 	AssetLoadAll();
 	CommandsLoad();
 	CommonSetScreen("Character", "Login");
+	ControllerActive = false;
 	ServerInit();
 	MainRun(0);
 };
@@ -356,6 +466,8 @@ function DocumentKeyDown(event) {
 				DialogLeaveItemMenu();
 		} else if ((CurrentCharacter != null) && (CurrentScreen == "ChatRoom")) {
 			DialogLeave();
+		} else if ((CurrentCharacter == null) && (CurrentScreen == "ChatRoom") && (document.getElementById("TextAreaChatLog") != null)) {
+			ElementScrollToEnd("TextAreaChatLog");
 		}
 	} else if (event.key == "Tab") {
 		event.preventDefault();
@@ -372,29 +484,26 @@ function Click(event) {
 }
 
 // When the user touches the screen (mobile only), we fire the click event for other screens
-function Touch(event) {
-	if (CommonIsMobile) {
-		var rect = document.getElementById("MainCanvas").getBoundingClientRect();
-		if (document.body.clientWidth <= document.body.clientHeight * 2) {
-			MouseX = Math.round((event.touches[0].clientX - rect.left) * 2000 / document.body.clientWidth);
-			MouseY = Math.round((event.touches[0].clientY - rect.top) * 2000 / document.body.clientWidth);
-		} else {
-			MouseX = Math.round((event.touches[0].clientX - rect.left) * 1000 / document.body.clientHeight);
-			MouseY = Math.round((event.touches[0].clientY - rect.top) * 1000 / document.body.clientHeight);
-		}		
+function TouchStart(/** @type {TouchEvent} */ event) {
+	if (CommonIsMobile && MainCanvas) {
+		TouchMove(event.touches[0]);
 		CommonClick();
-	} 
+	}
+}
+
+// When touch moves, we keep it's position for other scripts
+function TouchMove(/** @type {Touch} */ touch) {
+	if (MainCanvas) {
+		MouseX = Math.round((touch.pageX - MainCanvas.canvas.offsetLeft) * 2000 / MainCanvas.canvas.clientWidth);
+		MouseY = Math.round((touch.pageY - MainCanvas.canvas.offsetTop) * 1000 / MainCanvas.canvas.clientHeight);
+	}
 }
 
 // When mouse move, we keep the mouse position for other scripts
-function MouseMove(event) {
-	var rect = document.getElementById("MainCanvas").getBoundingClientRect();
-	if (document.body.clientWidth <= document.body.clientHeight * 2) {
-		MouseX = Math.round((event.clientX - rect.left) * 2000 / document.body.clientWidth);
-		MouseY = Math.round((event.clientY - rect.top) * 2000 / document.body.clientWidth);
-	} else {
-		MouseX = Math.round((event.clientX - rect.left) * 1000 / document.body.clientHeight);
-		MouseY = Math.round((event.clientY - rect.top) * 1000 / document.body.clientHeight);
+function MouseMove(/** @type {MouseEvent} */ event) {
+	if (MainCanvas) {
+		MouseX = Math.round(event.offsetX * 2000 / MainCanvas.canvas.clientWidth);
+		MouseY = Math.round(event.offsetY * 1000 / MainCanvas.canvas.clientHeight);
 	}
 }
 
@@ -405,10 +514,53 @@ function LoseFocus(event) {
 		MouseY = -1;
 	}
 }
- 
+
+</script>
+
+
+
+<div id="axes" style="display: flex; flex-direction: column;"></div>
+<script>
+    if (ControllerActive == true) {
+        window.addEventListener('gamepadconnected', (event) => {
+            const update = () => {
+                const output = document.getElementById('axes');
+                output.innerHTML = '';
+
+                for (const gamepad of navigator.getGamepads()) {
+                    if (!gamepad) continue;
+                    for (const [index, axis] of gamepad.axes.entries()) {
+                        ControllerAxis(gamepad.axes);
+                    }
+                }
+                requestAnimationFrame(update);
+            };
+            update();
+        });
+    }
+</script>
+<div id="buttons" style="display: flex; flex-direction: column;"></div>
+<script>
+    if (ControllerActive == true) {
+        window.addEventListener('gamepadconnected', (event) => {
+            const update = () => {
+                const output = document.getElementById('buttons');
+                output.innerHTML = '';
+
+                for (const gamepad of navigator.getGamepads()) {
+                    if (!gamepad) continue;
+                    for (const [index, button] of gamepad.buttons.entries()) {
+                        ControllerButton(gamepad.buttons);
+                    }
+                }
+                requestAnimationFrame(update);
+            };
+            update();
+        });
+    }
 </script>
 
 <body style="width:100%; height:100%; background-color:black; margin:0px; padding:0px; overflow:hidden;">
-	<canvas id="MainCanvas" Width="2000" Height="1000" onClick="Click(event);" onTouchStart="Touch(event);" onMouseMove="MouseMove(event);" onMouseLeave="LoseFocus(event);"></canvas>
+	<canvas id="MainCanvas" Width="2000" Height="1000" onClick="Click(event);" onTouchStart="TouchStart(event);" onMouseMove="MouseMove(event);" onMouseLeave="LoseFocus(event);"></canvas>
 </body>
 </html>

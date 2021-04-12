@@ -57,16 +57,25 @@ function CommandParse(msg) {
     if (msg.indexOf(CommandsKey) == 0) {
         CommandExecute(msg);
         return;
-    } else if (msg.indexOf("*") == 0) {
+    }
+    if (msg.indexOf("*") == 0) {
         ChatRoomSendEmote(msg);
-    } else if (m.indexOf("(") != 0 || !Player.ImmersionSettings || !Player.ImmersionSettings.BlockGaggedOOC || Player.CanTalk()) {
-        if (ChatRoomTargetMemberNumber == null) ServerSend("ChatRoomChat", { Content: msg, Type: "Chat" });
-        else {
+        ElementValue("InputChat", "");
+        return;
+    }
+    let WhisperTarget;
+    for (let C = 0; C < ChatRoomCharacter.length; C++)
+        if (ChatRoomTargetMemberNumber == ChatRoomCharacter[C].MemberNumber)
+            WhisperTarget = ChatRoomCharacter[C];
+    if (msg != "" && !((ChatRoomTargetMemberNumber != null || m.indexOf("(") >= 0) && Player.ImmersionSettings && (Player.ImmersionSettings.BlockGaggedOOC && (!Player.Effect.includes("VRAvatars") || !WhisperTarget || !WhisperTarget.Effect.includes("VRAvatars"))) && !Player.CanTalk())) {
+        if (ChatRoomTargetMemberNumber == null) {
+            // Regular chat
+            ServerSend("ChatRoomChat", { Content: msg, Type: "Chat" });
+            ChatRoomStimulationMessage("Gag");
+        } else {
+            // The whispers get sent to the server and shown on the client directly
             ServerSend("ChatRoomChat", { Content: msg, Type: "Whisper", Target: ChatRoomTargetMemberNumber });
-            let TargetName = "";
-            for (let C = 0; C < ChatRoomCharacter.length; C++)
-                if (ChatRoomTargetMemberNumber == ChatRoomCharacter[C].MemberNumber)
-                    TargetName = ChatRoomCharacter[C].Name;
+            const TargetName = WhisperTarget && WhisperTarget.Name || "";
 
             const div = document.createElement("div");
             div.setAttribute('class', 'ChatMessage ChatMessageWhisper');

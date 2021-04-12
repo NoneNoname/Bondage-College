@@ -316,6 +316,11 @@ function PrivatePlayerCanTurnTables() { return (!Player.IsRestrained() && (Reput
  * @returns {boolean} - TRUE if turning the tables is possible
  */
 function PrivateSubCanTurnTables() { return (!Player.IsRestrained() && !CurrentCharacter.IsRestrained() && !Player.IsOwned() && !PrivateOwnerInRoom() && (ReputationGet("Dominant") + 50 <= NPCTraitGet(CurrentCharacter, "Dominant")) && (NPCEventGet(CurrentCharacter, "NPCCollaring") > 0)) }
+/**
+ * Checks if it's possible to use cheats on an NPC
+ * @returns {boolean} - TRUE if we allow NPC cheats
+ */
+function PrivateNPCAllowCheat() { return (CheatFactor("ChangeNPCTrait", 0) == 0) }
 
 /**
  * Loads the private room screen and the vendor NPC.
@@ -335,10 +340,14 @@ function PrivateLoad() {
 	PrivateVendor.AllowItem = false;
 	Player.ArousalSettings.OrgasmCount = 0;
 	NPCTraitDialog(PrivateVendor);
-	for (let C = 1; C < PrivateCharacter.length; C++)
-		PrivateLoadCharacter(C);
-	PrivateRelationDecay();
+	let mustSync = false;
+	for (let C = 1; C < PrivateCharacter.length; C++) {
+		const updateRequired = PrivateLoadCharacter(C);
+		mustSync = mustSync || updateRequired;
+	}
+	mustSync = mustSync || PrivateRelationDecay();
 
+	if (mustSync) ServerPrivateCharacterSync();
 }
 
 /**
@@ -413,7 +422,11 @@ function PrivateRun() {
 
 	// Standard buttons
 	if (Player.CanWalk() && (Player.Cage == null)) DrawButton(1885, 25, 90, 90, "", "White", "Icons/Exit.png");
-	if (LogQuery("RentRoom", "PrivateRoom") && Player.CanKneel()) DrawButton(1885, 145, 90, 90, "", "White", "Icons/Kneel.png");
+	if (LogQuery("RentRoom", "PrivateRoom")) {
+		if (Player.CanKneel()) DrawButton(1885, 145, 90, 90, "", "White", "Icons/Kneel.png");
+		DrawButton(1885, 745, 90, 90, "", "White", "Icons/CollegeBackground.png", TextGet("MainHallBackground"));
+		DrawButton(1885, 865, 90, 90, "", "White", "Icons/BedroomBackground.png", TextGet("PrivateRoomBackground"));
+	}
 
 	// In orgasm mode, we add a pink filter and different controls depending on the stage
 	if ((Player.ArousalSettings != null) && (Player.ArousalSettings.Active != null) && (Player.ArousalSettings.Active != "Inactive") && (Player.ArousalSettings.Active != "NoMeter")) {
@@ -587,6 +600,29 @@ function PrivateClick() {
 	if (MouseIn(1885, 385, 90, 90) && LogQuery("RentRoom", "PrivateRoom") && Player.CanChange()) CharacterAppearanceLoadCharacter(Player);
 	if (MouseIn(1885, 505, 90, 90) && LogQuery("RentRoom", "PrivateRoom") && Player.CanChange() && LogQuery("Wardrobe", "PrivateRoom")) CommonSetScreen("Character", "Wardrobe");
 	if (MouseIn(1885, 625, 90, 90) && LogQuery("RentRoom", "PrivateRoom") && LogQuery("Expansion", "PrivateRoom")) PrivateCharacterOffset = (PrivateCharacterOffset + 4 == PrivateCharacterMax) ? 0 : PrivateCharacterOffset + 4;
+	if (MouseIn(1885, 745, 90, 90) && LogQuery("RentRoom", "PrivateRoom")) {
+		if (Player.VisualSettings == null) Player.VisualSettings = {};
+		let backgrounds = BackgroundsGenerateList(BackgroundsPrivateRoomTagList);
+		let index = backgrounds.indexOf(MainHallBackground);
+		if (index < 0) index = 0;
+		BackgroundSelectionMake(backgrounds, index, Name => {
+			Player.VisualSettings.MainHallBackground = Name;
+			ServerSend("AccountUpdate", { VisualSettings: Player.VisualSettings });
+		});
+	}
+	if (MouseIn(1885, 865, 90, 90) && LogQuery("RentRoom", "PrivateRoom")) {
+		if (Player.VisualSettings == null) Player.VisualSettings = {};
+		let backgrounds = BackgroundsGenerateList(BackgroundsPrivateRoomTagList);
+		let index = backgrounds.indexOf(PrivateBackground);
+		if (index < 0) index = 0;
+		BackgroundSelectionMake(backgrounds, index, Name => {
+			Player.VisualSettings.PrivateRoomBackground = Name;
+			PrivateBackground = Name;
+			ServerSend("AccountUpdate", { VisualSettings: Player.VisualSettings });
+		});
+		
+	}
+	
 	if ((MouseX <= 1885) && (MouseY < 900) && LogQuery("RentRoom", "PrivateRoom") && (Player.Cage == null)) PrivateClickCharacter();
 	if ((MouseX <= 1885) && (MouseY >= 900) && LogQuery("RentRoom", "PrivateRoom")) PrivateClickCharacterButton();
 
@@ -645,17 +681,26 @@ function PrivateGetSecondExpansion() {
  * @returns {void} - Nothing.
  */
 function PrivateLoadCharacter(C) {
+	let updateRequired = false;
 
 	// If there's no account, we build the full character from the server template
 	if ((PrivateCharacter[C].AccountName == null) && (PrivateCharacter[C].Name != null)) {
-		var N = CharacterLoadNPC("NPC_Private_Custom");
+		const N = CharacterLoadNPC("NPC_Private_Custom");
 		N.Name = PrivateCharacter[C].Name;
 		PrivateCharacter[C].AccountName = "NPC_Private_Custom" + N.ID.toString();
 		N.AccountName = "NPC_Private_Custom" + N.ID.toString();
 		if (PrivateCharacter[C].Title != null) N.Title = PrivateCharacter[C].Title;
 		if (PrivateCharacter[C].AssetFamily != null) N.AssetFamily = PrivateCharacter[C].AssetFamily;
-		if (PrivateCharacter[C].Appearance != null) N.Appearance = ServerAppearanceLoadFromBundle(PrivateCharacter[C], PrivateCharacter[C].AssetFamily, PrivateCharacter[C].Appearance);
-		if (PrivateCharacter[C].AppearanceFull != null) N.AppearanceFull = ServerAppearanceLoadFromBundle(PrivateCharacter[C], PrivateCharacter[C].AssetFamily, PrivateCharacter[C].AppearanceFull);
+		if (PrivateCharacter[C].Appearance != null) {
+			const loadedAppearance = ServerAppearanceLoadFromBundle(N, PrivateCharacter[C].AssetFamily, PrivateCharacter[C].Appearance);
+			N.Appearance = loadedAppearance.appearance;
+			updateRequired = updateRequired || !loadedAppearance.updateValid;
+		}
+		if (PrivateCharacter[C].AppearanceFull != null) {
+			const loadedAppearance = ServerAppearanceLoadFromBundle(N, PrivateCharacter[C].AssetFamily, PrivateCharacter[C].AppearanceFull);
+			N.AppearanceFull = loadedAppearance.appearance;
+			updateRequired = updateRequired || !loadedAppearance.updateValid;
+		}
 		if (PrivateCharacter[C].Trait != null) N.Trait = PrivateCharacter[C].Trait.slice();
 		if (PrivateCharacter[C].Cage != null) N.Cage = PrivateCharacter[C].Cage;
 		if (PrivateCharacter[C].Event != null) N.Event = PrivateCharacter[C].Event;
@@ -678,6 +723,7 @@ function PrivateLoadCharacter(C) {
 	PrivateCharacter[C].ArousalSettings.Visible = "All";
 	PrivateCharacter[C].AllowItem = (((ReputationGet("Dominant") + 25 >= NPCTraitGet(PrivateCharacter[C], "Dominant")) && !PrivateCharacter[C].IsOwner()) || PrivateCharacter[C].IsOwnedByPlayer() || PrivateCharacter[C].IsRestrained() || !PrivateCharacter[C].CanTalk());
 
+	return updateRequired;
 }
 
 /**
@@ -743,7 +789,7 @@ function PrivateChange(NewCloth) {
 	if (NewCloth == "Naked") CharacterNaked(CurrentCharacter);
 	if (NewCloth == "Custom") {
 		PrivateNPCInteraction(10);
-		CharacterChangeMoney(Player, -50);
+		if (CheatFactor("FreeNPCDress", 0) != 0) CharacterChangeMoney(Player, -50);
 		PrivateCharacterNewClothes = CurrentCharacter;
 		DialogLeave();
 		CharacterAppearanceLoadCharacter(PrivateCharacterNewClothes);
@@ -789,7 +835,7 @@ function PrivateRestrainPlayer() {
 
 /**
  * Alters relationships to make them decay after some time. Below -100, the NPC leaves if she's not caged.
- * @returns {void} - Nothing.
+ * @returns {boolean} - Whether or not any private characters require updating.
  */
 function PrivateRelationDecay() {
 	var MustSave = false;
@@ -809,7 +855,7 @@ function PrivateRelationDecay() {
 				}
 			}
 	}
-	if (MustSave) ServerPrivateCharacterSync();
+	return MustSave;
 }
 
 /**
@@ -1073,7 +1119,7 @@ function PrivateSelectPunishment() {
 		if ((PrivatePunishment == "ChastityBelt") && !Player.IsVulvaChaste() && (NPCTraitGet(CurrentCharacter, "Frigid") >= 0)) break;
 		if ((PrivatePunishment == "ChastityBra") && !Player.IsBreastChaste() && (NPCTraitGet(CurrentCharacter, "Frigid") >= 0)) break;
 		if ((PrivatePunishment == "ForceNaked") && Player.CanChange() && (NPCTraitGet(CurrentCharacter, "Horny") >= 0)) break;
-		if ((PrivatePunishment == "ConfiscateKey") && (InventoryAvailable(Player, "MetalCuffsKey", "ItemMisc") || InventoryAvailable(Player, "MetalPadlockKey", "ItemMisc") || InventoryAvailable(Player, "IntricatePadlockKey", "ItemMisc"))) break;
+		if ((PrivatePunishment == "ConfiscateKey") && (InventoryAvailable(Player, "MetalCuffsKey", "ItemMisc") || InventoryAvailable(Player, "MetalPadlockKey", "ItemMisc") || InventoryAvailable(Player, "IntricatePadlockKey", "ItemMisc") || InventoryAvailable(Player, "HighSecurityPadlockKey", "ItemMisc"))) break;
 		if ((PrivatePunishment == "ConfiscateCrop") && (InventoryAvailable(Player, "LeatherCrop", "ItemPelvis") || InventoryAvailable(Player, "LeatherCrop", "ItemBreast"))) break;
 		if ((PrivatePunishment == "ConfiscateWhip") && (InventoryAvailable(Player, "LeatherWhip", "ItemPelvis") || InventoryAvailable(Player, "LeatherWhip", "ItemBreast"))) break;
 		if ((PrivatePunishment == "SleepCage") && LogQuery("Cage", "PrivateRoom") && !LogQuery("SleepCage", "Rule")) break;
@@ -1389,4 +1435,13 @@ function PrivateSubTurnTablesDone() {
 	Player.Owner = "NPC-" + CurrentCharacter.Name;
 	ServerPlayerSync();
 
+}
+
+/**
+ * When the player triggers a cheat on a NPC
+ * @returns {void} - Nothing.
+ */
+function PrivateNPCCheat(Type) {
+	if (Type == "TraitDominant") NPCTraitSet(CurrentCharacter, "Dominant", (NPCTraitGet(CurrentCharacter, "Dominant") >= 90) ? 100 : NPCTraitGet(CurrentCharacter, "Dominant") + 10);
+	if (Type == "TraitSubmissive") NPCTraitSet(CurrentCharacter, "Dominant", (NPCTraitGet(CurrentCharacter, "Dominant") <= -90) ? -100 : NPCTraitGet(CurrentCharacter, "Dominant") - 10);
 }

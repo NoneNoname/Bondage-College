@@ -11,6 +11,7 @@
 var ColorPickerX, ColorPickerY, ColorPickerWidth, ColorPickerHeight;
 var ColorPickerInitialHSV, ColorPickerLastHSV, ColorPickerHSV, ColorPickerCallback, ColorPickerSourceElement;
 var ColorPickerCSS;
+var ColorPickerIsDefault;
 
 var ColorPickerHueBarHeight = 40;
 var ColorPickerSVPanelGap = 20;
@@ -104,26 +105,15 @@ function ColorPickerEndPick() {
  * @returns {{X: number, Y: number}} - Coordinates of the click/touch event on the canvas
  */
 function ColorPickerGetCoordinates(Event) {
-    var X, Y;
     if (Event.changedTouches) {
         // Mobile
         var Touch = Event.changedTouches[0];
-        X = Touch.clientX;
-        Y = Touch.clientY;
+        TouchMove(Touch);
     } else {
         // PC
-        X = Event.clientX;
-        Y = Event.clientY;
+        MouseMove(Event);
     }
 
-    var rect = document.getElementById("MainCanvas").getBoundingClientRect();
-	if (document.body.clientWidth <= document.body.clientHeight * 2) {
-		MouseX = Math.round((X - rect.left) * 2000 / document.body.clientWidth);
-		MouseY = Math.round((Y - rect.top) * 2000 / document.body.clientWidth);
-	} else {
-		MouseX = Math.round((X - rect.left) * 1000 / document.body.clientHeight);
-		MouseY = Math.round((Y - rect.top) * 1000 / document.body.clientHeight);
-    }
     return { X: MouseX, Y: MouseY };
 }
 
@@ -264,6 +254,7 @@ function ColorPickerDraw(X, Y, Width, Height, Src, Callback) {
         if (ColorPickerSourceElement != null) {
             var UserInputColor = ColorPickerSourceElement.value.trim().toUpperCase();
             if (CommonIsColor(UserInputColor)) {
+            	ColorPickerIsDefault = false;
                 if (!ColorPickerCSSColorEquals(UserInputColor, ColorPickerCSS)) {
                     if (ColorPickerCallback) {
                         // Fire callback due to source element changed by user interaction
@@ -272,6 +263,9 @@ function ColorPickerDraw(X, Y, Width, Height, Src, Callback) {
                     ColorPickerCSS = UserInputColor;
                     ColorPickerHSV = ColorPickerCSSToHSV(UserInputColor, ColorPickerHSV);
                 }
+            } else if (UserInputColor === "DEFAULT" && !ColorPickerIsDefault) {
+            	ColorPickerIsDefault = true;
+            	if (ColorPickerCallback) ColorPickerCallback("Default");
             }
         }
         // Use user updated HSV
@@ -305,10 +299,13 @@ function ColorPickerDraw(X, Y, Width, Height, Src, Callback) {
     Grad.addColorStop(1, "rgba(0, 0, 0, 1)");
     MainCanvas.fillStyle = Grad;
     MainCanvas.fillRect(X, SVPanelOffset, Width, SVPanelHeight);
-    
-    var CSS = ColorPickerHSVToCSS(HSV);
-    DrawCircle(X + HSV.S * Width, SVPanelOffset + (1 - HSV.V) * SVPanelHeight, 8, 16, CSS);
-    DrawCircle(X + HSV.S * Width, SVPanelOffset + (1 - HSV.V) * SVPanelHeight, 14, 4, (HSV.V > 0.8 && HSV.S < 0.2) ? "#333333" : "#FFFFFF");
+
+    if (!ColorPickerIsDefault) {
+	    var CSS = ColorPickerHSVToCSS(HSV);
+	    DrawCircle(X + HSV.S * Width, SVPanelOffset + (1 - HSV.V) * SVPanelHeight, 8, 16, CSS);
+	    DrawCircle(
+		    X + HSV.S * Width, SVPanelOffset + (1 - HSV.V) * SVPanelHeight, 14, 4, (HSV.V > 0.8 && HSV.S < 0.2) ? "#333333" : "#FFFFFF");
+    }
     // Draw Hue Picker
     DrawEmptyRect(X + HSV.H * (Width - 20), Y, 20, ColorPickerHueBarHeight, "#FFFFFF");
 

@@ -7,10 +7,15 @@ ResetClothes,Reset character
 WearRandom,Randomize clothes
 Random,Randomize character
 Naked,Strip clothes
+Character,Show character in previews
 StripItem,Strip item
 Next,Next
 Prev,Previous
 Cancel,Cancel changes
 Accept,Accept changes
 Wardrobe,Wardrobe
-DressManually,Dress manually
+DialogPermissionMode,Edit item permissions
+Use,Use this item
+Reset,Reset character
+ColorPick,Select a colour
+MultiColorPick,Select colours

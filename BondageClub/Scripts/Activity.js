@@ -12,7 +12,9 @@ var ActivityOrgasmResistLabel = "";
  * Checks if the current room allows for activities. (They can only be done in certain rooms)
  * @returns {boolean} - Whether or not activities can be done
  */
-function ActivityAllowed() { return ((CurrentScreen == "ChatRoom") || ((CurrentScreen == "Private") && LogQuery("RentRoom", "PrivateRoom"))) }
+function ActivityAllowed() {
+	return (CurrentScreen == "ChatRoom" && !(ChatRoomData && ChatRoomData.BlockCategory && ChatRoomData.BlockCategory.includes("Arousal")))
+		|| ((CurrentScreen == "Private") && LogQuery("RentRoom", "PrivateRoom")); }
 
 /**
  * Loads the activity dictionary that will be used throughout the game to output messages. Loads from cache first if possible.
@@ -115,8 +117,9 @@ function ActivityDialogBuild(C) {
 						else if ((Activity.Prerequisite[P] == "CantUseFeet") && Player.CanWalk()) Allow = false;
 						else if ((Activity.Prerequisite[P] == "TargetCanUseTongue") && C.IsMouthBlocked()) Allow = false;
 						else if ((Activity.Prerequisite[P] == "TargetMouthOpen") && (C.FocusGroup.Name == "ItemMouth") && (InventoryGet(C, "ItemMouth") && !C.IsMouthOpen())) Allow = false;
-						else if ((Activity.Prerequisite[P] == "VulvaEmpty")  && (C.FocusGroup.Name == "ItemVulva") && C.IsVulvaFull()) Allow = false;
-						else if ((Activity.Prerequisite[P] == "ZoneAccessible") && InventoryGroupIsBlocked(C, C.FocusGroup.Name)) Allow = false;
+						else if ((Activity.Prerequisite[P] == "VulvaEmpty") && (C.FocusGroup.Name == "ItemVulva") && C.IsVulvaFull()) Allow = false;
+						else if ((Activity.Prerequisite[P] == "MoveHead") && (C.FocusGroup.Name == "ItemHead") && C.Effect != null && C.Effect.includes("FixedHead")) Allow = false;
+						else if ((Activity.Prerequisite[P] == "ZoneAccessible") && InventoryGroupIsBlocked(C, C.FocusGroup.Name, true)) Allow = false;
 						else if ((Activity.Prerequisite[P] == "WearingPenetrationItem") && (!CharacterHasItemForActivity(Player, "Penetrate") || Player.IsEnclose())) Allow = false;
 						else if ((Activity.Prerequisite[P] == "ZoneNaked") && (C.FocusGroup.Name == "ItemButt") && ((InventoryPrerequisiteMessage(C, "AccessButt") != "") || C.IsPlugged())) Allow = false;
 						else if ((Activity.Prerequisite[P] == "ZoneNaked") && (C.FocusGroup.Name == "ItemVulva") && ((InventoryPrerequisiteMessage(C, "AccessVulva") != "") || C.IsVulvaChaste())) Allow = false;
@@ -177,6 +180,31 @@ function ActivityEffect(S, C, A, Z, Count) {
 }
 
 /**
+ * Used for arousal events that are not activities, such as stimulation events
+ * @param {Character} S - The character performing the activity
+ * @param {Character} C - The character on which the activity is performed
+ * @param {number} Amount - The base amount of arousal to add
+ * @param {string} Z - The group/zone name where the activity was performed
+ * @param {number} [count=1] - If the activity is done repeatedly, this defines the number of times, the activity is done. 
+ * If you don't want an activity to modify arousal, set this parameter to '0'
+ * @return {void} - Nothing
+ */
+function ActivityEffectFlat(S, C, Amount, Z, Count) {
+
+	// Converts from activity name to the activity object
+	if ((Amount == null) || (typeof Amount != "number")) return;
+	if ((Count == null) || (Count == undefined) || (Count == 0)) Count = 1;
+
+	// Calculates the next progress factor
+	var Factor = Amount; // Check how much the character likes the activity, from -10 to +10
+	Factor = Factor + (PreferenceGetZoneFactor(C, Z) * 5) - 10; // The zone used also adds from -10 to +10
+	Factor = Factor + ActivityFetishFactor(C) * 2; // Adds a fetish factor based on the character preferences
+	Factor = Factor + Math.round(Factor * (Count - 1) / 3); // if the action is done repeatedly, we apply a multiplication factor based on the count
+	ActivitySetArousalTimer(C, null, Z, Factor);
+
+}
+
+/**
  * Syncs the player arousal with everyone in chatroom
  * @param {Character} C - The character for which to sync the arousal data
  * @return {void} - Nothing
@@ -221,7 +249,7 @@ function ActivitySetArousalTimer(C, Activity, Zone, Progress) {
 	if (Progress > 25) Progress = 25;
 
 	// Make sure we do not allow orgasms if the activity (MaxProgress) or the zone (AllowOrgasm) doesn't allow it
-	var Max = ((Activity.MaxProgress == null) || (Activity.MaxProgress > 100)) ? 100 : Activity.MaxProgress;
+	var Max = ((Activity == null || Activity.MaxProgress == null) || (Activity.MaxProgress > 100)) ? 100 : Activity.MaxProgress;
 	if ((Max > 95) && !PreferenceGetZoneOrgasm(C, Zone)) Max = 95;
 	if ((Max > 67) && (Zone == "ActivityOnOther")) Max = 67;
 	if ((Progress > 0) && (C.ArousalSettings.Progress + Progress > Max)) Progress = (Max - C.ArousalSettings.Progress >= 0) ? Max - C.ArousalSettings.Progress : 0;
@@ -233,6 +261,7 @@ function ActivitySetArousalTimer(C, Activity, Zone, Progress) {
 	}
 
 }
+
 
 /**
  * Draws the arousal progress bar at the given coordinates for every orgasm timer.
@@ -339,6 +368,11 @@ function ActivityOrgasmGameGenerate(Progress) {
  * @returns {void} - Nothing
  */
 function ActivityOrgasmPrepare(C) {
+	if (C.Effect.includes("DenialMode")) {
+		C.ArousalSettings.Progress = 99;
+		return;
+	}
+
 	if (C.IsEdged()) {
 		C.ArousalSettings.Progress = 95;
 		return;
@@ -491,6 +525,13 @@ function ActivityRun(C, Activity) {
 		if ((C.ID == 0) || C.IsNpc())
 			ActivityEffect(Player, C, Activity, C.FocusGroup.Name);
 
+	if (C.ID == 0) {
+		if (Activity.MakeSound) {
+			AutoPunishGagActionFlag = true
+			AutoShockGagActionFlag = true
+		}
+	}
+
 	// If the player does the activity on someone else, we calculate the progress for the player right away
 	ActivityRunSelf(Player, C, Activity);
 
@@ -505,6 +546,10 @@ function ActivityRun(C, Activity) {
 		Dictionary.push({ Tag: "ActivityName", Text: Activity.Name });
 		ServerSend("ChatRoomChat", { Content: ((C.ID == 0) ? "ChatSelf-" : "ChatOther-") + C.FocusGroup.Name + "-" + Activity.Name, Type: "Activity", Dictionary: Dictionary });
 
+		if (C.ID == 0 && Activity.Name.indexOf("Struggle") >= 0 )
+			
+			ChatRoomStimulationMessage("StruggleAction")
+		
 		// Exits from dialog to see the result
 		DialogLeave();
 

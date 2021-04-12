@@ -19,8 +19,6 @@ var ManagementRandomTalkCount = 0;
 var ManagementVisitRoom = false;
 var ManagementTimer = 0;
 
-
-// Returns TRUE if the player has maids disabled
 /**
  * Checks if the player is helpless (maids disabled) or not.
  * @returns {boolean} - Returns true if the player still has time remaining after asking the maids to stop helping
@@ -151,22 +149,27 @@ function ManagementCanBreakTrialOnline() { return ((Player.Owner == "") && (Play
  * Checks if the player can part ways from their online owner. (7 days wait time over)
  * @returns {boolean} - TRUE if the player can break her full collar.
  */
-function ManagementCanBeReleasedOnline() { return ((Player.Owner != "") && (Player.Ownership != null) && (Player.Ownership.Start != null) && (Player.Ownership.Start + 604800000 <= CurrentTime)) }
+function ManagementCanBeReleasedOnline() { return ((Player.Owner != "") && (Player.Ownership != null) && (Player.Ownership.Start != null) && (Player.Ownership.Start + 604800000 <= CurrentTime) && (Player.GetDifficulty() <= 2)) }
 /**
  * Checks if the player cannot part ways from their online owner. (7 days wait time not over)
  * @returns {boolean} - TRUE if the player cannot break her full collar.
  */
-function ManagementCannotBeReleasedOnline() { return ((Player.Owner != "") && (Player.Ownership != null) && (Player.Ownership.Start != null) && (Player.Ownership.Start + 604800000 > CurrentTime)) }
+function ManagementCannotBeReleasedOnline() { return ((Player.Owner != "") && (Player.Ownership != null) && (Player.Ownership.Start != null) && (Player.Ownership.Start + 604800000 > CurrentTime) && (Player.GetDifficulty() <= 2)) }
 /**
  * Checks if the player can part ways from her owner. (The NPC left the private room.)
  * @returns {boolean} - TRUE if the player can part ways with her current NPC owner.
  */
-function ManagementCanBeReleased() { return ((Player.Owner != "") && (Player.Ownership == null) && !PrivateOwnerInRoom()) }
+function ManagementCanBeReleased() { return ((Player.Owner != "") && (Player.Ownership == null) && !PrivateOwnerInRoom() && (Player.GetDifficulty() <= 2)) }
 /**
  * Checks if the player cannot part ways from her owner. (The NPC is still in the private room.)
  * @returns {boolean} - TRUE if the player cannot part ways with her current NPC owner.
  */
-function ManagementCannotBeReleased() { return ((Player.Owner != "") && (Player.Ownership == null) && PrivateOwnerInRoom()) }
+function ManagementCannotBeReleased() { return ((Player.Owner != "") && (Player.Ownership == null) && PrivateOwnerInRoom() && (Player.GetDifficulty() <= 2)) }
+/**
+ * Checks if the player cannot part ways from her owner because she's on the Extreme difficulty.
+ * @returns {boolean} - TRUE if the player cannot part ways with her current owner.
+ */
+function ManagementCannotBeReleasedExtreme() { return ((Player.Owner != "") && (Player.GetDifficulty() >= 3)) }
 /**
  * Checks if the player can be owned by the mistress.
  * @returns {boolean} - TRUE if the player is fully submissive, the player is not owned, the mistress has not been angered and the mistress can enter the private room.
@@ -372,7 +375,7 @@ function ManagementClick() {
 	if (MouseIn(250, 0, 500, 1000)) CharacterSetCurrent(Player);
 	if (MouseIn(750, 0, 500, 1000) && !ManagementEmpty) {		
 		if ((ManagementMistress.Stage == "0") && ManagementIsClubSlave()) ManagementMistress.Stage = "350";
-		if ((ManagementMistress.Stage == "0") && (ReputationGet("Dominant") < 50) && LogQuery("ClubMistress", "Management")) {
+		if ((ManagementMistress.Stage == "0") && (ReputationGet("Dominant") < 50) && (CheatFactor("CantLoseMistress", 0) == 1) && LogQuery("ClubMistress", "Management")) {
 			ManagementMistress.Stage = "500";
 			ManagementMistress.CurrentDialog = DialogFind(ManagementMistress, "MistressExpulsion");
 		}
@@ -525,7 +528,7 @@ function ManagementBreakTrialOnline() {
 		ServerSend("AccountOwnership", { MemberNumber: Player.Ownership.MemberNumber, Action: "Break" });
 		Player.Ownership = null;
 		for (let A = 0; A < Player.Appearance.length; A++)
-			ServerValidateProperties(Player, Player.Appearance[A]);
+			ValidationSanitizeProperties(Player, Player.Appearance[A]);
 	}
 }
 
@@ -576,7 +579,7 @@ function ManagementClubSlaveCollar(RepChange) {
  */
 function ManagementFinishClubSlave(RepChange) {
 	ReputationProgress("Dominant", RepChange);
-	CharacterChangeMoney(Player, 80);
+	CharacterChangeMoney(Player, 50);
 	if (Player.IsOwned() && !LogQuery("ReleasedCollar", "OwnerRule")) InventoryWear(Player, "SlaveCollar", "ItemNeck");
 	else {
 		InventoryRemove(Player, "ItemNeck");
@@ -761,7 +764,7 @@ function ManagementPlayerMistressCutscene() {
  */
 function ManagementMistressPay() {
 	LogAdd("MistressWasPaid", "Management", CurrentTime + 604800000);
-	CharacterChangeMoney(Player, 100);
+	CharacterChangeMoney(Player, 150);
 }
 
 /**

@@ -1,6 +1,8 @@
 "use strict";
 
 
+var AutoShockGagActionFlag = false;
+
 // Loads the item extension properties
 function InventoryItemNeckAccessoriesCollarAutoShockUnitLoad() {
 	if (DialogFocusItem.Property == null) DialogFocusItem.Property = { Intensity: 0, Sensitivity: 0, ShowText: true };
@@ -11,24 +13,22 @@ function InventoryItemNeckAccessoriesCollarAutoShockUnitLoad() {
 
 // Draw the item extension screen
 function InventoryItemNeckAccessoriesCollarAutoShockUnitDraw() {
-	DrawRect(1387, 205, 225, 275, "white");
-	DrawImageResize("Assets/" + DialogFocusItem.Asset.Group.Family + "/" + DialogFocusItem.Asset.Group.Name + "/Preview/" + DialogFocusItem.Asset.Name + ".png", 1389, 207, 221, 221);
-	DrawTextFit(DialogFocusItem.Asset.Description, 1500, 455, 221, "black");
-	DrawText(DialogFind(Player, "Intensity" + DialogFocusItem.Property.Intensity.toString()).replace("Item", DialogFocusItem.Asset.Description), 1500, 520, "White", "Gray");
-	if (DialogFocusItem.Property.Intensity > 0) DrawButton(1100, 550, 200, 55, DialogFind(Player, "Low"), "White");
-	if (DialogFocusItem.Property.Intensity < 1 || DialogFocusItem.Property.Intensity > 1) DrawButton(1375, 550, 200, 55, DialogFind(Player, "Medium"), "White");
-	if (DialogFocusItem.Property.Intensity < 2) DrawButton(1650, 550, 200, 55, DialogFind(Player, "High"), "White");
-	
-	DrawText(DialogFind(Player, "Sensitivity" + (DialogFocusItem.Property.Sensitivity-1).toString()).replace("Item", DialogFocusItem.Asset.Description), 1500, 660, "White", "Gray");
-	
-	if (DialogFocusItem.Property.Sensitivity != 0) DrawButton(1100, 700, 150, 55, DialogFind(Player, "TurnOff"), "White");
-	if (DialogFocusItem.Property.Sensitivity != 1) DrawButton(1300, 700, 150, 55, DialogFind(Player, "Low"), "White");
-	if (DialogFocusItem.Property.Sensitivity != 2) DrawButton(1500, 700, 150, 55, DialogFind(Player, "Medium"), "White");
-	if (DialogFocusItem.Property.Sensitivity != 3) DrawButton(1700, 700, 150, 55, DialogFind(Player, "High"), "White");
-	
+	DrawAssetPreview(1387, 205, DialogFocusItem.Asset);
+	DrawText(DialogFindPlayer("Intensity" + DialogFocusItem.Property.Intensity.toString()).replace("Item", DialogFocusItem.Asset.Description), 1500, 520, "White", "Gray");
+	if (DialogFocusItem.Property.Intensity > 0) DrawButton(1100, 550, 200, 55, DialogFindPlayer("Low"), "White");
+	if (DialogFocusItem.Property.Intensity < 1 || DialogFocusItem.Property.Intensity > 1) DrawButton(1375, 550, 200, 55, DialogFindPlayer("Medium"), "White");
+	if (DialogFocusItem.Property.Intensity < 2) DrawButton(1650, 550, 200, 55, DialogFindPlayer("High"), "White");
+
+	DrawText(DialogFindPlayer("Sensitivity" + (DialogFocusItem.Property.Sensitivity-1).toString()).replace("Item", DialogFocusItem.Asset.Description), 1500, 660, "White", "Gray");
+
+	if (DialogFocusItem.Property.Sensitivity != 0) DrawButton(1100, 700, 150, 55, DialogFindPlayer("TurnOff"), "White");
+	if (DialogFocusItem.Property.Sensitivity != 1) DrawButton(1300, 700, 150, 55, DialogFindPlayer("Low"), "White");
+	if (DialogFocusItem.Property.Sensitivity != 2) DrawButton(1500, 700, 150, 55, DialogFindPlayer("Medium"), "White");
+	if (DialogFocusItem.Property.Sensitivity != 3) DrawButton(1700, 700, 150, 55, DialogFindPlayer("High"), "White");
+
 	if (CurrentScreen == "ChatRoom") DrawButton(1125, 780, 64, 64, "", "White", DialogFocusItem.Property.ShowText ? "Icons/Checked.png" : "");
-	if (CurrentScreen == "ChatRoom") DrawText(DialogFind(Player, "ShockCollarShowChat"), 1370, 813, "White", "Gray");
-	DrawButton(1600, 790, 200, 55, DialogFind(Player, "TriggerShock"), "White");
+	if (CurrentScreen == "ChatRoom") DrawText(DialogFindPlayer("ShockCollarShowChat"), 1370, 813, "White", "Gray");
+	DrawButton(1600, 790, 200, 55, DialogFindPlayer("TriggerShock"), "White");
 }
 
 // Catches the item extension clicks
@@ -99,26 +99,50 @@ function InventoryItemNeckAccessoriesCollarAutoShockUnitSetSensitivity(Modifier)
 
 function InventoryItemNeckAccessoriesCollarAutoShockUnitUpdate(data) {
 	var Item = data.Item
+	if (Item.Property.Sensitivity < 3)
+		AutoShockGagActionFlag = false
+	
 	// Punish the player if they speak
 	if (Item.Property.Sensitivity && Item.Property.Sensitivity > 0) {
 		
 		var LastMessages = data.PersistentData().LastMessageLen
 		var ShockTriggerPunish = false
+		var keywords = false;
+		var gagaction = false;
 		
-		if (Item.Property.Sensitivity == 3 && ChatRoomLastMessage && ChatRoomLastMessage.length != LastMessages
-			&& !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("(") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("*") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("/"))
-			ShockTriggerPunish = true
+		if (Item.Property.Sensitivity == 3) {
+			if (AutoShockGagActionFlag == true) {
+				gagaction = true
+				AutoShockGagActionFlag = false
+			} else for (let K = 0; K < AutoPunishKeywords.length; K++) {
+				if (ChatRoomLastMessage[ChatRoomLastMessage.length-1].includes(AutoPunishKeywords[K])) {
+					keywords = true;
+					break;
+				}
+			}
+		}
+		
+		if (Item.Property.Sensitivity == 3 && (gagaction || (ChatRoomLastMessage && ChatRoomLastMessage.length != LastMessages
+			&& !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("(") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("*") && ChatRoomLastMessage[ChatRoomLastMessage.length-1].replace(/[A-Za-z]+/g, '') != ChatRoomLastMessage[ChatRoomLastMessage.length-1]
+			 && (!ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("/")
+			|| (keywords && (ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("/me") || ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("*")))))))
+			ShockTriggerPunish = true;
 		if (Item.Property.Sensitivity == 2 && ChatRoomLastMessage && ChatRoomLastMessage.length != LastMessages
 			&& !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("(") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("*") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("/")
 			&& (ChatRoomLastMessage[ChatRoomLastMessage.length-1].length > 25
-				|| (ChatRoomLastMessage[ChatRoomLastMessage.length-1].replace(/[A-Za-z]+/g, '') != ChatRoomLastMessage[ChatRoomLastMessage.length-1] && ChatRoomLastMessage[ChatRoomLastMessage.length-1] == ChatRoomLastMessage[ChatRoomLastMessage.length-1].toUpperCase())
-				|| (ChatRoomLastMessage[ChatRoomLastMessage.length-1].includes('!'))))
+				|| (ChatRoomLastMessage[ChatRoomLastMessage.length-1].replace(/[A-Za-z]+/g, '') != ChatRoomLastMessage[ChatRoomLastMessage.length-1] && (ChatRoomLastMessage[ChatRoomLastMessage.length-1] == ChatRoomLastMessage[ChatRoomLastMessage.length-1].toUpperCase()
+				|| (ChatRoomLastMessage[ChatRoomLastMessage.length-1].includes('!'))))))
 			ShockTriggerPunish = true
 		if (Item.Property.Sensitivity == 1 && ChatRoomLastMessage && ChatRoomLastMessage.length != LastMessages
 			&& !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("(") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("*") && !ChatRoomLastMessage[ChatRoomLastMessage.length-1].startsWith("/")
-			&& (ChatRoomLastMessage[ChatRoomLastMessage.length-1].replace(/[A-Za-z]+/g, '') != ChatRoomLastMessage[ChatRoomLastMessage.length-1] && ChatRoomLastMessage[ChatRoomLastMessage.length-1] == ChatRoomLastMessage[ChatRoomLastMessage.length-1].toUpperCase()
-				|| (ChatRoomLastMessage[ChatRoomLastMessage.length-1].includes('!'))))
+			&& (ChatRoomLastMessage[ChatRoomLastMessage.length-1].replace(/[A-Za-z]+/g, '') != ChatRoomLastMessage[ChatRoomLastMessage.length-1] && (ChatRoomLastMessage[ChatRoomLastMessage.length-1] == ChatRoomLastMessage[ChatRoomLastMessage.length-1].toUpperCase()
+				|| (ChatRoomLastMessage[ChatRoomLastMessage.length-1].includes('!')))))
 			ShockTriggerPunish = true
+		
+		
+		if (ChatRoomTargetMemberNumber != null) {
+			ShockTriggerPunish = false // No trigger on whispers
+		}
 		
 		if (ShockTriggerPunish) {
 			InventoryItemNeckAccessoriesCollarAutoShockUnitTriggerAutomatic(data)
@@ -139,7 +163,6 @@ function InventoryItemNeckAccessoriesCollarAutoShockUnitTriggerAutomatic(data) {
 		var Dictionary = [
 			{ Tag: "DestinationCharacterName", Text: C.Name, MemberNumber: C.MemberNumber },
 			{ Tag: "AssetName", AssetName: data.Item.Asset.Name },
-			{ Automatic: true },
 		];
 		ServerSend("ChatRoomChat", { Content: msg, Type: "Action", Dictionary });
 		ChatRoomCharacterItemUpdate(C, data.Item.Asset.Group.Name);
