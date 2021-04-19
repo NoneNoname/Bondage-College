@@ -262,7 +262,7 @@ function ServerPlayerRelationsSync() {
  * Prepares an appearance bundle so we can push it to the server. It minimizes it by keeping only the necessary
  * information. (Asset name, group name, color, properties and difficulty)
  * @param {Item[]} Appearance - The appearance array to bundle
- * @returns {ItemBundle[]} - The appearance bundle created from the given appearance array
+ * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array
  */
 function ServerAppearanceBundle(Appearance) {
 	var Bundle = [];
@@ -322,7 +322,7 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 /**
  * Builds a diff map for comparing changes to a character's appearance, keyed by asset group name
  * @param {string} assetFamily - The asset family of the appearance
- * @param {AppearanceItem[]} appearance - The current appearance to compare against
+ * @param {Item[]} appearance - The current appearance to compare against
  * @param {AppearanceBundle} bundle - The new appearance bundle
  * @returns {AppearanceDiffMap} - An appearance diff map representing the changes that have been made to the character's
  * appearance
@@ -346,8 +346,8 @@ function ServerBuildAppearanceDiff(assetFamily, appearance, bundle) {
  * Maps a bundled appearance item, as stored on the server and used for appearance update messages, into a full
  * appearance item, as used by the game client
  * @param {string} assetFamily - The asset family of the appearance item
- * @param {AppearanceBundleItem} item - The bundled appearance item
- * @returns {AppearanceItem} - A full appearance item representation of the provided bundled appearance item
+ * @param {ItemBundle} item - The bundled appearance item
+ * @returns {Item} - A full appearance item representation of the provided bundled appearance item
  */
 function ServerBundledItemToAppearanceItem(assetFamily, item) {
 	if (!item || typeof item !== "object" || typeof item.Name !== "string" || typeof item.Group !==

@@ -212,6 +212,9 @@ interface ItemBundle {
 	Property?: Record<string, any>;
 }
 
+/** An AppearanceBundle is whole minified appearance of a character */
+type AppearanceBundle = ItemBundle[];
+
 interface Pose {
 	Name: string;
 	Category?: 'BodyUpper' | 'BodyLower' | 'BodyFull';
