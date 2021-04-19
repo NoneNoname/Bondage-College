@@ -1,6 +1,7 @@
 "use strict";
 var InfiltrationPerksBackground = "Sheet";
-var InfiltrationPerksList = ["Strength", "Charisma", "Agility", "Resilience", "Endurance", "Lockpicking", "KeenEye", "Running", "Mapping", "Forgery", "Begging", "Bribery", "Negotiation"];
+//var InfiltrationPerksList = ["Strength", "Charisma", "Agility", "Resilience", "Endurance", "Lockpicking", "Investigation", "Running", "Mapping", "Forgery", "Begging", "Bribery", "Negotiation", "Recruiter"];
+var InfiltrationPerksList = ["Strength", "Charisma", "Agility", "Resilience", "Endurance", "Investigation", "Bribery", "Negotiation", "Recruiter"];
 
 /**
  * Checks if a named perk is activated or not
@@ -43,10 +44,12 @@ function InfiltrationPerksAvail() {
 }
 
 /**
- * Loads the infiltration perks screen
+ * Loads the infiltration perks screen, checks if there's an invalid perk and clears the list if it's the case
  * @returns {void} - Nothing
  */
 function InfiltrationPerksLoad() {
+	if ((Player.Infiltration != null) && (Player.Infiltration.Perks != null) && (Player.Infiltration.Perks.length > InfiltrationPerksList.length))
+		Player.Infiltration.Perks = "";
 }
 
 /**

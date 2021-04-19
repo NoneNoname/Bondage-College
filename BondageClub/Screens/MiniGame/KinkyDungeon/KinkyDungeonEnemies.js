@@ -36,13 +36,13 @@ function KinkyDungeonDrawEnemies(canvasOffsetX, canvasOffsetY, CamX, CamY) {
 		var enemy = KinkyDungeonEntities[E]
 		var sprite = enemy.Enemy.name
 		if (KinkyDungeonEntities[E].x >= CamX && KinkyDungeonEntities[E].y >= CamY && KinkyDungeonEntities[E].x < CamX + KinkyDungeonGridWidthDisplay && KinkyDungeonEntities[E].y < CamY + KinkyDungeonGridHeightDisplay) {
-			DrawImageZoomCanvas("Screens/Minigame/KinkyDungeon/Enemies/" + sprite + ".png",
+			DrawImageZoomCanvas("Screens/MiniGame/KinkyDungeon/Enemies/" + sprite + ".png",
 				KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize,
 				(KinkyDungeonEntities[E].x - CamX)*KinkyDungeonGridSizeDisplay, (KinkyDungeonEntities[E].y - CamY)*KinkyDungeonGridSizeDisplay,
 				KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)
 				
 			if (enemy.stun > 0) {
-				DrawImageZoomCanvas("Screens/Minigame/KinkyDungeon/Stun.png",
+				DrawImageZoomCanvas("Screens/MiniGame/KinkyDungeon/Stun.png",
 					KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize,
 					(KinkyDungeonEntities[E].x - CamX)*KinkyDungeonGridSizeDisplay, (KinkyDungeonEntities[E].y - CamY)*KinkyDungeonGridSizeDisplay,
 					KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)
@@ -64,7 +64,7 @@ function KinkyDungeonDrawEnemiesWarning(canvasOffsetX, canvasOffsetY, CamX, CamY
 				var tx = enemy.x + enemy.warningTiles[T].x
 				var ty = enemy.y + enemy.warningTiles[T].y
 				if (tx >= CamX && ty >= CamY && tx < CamX + KinkyDungeonGridWidthDisplay && ty < CamY + KinkyDungeonGridHeightDisplay && KinkyDungeonNoEnemy(tx, ty) && KinkyDungeonMovableTilesEnemy.includes(KinkyDungeonMapGet(tx, ty))) {
-					DrawImageZoomCanvas("Screens/Minigame/KinkyDungeon/Warning.png",
+					DrawImageZoomCanvas("Screens/MiniGame/KinkyDungeon/Warning.png",
 						KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize,
 						(tx - CamX)*KinkyDungeonGridSizeDisplay, (ty - CamY)*KinkyDungeonGridSizeDisplay,
 						KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)
@@ -121,7 +121,7 @@ function KinkyDungeonUpdateEnemies(delta) {
 							break;
 						}
 					}
-			} else if (AI == "guard") {
+			} else if (AI == "guard" && (enemy.Enemy.attackWhileMoving || playerDist > enemy.Enemy.attackRange + 0.5)) {
 				if (!enemy.gx) enemy.gx = enemy.x
 				if (!enemy.gy) enemy.gy = enemy.y
 				
@@ -152,7 +152,7 @@ function KinkyDungeonUpdateEnemies(delta) {
 			}
 			playerDist = Math.sqrt((enemy.x - KinkyDungeonPlayerEntity.x)*(enemy.x - KinkyDungeonPlayerEntity.x) + (enemy.y - KinkyDungeonPlayerEntity.y)*(enemy.y - KinkyDungeonPlayerEntity.y))
 			
-			if (!moved && enemy.Enemy.attack.includes("Melee") && playerDist < enemy.Enemy.attackRange + 0.5) {//Player is adjacent
+			if ((!moved || enemy.Enemy.attackWhileMoving) && enemy.Enemy.attack.includes("Melee") && playerDist < enemy.Enemy.attackRange + 0.5) {//Player is adjacent
 				idle = false;
 			
 				var dir = KinkyDungeonGetDirection(KinkyDungeonPlayerEntity.x - enemy.x, KinkyDungeonPlayerEntity.y - enemy.y)

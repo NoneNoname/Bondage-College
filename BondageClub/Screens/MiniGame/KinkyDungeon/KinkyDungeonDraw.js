@@ -70,7 +70,7 @@ function KinkyDungeonDrawGame() {
 						else if (rows[R+CamY][X+CamX] == "S") sprite = "StairsUp"
 						else if (rows[R+CamY][X+CamX] == "s") sprite = "StairsDown"
 							
-						DrawImageZoomCanvas("Screens/Minigame/KinkyDungeon/Floor" + KinkyDungeonMapIndex[MiniGameKinkyDungeonCheckpoint] + "/" + sprite + ".png", KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize, X*KinkyDungeonGridSizeDisplay, R*KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)
+						DrawImageZoomCanvas("Screens/MiniGame/KinkyDungeon/Floor" + KinkyDungeonMapIndex[MiniGameKinkyDungeonCheckpoint] + "/" + sprite + ".png", KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize, X*KinkyDungeonGridSizeDisplay, R*KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)
 					}
 				}
 				
@@ -120,12 +120,12 @@ function KinkyDungeonDrawGame() {
 					
 					if (KinkyDungeonSpellValid)
 						if (KinkyDungeonTargetingSpell.projectile)
-							DrawImageZoomCanvas("Screens/Minigame/KinkyDungeon/Target.png",
+							DrawImageZoomCanvas("Screens/MiniGame/KinkyDungeon/Target.png",
 								KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize,
 								(KinkyDungeonMoveDirection.x + KinkyDungeonPlayerEntity.x - CamX)*KinkyDungeonGridSizeDisplay, (KinkyDungeonMoveDirection.y + KinkyDungeonPlayerEntity.y - CamY)*KinkyDungeonGridSizeDisplay,
 								KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)
 						else
-							DrawImageZoomCanvas("Screens/Minigame/KinkyDungeon/Target.png",
+							DrawImageZoomCanvas("Screens/MiniGame/KinkyDungeon/Target.png",
 								KinkyDungeonContext, 0, 0, KinkyDungeonSpriteSize, KinkyDungeonSpriteSize,
 								(KinkyDungeonTargetX - CamX)*KinkyDungeonGridSizeDisplay, (KinkyDungeonTargetY - CamY)*KinkyDungeonGridSizeDisplay,
 								KinkyDungeonGridSizeDisplay, KinkyDungeonGridSizeDisplay, false)	
@@ -177,46 +177,46 @@ function KinkyDungeonDrawGame() {
 				MainCanvas.textAlign = "center";
 				
 				var i = 1
-				DrawButton(x, y, ButtonWidth, ButtonWidth, "", "White", "Screens/Minigame/KinkyDungeon/Struggle.png", "");
+				DrawButton(x, y, ButtonWidth, ButtonWidth, "", "White", "Screens/MiniGame/KinkyDungeon/Struggle.png", "");
 				if (!sg.blocked) {
 					var toolSprite = (sg.lock != "") ? ((sg.lock != "Jammed") ? "Key" : "LockJam") : "Buckle"
-					DrawButton(x + ((!sg.left) ? -(ButtonWidth)*i : (ButtonWidth)*i), y, ButtonWidth, ButtonWidth, "", "White", "Screens/Minigame/KinkyDungeon/" + toolSprite + ".png", ""); i++;
-					if (KinkyDungeonLockpicks > 0 && sg.lock != "") {DrawButton(x + ((!sg.left) ? -(ButtonWidth)*i : (ButtonWidth)*i), y, ButtonWidth, ButtonWidth, "", "White", "Screens/Minigame/KinkyDungeon/UseTool.png", ""); i++;}
-					if (KinkyDungeonNormalBlades > 0 || KinkyDungeonEnchantedBlades > 0) {DrawButton(x + ((!sg.left) ? -(ButtonWidth)*i : (ButtonWidth)*i), y, ButtonWidth, ButtonWidth, "", "White", "Screens/Minigame/KinkyDungeon/Cut.png", ""); i++;}
+					DrawButton(x + ((!sg.left) ? -(ButtonWidth)*i : (ButtonWidth)*i), y, ButtonWidth, ButtonWidth, "", "White", "Screens/MiniGame/KinkyDungeon/" + toolSprite + ".png", ""); i++;
+					if (KinkyDungeonLockpicks > 0 && sg.lock != "") {DrawButton(x + ((!sg.left) ? -(ButtonWidth)*i : (ButtonWidth)*i), y, ButtonWidth, ButtonWidth, "", "White", "Screens/MiniGame/KinkyDungeon/UseTool.png", ""); i++;}
+					if (KinkyDungeonNormalBlades > 0 || KinkyDungeonEnchantedBlades > 0) {DrawButton(x + ((!sg.left) ? -(ButtonWidth)*i : (ButtonWidth)*i), y, ButtonWidth, ButtonWidth, "", "White", "Screens/MiniGame/KinkyDungeon/Cut.png", ""); i++;}
 				}
 			}
 
 		if (KinkyDungeonStruggleGroups.length > 0) {
-			if (KinkyDungeonDrawStruggle) DrawButton(510, 925, 120, 60, "", "White", "Screens/Minigame/KinkyDungeon/HideTrue.png", "");
-			else DrawButton(510, 925, 120, 60, "", "White", "Screens/Minigame/KinkyDungeon/HideFalse.png", "");
+			if (KinkyDungeonDrawStruggle) DrawButton(510, 925, 120, 60, "", "White", "Screens/MiniGame/KinkyDungeon/HideTrue.png", "");
+			else DrawButton(510, 925, 120, 60, "", "White", "Screens/MiniGame/KinkyDungeon/HideFalse.png", "");
 		}
 		
-		//DrawButton(650, 925, 325, 60, TextGet("KinkyDungeonInventory"), "White", "", "");
-		DrawButton(1000, 925, 325, 60, TextGet("KinkyDungeonMagic"), "White", "", "");
+		//DrawButton(650, 925, 250, 60, TextGet("KinkyDungeonInventory"), "White", "", "");
+		DrawButton(925, 925, 250, 60, TextGet("KinkyDungeonMagic"), "White", "", "");
 		
 		if (KinkyDungeonSpells[KinkyDungeonSpellChoices[0]]) {
 			var spell = KinkyDungeonSpells[KinkyDungeonSpellChoices[0]]
-			DrawText(TextGet("KinkyDungeonSpell"+ spell.name), 1450, 835, color, "silver")
-			DrawText("(" + KinkyDungeonGetCost(spell.level) + ")", 1450, 870, color, "silver")
-			DrawButton(1405, 895, 90, 90, "", "White", "Screens/Minigame/KinkyDungeon/Spell1.png", "");
+			DrawText(TextGet("KinkyDungeonSpell"+ spell.name), 1275, 835, color, "silver")
+			DrawText("(" + Math.ceil(KinkyDungeonGetCost(spell.level)) + ")", 1275, 870, color, "silver")
+			DrawButton(1230, 895, 90, 90, "", "White", "Screens/MiniGame/KinkyDungeon/Spell1.png", "");
 		}
 		if (KinkyDungeonSpells[KinkyDungeonSpellChoices[1]]) {
 			var spell = KinkyDungeonSpells[KinkyDungeonSpellChoices[1]]
-			DrawText(TextGet("KinkyDungeonSpell"+ spell.name), 1650, 835, color, "silver")
-			DrawText("(" + KinkyDungeonGetCost(spell.level) + ")", 1650, 870, color, "silver")
-			DrawButton(1605, 895, 90, 90, "", "White", "Screens/Minigame/KinkyDungeon/Spell2.png", "");
+			DrawText(TextGet("KinkyDungeonSpell"+ spell.name), 1525, 835, color, "silver")
+			DrawText("(" + Math.ceil(KinkyDungeonGetCost(spell.level)) + ")", 1525, 870, color, "silver")
+			DrawButton(1480, 895, 90, 90, "", "White", "Screens/MiniGame/KinkyDungeon/Spell2.png", "");
 		}
 		if (KinkyDungeonSpells[KinkyDungeonSpellChoices[2]]) {
 			var spell = KinkyDungeonSpells[KinkyDungeonSpellChoices[2]]
-			DrawText(TextGet("KinkyDungeonSpell"+ spell.name), 1850, 835, color, "silver")
-			DrawText("(" + KinkyDungeonGetCost(spell.level) + ")", 1850, 870, color, "silver")
-			DrawButton(1805, 895, 90, 90, "", "White", "Screens/Minigame/KinkyDungeon/Spell3.png", "");
+			DrawText(TextGet("KinkyDungeonSpell"+ spell.name), 1775, 835, color, "silver")
+			DrawText("(" + Math.ceil(KinkyDungeonGetCost(spell.level)) + ")", 1775, 870, color, "silver")
+			DrawButton(1730, 895, 90, 90, "", "White", "Screens/MiniGame/KinkyDungeon/Spell3.png", "");
 		}
 	} else if (KinkyDungeonDrawState == "Magic") {
-		DrawButton(1000, 925, 325, 60, TextGet("KinkyDungeonGame"), "White", "", "");
+		DrawButton(925, 925, 250, 60, TextGet("KinkyDungeonGame"), "White", "", "");
 		KinkyDungeonDrawMagic()
 	} else if (KinkyDungeonDrawState == "Inventory") {
-		DrawButton(650, 925, 325, 60, TextGet("KinkyDungeonGame"), "White", "", "");
+		DrawButton(650, 925, 250, 60, TextGet("KinkyDungeonGame"), "White", "", "");
 		KinkyDungeonDrawInventory()
 	}
 	
@@ -226,9 +226,9 @@ function KinkyDungeonDrawGame() {
 
 function KinkyDungeonHandleHUD() {
 	if (KinkyDungeonDrawState == "Game") {
-		//if (MouseIn(650, 925, 325, 60)) { KinkyDungeonDrawState = "Inventory"}
+		//if (MouseIn(650, 925, 250, 60)) { KinkyDungeonDrawState = "Inventory"}
 		//else 
-		if (MouseIn(1000, 925, 325, 60)) { KinkyDungeonDrawState = "Magic"; return true;}
+		if (MouseIn(925, 925, 250, 60)) { KinkyDungeonDrawState = "Magic"; return true;}
 		else if (MouseIn(510, 925, 120, 60)) { KinkyDungeonDrawStruggle = !KinkyDungeonDrawStruggle; return true;}
 		
 		if (!KinkyDungeonTargetingSpell) {
@@ -257,10 +257,10 @@ function KinkyDungeonHandleHUD() {
 
 			}
 	} else if (KinkyDungeonDrawState == "Magic") {
-		if (MouseIn(1000, 925, 325, 60)) { KinkyDungeonDrawState = "Game"; return true;}
+		if (MouseIn(925, 925, 250, 60)) { KinkyDungeonDrawState = "Game"; return true;}
 		else return KinkyDungeonHandleMagic()
 	} else if (KinkyDungeonDrawState == "Inventory") {
-		if (MouseIn(650, 925, 325, 60)) { KinkyDungeonDrawState = "Game"; return true;}
+		if (MouseIn(650, 925, 250, 60)) { KinkyDungeonDrawState = "Game"; return true;}
 		else return KinkyDungeonHandleInventory()
 	}
 		
