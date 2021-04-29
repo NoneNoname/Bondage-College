@@ -32,6 +32,9 @@ function ServerInit() {
 	ServerSocket.on("ChatRoomSync", function (data) { ChatRoomSync(data); });
 	ServerSocket.on("ChatRoomSyncMemberJoin", function (data) { ChatRoomSyncMemberJoin(data); });
 	ServerSocket.on("ChatRoomSyncMemberLeave", function (data) { ChatRoomSyncMemberLeave(data); });
+	ServerSocket.on("ChatRoomSyncSwapPlayers", function (data) { ChatRoomSyncSwapPlayers(data); });
+	ServerSocket.on("ChatRoomSyncMovePlayer", function (data) { ChatRoomSyncMovePlayer(data); });
+	ServerSocket.on("ChatRoomSyncReorderPlayers", function (data) { ChatRoomSyncReorderPlayers(data); });
 	ServerSocket.on("ChatRoomSyncSingle", function (data) { ChatRoomSyncSingle(data); });
 	ServerSocket.on("ChatRoomSyncExpression", function (data) { ChatRoomSyncExpression(data); });
 	ServerSocket.on("ChatRoomSyncPose", function (data) { ChatRoomSyncPose(data); });
@@ -149,7 +152,7 @@ function ServerDisconnect(data, close = false) {
 
 /**
  * Returns whether the player is currently in a chatroom or viewing a subscreen while in a chatroom
- * @returns {boolean} - True if in a chatroom 
+ * @returns {boolean} - True if in a chatroom
  */
 function ServerPlayerIsInChatRoom() {
 	return (CurrentScreen == "ChatRoom")
@@ -252,7 +255,7 @@ function ServerPlayerRelationsSync() {
 	Array.from(Player.FriendNames.keys()).forEach(k => {
 		if (!Player.FriendList.includes(k) && !Player.SubmissivesList.has(k))
 			Player.FriendNames.delete(k);
-	})
+	});
 	D.FriendNames = LZString.compressToUTF16(JSON.stringify(Array.from(Player.FriendNames)));
 	D.SubmissivesList = LZString.compressToUTF16(JSON.stringify(Array.from(Player.SubmissivesList)));
 	ServerSend("AccountUpdate", D);
@@ -350,8 +353,7 @@ function ServerBuildAppearanceDiff(assetFamily, appearance, bundle) {
  * @returns {Item} - A full appearance item representation of the provided bundled appearance item
  */
 function ServerBundledItemToAppearanceItem(assetFamily, item) {
-	if (!item || typeof item !== "object" || typeof item.Name !== "string" || typeof item.Group !==
-	    "string") return null;
+	if (!item || typeof item !== "object" || typeof item.Name !== "string" || typeof item.Group !== "string") return null;
 
 	const asset = AssetGet(assetFamily, item.Group, item.Name);
 	if (!asset) return null;
@@ -514,7 +516,7 @@ function ServerAccountBeep(data) {
 			if (ServerBeep.ChatRoomName != null)
 				ServerBeep.Message = ServerBeep.Message + " " + DialogFindPlayer("InRoom") + " \"" + ServerBeep.ChatRoomName + "\" " + (data.ChatRoomSpace === "Asylum" ? DialogFindPlayer("InAsylum") : '');
 			if (data.Message) {
-				ServerBeep.Message += `; ${DialogFindPlayer("BeepWithMessage")}`
+				ServerBeep.Message += `; ${DialogFindPlayer("BeepWithMessage")}`;
 			}
 			FriendListBeepLog.push({
 				MemberNumber: data.MemberNumber,
@@ -537,17 +539,17 @@ function ServerAccountBeep(data) {
 		} else if (data.BeepType == "Leash" && ChatRoomLeashPlayer == data.MemberNumber && data.ChatRoomName) {
 			if (Player.OnlineSharedSettings && Player.OnlineSharedSettings.AllowPlayerLeashing != false && ( CurrentScreen != "ChatRoom" || !ChatRoomData || (CurrentScreen == "ChatRoom" && ChatRoomData.Name != data.ChatRoomName))) {
 				if (ChatRoomCanBeLeashedBy(data.MemberNumber, Player)) {
-					ChatRoomJoinLeash = data.ChatRoomName
-					
-					DialogLeave()
+					ChatRoomJoinLeash = data.ChatRoomName;
+
+					DialogLeave();
 					ChatRoomClearAllElements();
 					if (CurrentScreen == "ChatRoom") {
 						ServerSend("ChatRoomLeave", "");
 						CommonSetScreen("Online", "ChatSearch");
 					}
-					else ChatRoomStart("", "", "MainHall", "Introduction", BackgroundsTagList) //CommonSetScreen("Room", "ChatSearch")
+					else ChatRoomStart("", "", "MainHall", "Introduction", BackgroundsTagList); //CommonSetScreen("Room", "ChatSearch")
 				} else {
-					ChatRoomLeashPlayer = null
+					ChatRoomLeashPlayer = null;
 				}
 			}
 		}

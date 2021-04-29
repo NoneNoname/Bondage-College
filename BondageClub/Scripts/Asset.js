@@ -48,7 +48,8 @@ function AssetGroupAdd(NewAssetFamily, NewAsset) {
 		InheritColor: NewAsset.InheritColor,
 		FreezeActivePose: Array.isArray(NewAsset.FreezeActivePose) ? NewAsset.FreezeActivePose : [],
 		PreviewZone: NewAsset.PreviewZone,
-	}
+		DynamicGroupName: NewAsset.DynamicGroupName || NewAsset.Group,
+	};
 	AssetGroup.push(A);
 	AssetCurrentGroup = A;
 }
@@ -125,16 +126,16 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		CustomBlindBackground: NewAsset.CustomBlindBackground,
 		ArousalZone: (NewAsset.ArousalZone == null) ? AssetCurrentGroup.Name : NewAsset.ArousalZone,
 		IsRestraint: (NewAsset.IsRestraint == null) ? ((AssetCurrentGroup.IsRestraint == null) ? false : AssetCurrentGroup.IsRestraint) : NewAsset.IsRestraint,
-		BodyCosplay: (NewAsset.BodyCosplay == null) ? ((AssetCurrentGroup.BodyCosplay == null) ? false : AssetCurrentGroup.BodyCosplay) : NewAsset.BodyCosplay,
+		BodyCosplay: (NewAsset.BodyCosplay == null) ? AssetCurrentGroup.BodyCosplay : NewAsset.BodyCosplay,
 		OverrideBlinking: (NewAsset.OverrideBlinking == null) ? false : NewAsset.OverrideBlinking,
 		DialogSortOverride: NewAsset.DialogSortOverride,
-		DynamicDescription: (typeof NewAsset.DynamicDescription === 'function') ? NewAsset.DynamicDescription : function () { return this.Description },
-		DynamicPreviewIcon: (typeof NewAsset.DynamicPreviewIcon === 'function') ? NewAsset.DynamicPreviewIcon : function () { return "" },
-		DynamicAllowInventoryAdd: (typeof NewAsset.DynamicAllowInventoryAdd === 'function') ? NewAsset.DynamicAllowInventoryAdd : function () { return true },
-		DynamicExpressionTrigger: (typeof NewAsset.DynamicExpressionTrigger === 'function') ? NewAsset.DynamicExpressionTrigger : function () { return this.ExpressionTrigger },
-		DynamicName: (typeof NewAsset.DynamicName === 'function') ? NewAsset.DynamicName : function () { return this.Name },
-		DynamicGroupName: (NewAsset.DynamicGroupName || AssetCurrentGroup.Name),
-		DynamicActivity: (typeof NewAsset.DynamicActivity === 'function') ? NewAsset.DynamicActivity : function () { return NewAsset.Activity },
+		DynamicDescription: (typeof NewAsset.DynamicDescription === 'function') ? NewAsset.DynamicDescription : function () { return this.Description; },
+		DynamicPreviewIcon: (typeof NewAsset.DynamicPreviewIcon === 'function') ? NewAsset.DynamicPreviewIcon : function () { return ""; },
+		DynamicAllowInventoryAdd: (typeof NewAsset.DynamicAllowInventoryAdd === 'function') ? NewAsset.DynamicAllowInventoryAdd : function () { return true; },
+		DynamicExpressionTrigger: (typeof NewAsset.DynamicExpressionTrigger === 'function') ? NewAsset.DynamicExpressionTrigger : function () { return this.ExpressionTrigger; },
+		DynamicName: (typeof NewAsset.DynamicName === 'function') ? NewAsset.DynamicName : function () { return this.Name; },
+		DynamicGroupName: (NewAsset.DynamicGroupName || AssetCurrentGroup.DynamicGroupName),
+		DynamicActivity: (typeof NewAsset.DynamicActivity === 'function') ? NewAsset.DynamicActivity : function () { return NewAsset.Activity; },
 		DynamicAudio: (typeof NewAsset.DynamicAudio === 'function') ? NewAsset.DynamicAudio : null,
 		CharacterRestricted: typeof NewAsset.CharacterRestricted === 'boolean' ? NewAsset.CharacterRestricted : false,
 		AllowRemoveExclusive: typeof NewAsset.AllowRemoveExclusive === 'boolean' ? NewAsset.CharacterRestricted : false,
@@ -154,8 +155,9 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		MirrorExpression: NewAsset.MirrorExpression,
 		FixedPosition: typeof NewAsset.FixedPosition === 'boolean' ? NewAsset.FixedPosition : false,
 		Layer: [],
-		ColorableLayerCount: 0
+		ColorableLayerCount: 0,
 	}
+	};
 	if (A.MinOpacity > A.Opacity) A.MinOpacity = A.Opacity;
 	if (A.MaxOpacity < A.Opacity) A.MaxOpacity = A.Opacity;
 	A.Layer = AssetBuildLayer(NewAsset, A);
@@ -175,8 +177,13 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 function AssetBuildExtended(A, ExtendedConfig) {
 	let AssetConfig = AssetFindExtendedConfig(ExtendedConfig, AssetCurrentGroup.Name, A.Name);
 	if (AssetConfig && AssetConfig.CopyConfig) {
+		const Overrides = AssetConfig.Config;
 		const { GroupName, AssetName } = AssetConfig.CopyConfig;
 		AssetConfig = AssetFindExtendedConfig(ExtendedConfig, GroupName || AssetCurrentGroup.Name, AssetName);
+		if (AssetConfig && Overrides) {
+			const MergedConfig = Object.assign({}, AssetConfig.Config, Overrides);
+			AssetConfig = Object.assign({}, AssetConfig, {Config: MergedConfig});
+		}
 	}
 	if (AssetConfig) {
 		switch (AssetConfig.Archetype) {
@@ -431,7 +438,7 @@ function AssetGetActivity(Family, Name) {
  * @param {Array.<{Name: string, Group: string}>} AssetArray - The arrays of items to clean
  * @returns {Array.<{Name: string, Group: string}>} - The cleaned up array
  */
-function AssetCleanArray(AssetArray) { 
+function AssetCleanArray(AssetArray) {
 	var CleanArray = [];
 	// Only save the existing items
 	for (let A = 0; A < Asset.length; A++)
