@@ -70,9 +70,27 @@ function ServerInit() {
 /** @readonly */
 var ServerAccountUpdate = new class AccountUpdater {
 
-    /** Clears queue and sync with server  */
-    SyncToServer() {
-        if (this.Timeout) clearTimeout(this.Timeout);
+	constructor() {
+		/**
+ 		 * @private
+ 		 * @type {Map<string, object>}
+		 */
+		this.Queue = new Map;
+		/**
+ 		 * @private
+ 		 * @type {null | number}
+ 		 */
+		this.Timeout = null;
+		/**
+ 		 * @private
+ 		 * @type {number}
+ 		 */
+		this.Start = 0;
+	}
+
+	/** Clears queue and sync with server  */
+	SyncToServer() {
+		if (this.Timeout) clearTimeout(this.Timeout);
         this.Timeout = null;
 
         if (this.Queue.size == 0) return;
@@ -107,22 +125,6 @@ var ServerAccountUpdate = new class AccountUpdater {
 
         if (!this.Timeout) this.Timeout = setTimeout(this.SyncToServer.bind(this), 10000);
     }
-
-    /**
-     * @private
-     * @type {Map<string, object>}
-     */
-    Queue = new Map;
-    /**
-     * @private
-     * @type {null | number}
-     */
-    Timeout = null;
-    /**
-     * @private
-     * @type {number}
-     */
-    Start = 0;
 };
 
 /**
