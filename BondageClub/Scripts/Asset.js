@@ -156,7 +156,6 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		FixedPosition: typeof NewAsset.FixedPosition === 'boolean' ? NewAsset.FixedPosition : false,
 		Layer: [],
 		ColorableLayerCount: 0,
-	}
 	};
 	if (A.MinOpacity > A.Opacity) A.MinOpacity = A.Opacity;
 	if (A.MaxOpacity < A.Opacity) A.MaxOpacity = A.Opacity;
