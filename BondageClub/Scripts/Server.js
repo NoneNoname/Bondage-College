@@ -49,6 +49,9 @@ function ServerInit() {
 	ServerSocket.on("ChatRoomSync", function (data) { ChatRoomSync(data); });
 	ServerSocket.on("ChatRoomSyncMemberJoin", function (data) { ChatRoomSyncMemberJoin(data); });
 	ServerSocket.on("ChatRoomSyncMemberLeave", function (data) { ChatRoomSyncMemberLeave(data); });
+	ServerSocket.on("ChatRoomSyncSwapPlayers", function (data) { ChatRoomSyncSwapPlayers(data); });
+	ServerSocket.on("ChatRoomSyncMovePlayer", function (data) { ChatRoomSyncMovePlayer(data); });
+	ServerSocket.on("ChatRoomSyncReorderPlayers", function (data) { ChatRoomSyncReorderPlayers(data); });
 	ServerSocket.on("ChatRoomSyncSingle", function (data) { ChatRoomSyncSingle(data); });
 	ServerSocket.on("ChatRoomSyncExpression", function (data) { ChatRoomSyncExpression(data); });
 	ServerSocket.on("ChatRoomSyncPose", function (data) { ChatRoomSyncPose(data); });
@@ -235,7 +238,8 @@ function ServerPlayerIsInChatRoom() {
 		|| ((CurrentScreen == "Title") && (InformationSheetPreviousScreen == "ChatRoom"))
 		|| ((CurrentScreen == "OnlineProfile") && (InformationSheetPreviousScreen == "ChatRoom"))
 		|| ((CurrentScreen == "FriendList") && (InformationSheetPreviousScreen == "ChatRoom") && (FriendListReturn == null))
-		|| ((CurrentScreen == "Preference") && (InformationSheetPreviousScreen == "ChatRoom"));
+		|| ((CurrentScreen == "Preference") && (InformationSheetPreviousScreen == "ChatRoom"))
+		|| ((CurrentModule == "MiniGame") && (DialogGamingPreviousRoom == "ChatRoom"));
 }
 
 /** Sends a message with the given data to the server via socket.emit */
@@ -352,9 +356,11 @@ function ServerAppearanceBundle(Appearance) {
  * @param {string} AssetFamily - Family of assets used for the appearance array
  * @param {AppearanceBundle} Bundle - Bundled appearance
  * @param {number} SourceMemberNumber - Member number of the user who triggered the change
- * @returns {void} - Nothing
+ * @param {boolean} AppearanceFull - Whether or not the appearance should be assigned to an NPC's AppearanceFull
+ * property
+ * @returns {boolean} - Whether or not the appearance bundle update contained invalid items
  */
-function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumber) {
+function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumber, AppearanceFull) {
 	const appearanceDiffs = ServerBuildAppearanceDiff(AssetFamily, C.Appearance, Bundle);
 	ServerAddRequiredAppearance(AssetFamily, appearanceDiffs);
 
@@ -370,12 +376,18 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 			return { appearance, updateValid };
 		}, { appearance: [], updateValid: true });
 
+	if (AppearanceFull) {
+		C.AppearanceFull = appearance;
+	} else {
+		C.Appearance = appearance;
+	}
+
 	// If the appearance update was invalid, send another update to correct any issues
 	if (!updateValid && C.ID === 0) {
 		console.warn("Invalid appearance update bundle received. Updating with sanitized appearance.");
 		ChatRoomCharacterUpdate(C);
 	}
-	return { appearance, updateValid };
+	return updateValid;
 }
 
 /**
@@ -409,8 +421,7 @@ function ServerBuildAppearanceDiff(assetFamily, appearance, bundle) {
  * @returns {AppearanceItem} - A full appearance item representation of the provided bundled appearance item
  */
 function ServerBundledItemToAppearanceItem(assetFamily, item) {
-	if (!item || typeof item !== "object" || typeof item.Name !== "string" || typeof item.Group !==
-	    "string") return null;
+	if (!item || typeof item !== "object" || typeof item.Name !== "string" || typeof item.Group !== "string") return null;
 
 	const asset = AssetGet(assetFamily, item.Group, item.Name);
 	if (!asset) return null;
