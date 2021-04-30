@@ -57,7 +57,7 @@ function AssetGroupAdd(NewAssetFamily, NewAsset) {
 // Adds a new asset to the main list
 function AssetAdd(NewAsset, ExtendedConfig) {
 	/** @type {Asset} */
-	var A = {
+	var A = Object.assign({
 		Name: NewAsset.Name,
 		Description: NewAsset.Name,
 		Group: AssetCurrentGroup,
@@ -80,9 +80,6 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		HideItemExclude: NewAsset.HideItemExclude || [],
 		Require: NewAsset.Require,
 		SetPose: (NewAsset.SetPose == null) ? AssetCurrentGroup.SetPose : NewAsset.SetPose,
-		AllowPose: Array.isArray(NewAsset.AllowPose) ? NewAsset.AllowPose : AssetCurrentGroup.AllowPose,
-		HideForPose: Array.isArray(NewAsset.HideForPose) ? NewAsset.HideForPose : [],
-		OverrideAllowPose: NewAsset.OverrideAllowPose,
 		AllowActivePose: (NewAsset.AllowActivePose == null) ? AssetCurrentGroup.AllowActivePose : NewAsset.AllowActivePose,
 		WhitelistActivePose: (NewAsset.WhitelistActivePose == null) ? AssetCurrentGroup.WhitelistActivePose : NewAsset.WhitelistActivePose,
 		Value: (NewAsset.Value == null) ? 0 : NewAsset.Value,
@@ -145,20 +142,23 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		DynamicScriptDraw: (typeof NewAsset.DynamicScriptDraw === 'boolean') ? NewAsset.DynamicScriptDraw : false,
 		HasType: (typeof NewAsset.HasType === 'boolean') ? NewAsset.HasType : true,
 		AllowLockType: NewAsset.AllowLockType,
-		AllowColorizeAll: typeof NewAsset.AllowColorizeAll === 'boolean' ? NewAsset.AllowColorizeAll : true,
+		AllowColorizeAll: typeof NewAsset.AllowColorizeAll === "boolean" ? NewAsset.AllowColorizeAll : true,
 		AvailableLocations: NewAsset.AvailableLocations || [],
 		OverrideHeight: NewAsset.OverrideHeight,
 		FreezeActivePose: Array.isArray(NewAsset.FreezeActivePose) ? NewAsset.FreezeActivePose :
 			Array.isArray(AssetCurrentGroup.FreezeActivePose) ? AssetCurrentGroup.FreezeActivePose : [],
-		DrawLocks: typeof NewAsset.DrawLocks === 'boolean' ? NewAsset.DrawLocks : true,
+		DrawLocks: typeof NewAsset.DrawLocks === "boolean" ? NewAsset.DrawLocks : true,
 		AllowExpression: NewAsset.AllowExpression,
 		MirrorExpression: NewAsset.MirrorExpression,
-		FixedPosition: typeof NewAsset.FixedPosition === 'boolean' ? NewAsset.FixedPosition : false,
+		FixedPosition: typeof NewAsset.FixedPosition === "boolean" ? NewAsset.FixedPosition : false,
 		Layer: [],
 		ColorableLayerCount: 0,
-	};
+	}, AssetParsePoseProperties(NewAsset, [...AssetCurrentGroup.AllowPose]));
+
+	// Ensure opacity value is valid
 	if (A.MinOpacity > A.Opacity) A.MinOpacity = A.Opacity;
 	if (A.MaxOpacity < A.Opacity) A.MaxOpacity = A.Opacity;
+
 	A.Layer = AssetBuildLayer(NewAsset, A);
 	AssetAssignColorIndices(A);
 	// Unwearable assets are not visible but can be overwritten
@@ -202,8 +202,9 @@ function AssetFindExtendedConfig(ExtendedConfig, GroupName, AssetName) {
 }
 
 /**
- * Builds the layer array for an asset based on the asset definition. One layer is created for each drawable part of the asset (excluding
- * the lock). If the asset definition contains no layer definitions, a default layer definition will be created.
+ * Builds the layer array for an asset based on the asset definition. One layer is created for each drawable part of
+ * the asset (excluding the lock). If the asset definition contains no layer definitions, a default layer definition
+ * will be created.
  * @param {Object} AssetDefinition - The raw asset definition
  * @param {Asset} A - The built asset
  * @return {AssetLayer[]} - An array of layer objects representing the drawable layers of the asset
@@ -223,7 +224,7 @@ function AssetBuildLayer(AssetDefinition, A) {
  */
 function AssetMapLayer(Layer, AssetDefinition, A, I) {
 	/** @type {AssetLayer} */
-	const L = {
+	const L = Object.assign({
 		Name: Layer.Name || null,
 		AllowColorize: AssetLayerAllowColorize(Layer, AssetDefinition),
 		CopyLayerColor: Layer.CopyLayerColor || null,
@@ -232,7 +233,6 @@ function AssetMapLayer(Layer, AssetDefinition, A, I) {
 		AllowTypes: Array.isArray(Layer.AllowTypes) ? Layer.AllowTypes : null,
 		HasType: typeof Layer.HasType === "boolean" ? Layer.HasType : A.HasType,
 		ParentGroupName: Layer.ParentGroup,
-		OverrideAllowPose: Array.isArray(Layer.OverrideAllowPose) ? Layer.OverrideAllowPose : null,
 		Priority: Layer.Priority || AssetDefinition.Priority || AssetCurrentGroup.DrawingPriority,
 		InheritColor: Layer.InheritColor,
 		Alpha: AssetLayerAlpha(Layer, AssetDefinition, I),
@@ -246,13 +246,34 @@ function AssetMapLayer(Layer, AssetDefinition, A, I) {
 		MaxOpacity: typeof Layer.MaxOpacity === "number" ? AssetParseOpacity(Layer.Opacity) : A.MaxOpacity,
 		LockLayer: typeof Layer.LockLayer === "boolean" ? Layer.LockLayer : false,
 		MirrorExpression: Layer.MirrorExpression,
-		HideForPose: Array.isArray(Layer.HideForPose) ? Layer.HideForPose : [],
 		AllowModuleTypes: Layer.AllowModuleTypes,
 		ColorIndex: 0
-	};
+	}, AssetParsePoseProperties(
+		Layer,
+		Array.isArray(AssetDefinition.AllowPose) ? [...AssetDefinition.AllowPose] : null)
+	);
 	if (L.MinOpacity > L.Opacity) L.MinOpacity = L.Opacity;
 	if (L.MaxOpacity < L.Opacity) L.MaxOpacity = L.Opacity;
 	return L;
+}
+
+/**
+ * Resolves the AllowPose and HideForPose properties on a layer or an asset
+ * @param {Asset | AssetLayer} obj - The asset or layer object
+ * @param {string[] | null} defaultAllowPose - A fallback value for the AllowPose property if it's not defined on the
+ * object
+ * @return {{AllowPose?: string[], HideForPose: string[]}} - A partial object containing AllowPose and HideForPose
+ * properties
+ */
+function AssetParsePoseProperties(obj, defaultAllowPose = null) {
+	const HideForPose = Array.isArray(obj.HideForPose) ? obj.HideForPose : [];
+	let AllowPose = Array.isArray(obj.AllowPose) ? obj.AllowPose : defaultAllowPose;
+	if (HideForPose.length > 0) {
+		// Automatically add any entries from HideForPose into AllowPose
+		AllowPose = AllowPose || [];
+		CommonArrayConcatDedupe(AllowPose, HideForPose);
+	}
+	return {AllowPose, HideForPose};
 }
 
 function AssetParseOpacity(opacity) {
@@ -291,8 +312,8 @@ function AssetLayerAlpha(Layer, NewAsset, I) {
 }
 
 /**
- * Assigns colour indices to the layers of an asset. These determine which colours get applied to the layer. Also adds a count of colorable
- * layers to the asset definition.
+ * Assigns colour indices to the layers of an asset. These determine which colours get applied to the layer. Also adds
+ * a count of colorable layers to the asset definition.
  * @param {Asset} A - The built asset
  * @returns {void} - Nothing
  */
@@ -456,7 +477,7 @@ function AssetCleanArray(AssetArray) {
  * @returns {*} - The asset group matching the provided family and group name
  */
 function AssetGroupGet(Family, Group) {
-    return AssetGroup.find(g => g.Family === Family && g.Name === Group);
+	return AssetGroup.find(g => g.Family === Family && g.Name === Group);
 }
 
 /**
