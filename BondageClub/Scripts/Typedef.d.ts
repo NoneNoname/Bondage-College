@@ -36,6 +36,7 @@ interface AssetGroup {
 	InheritColor?: string;
 	FreezeActivePose: string[];
 	PreviewZone?: [number, number, number, number][];
+	DynamicGroupName: string;
 }
 
 /** An object defining a drawable layer of an asset */
@@ -61,7 +62,9 @@ interface AssetLayer {
 	ParentGroupName?: string | null;
 	/** An array of poses that this layer permits. If set, it will override the poses permitted
 	by the parent asset/group. */
-	OverrideAllowPose: string[] | null;
+	AllowPose: string[] | null;
+	/** An array of poses that this layer should be hidden for. */
+	HideForPose: string[];
 	/** The drawing priority of this layer. Inherited from the parent asset/group if not specified in the layer
 	definition. */
 	Priority: number;
@@ -78,7 +81,6 @@ interface AssetLayer {
 	MaxOpacity: number;
 	LockLayer: boolean;
 	MirrorExpression?: string;
-	HideForPose: string[];
 	AllowModuleTypes?: string[];
 	/** The coloring index for this layer */
 	ColorIndex: number;
@@ -128,7 +130,6 @@ interface Asset {
 	SetPose?: string[];
 	AllowPose: string[];
 	HideForPose: string[];
-	OverrideAllowPose?: string[];
 	AllowActivePose?: string[];
 	WhitelistActivePose?: string[];
 	Value: number;
