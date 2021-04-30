@@ -229,7 +229,7 @@ function ServerDisconnect(data, close = false) {
 
 /**
  * Returns whether the player is currently in a chatroom or viewing a subscreen while in a chatroom
- * @returns {boolean} - True if in a chatroom 
+ * @returns {boolean} - True if in a chatroom
  */
 function ServerPlayerIsInChatRoom() {
 	return (CurrentScreen == "ChatRoom")
@@ -325,7 +325,7 @@ function ServerPlayerRelationsSync() {
 	Array.from(Player.FriendNames.keys()).forEach(k => {
 		if (!Player.FriendList.includes(k) && !Player.SubmissivesList.has(k))
 			Player.FriendNames.delete(k);
-	})
+	});
 	D.FriendNames = LZString.compressToUTF16(JSON.stringify(Array.from(Player.FriendNames)));
 	D.SubmissivesList = LZString.compressToUTF16(JSON.stringify(Array.from(Player.SubmissivesList)));
 	ServerAccountUpdate.QueueData(D, true);
@@ -586,7 +586,7 @@ function ServerAccountBeep(data) {
 			if (ServerBeep.ChatRoomName != null)
 				ServerBeep.Message = ServerBeep.Message + " " + DialogFindPlayer("InRoom") + " \"" + ServerBeep.ChatRoomName + "\" " + (data.ChatRoomSpace === "Asylum" ? DialogFindPlayer("InAsylum") : '');
 			if (data.Message) {
-				ServerBeep.Message += `; ${DialogFindPlayer("BeepWithMessage")}`
+				ServerBeep.Message += `; ${DialogFindPlayer("BeepWithMessage")}`;
 			}
 			FriendListBeepLog.push({
 				MemberNumber: data.MemberNumber,
@@ -609,17 +609,17 @@ function ServerAccountBeep(data) {
 		} else if (data.BeepType == "Leash" && ChatRoomLeashPlayer == data.MemberNumber && data.ChatRoomName) {
 			if (Player.OnlineSharedSettings && Player.OnlineSharedSettings.AllowPlayerLeashing != false && ( CurrentScreen != "ChatRoom" || !ChatRoomData || (CurrentScreen == "ChatRoom" && ChatRoomData.Name != data.ChatRoomName))) {
 				if (ChatRoomCanBeLeashedBy(data.MemberNumber, Player)) {
-					ChatRoomJoinLeash = data.ChatRoomName
-					
-					DialogLeave()
+					ChatRoomJoinLeash = data.ChatRoomName;
+
+					DialogLeave();
 					ChatRoomClearAllElements();
 					if (CurrentScreen == "ChatRoom") {
 						ServerSend("ChatRoomLeave", "");
 						CommonSetScreen("Online", "ChatSearch");
 					}
-					else ChatRoomStart("", "", "MainHall", "Introduction", BackgroundsTagList) //CommonSetScreen("Room", "ChatSearch")
+					else ChatRoomStart("", "", "MainHall", "Introduction", BackgroundsTagList); //CommonSetScreen("Room", "ChatSearch")
 				} else {
-					ChatRoomLeashPlayer = null
+					ChatRoomLeashPlayer = null;
 				}
 			}
 		}

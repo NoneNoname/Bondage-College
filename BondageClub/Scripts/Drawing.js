@@ -42,10 +42,10 @@ function DrawHexToRGB(color) {
 		g: parseInt(result[2], 16),
 		b: parseInt(result[3], 16)
 	} : {
-			r: 0,
-			g: 0,
-			b: 0
-		};
+		r: 0,
+		g: 0,
+		b: 0
+	};
 }
 
 /**
@@ -152,8 +152,8 @@ function DrawGetImageOnError(Img, IsAsset) {
  */
 function DrawArousalGlow(X, Y, Zoom, Level, Animated, AnimFactor, Orgasm) {
 	if (!Orgasm) {
-		let Rx = 0
-		let Ry = 0
+		let Rx = 0;
+		let Ry = 0;
 
 		if (Level > 0 && Animated) {
 			Rx = -(1 + AnimFactor * Level / 2) + (2 + AnimFactor * Level) * Math.random();
@@ -195,13 +195,13 @@ function DrawArousalMeter(C, X, Y, Zoom) {
 				ActivitySetArousal(C, C.ArousalSettings.Progress);
 
 				if (C.ArousalSettings != null && Player.ArousalSettings.VFX != "VFXInactive" && C.ArousalSettings.Progress > 0 && ((C.ArousalSettings.Active == "Automatic") || (C.ArousalSettings.Active == "Hybrid"))) {
-					let Progress = 0
+					let Progress = 0;
 					if (!((C.ArousalSettings.VibratorLevel == null) || (typeof C.ArousalSettings.VibratorLevel !== "number") || isNaN(C.ArousalSettings.VibratorLevel))) {
-						Progress = C.ArousalSettings.VibratorLevel
+						Progress = C.ArousalSettings.VibratorLevel;
 					}
 
 					if (Progress > 0) { // -1 is disabled
-						const max_time = 5000 // 5 seconds
+						const max_time = 5000; // 5 seconds
 						DrawArousalGlow(X + ((C.ArousalZoom ? 50 : 90) * Zoom), Y + ((C.ArousalZoom ? 200 : 400) * Zoom), C.ArousalZoom ? Zoom : Zoom * 0.2, Progress, Player.ArousalSettings.VFX == "VFXAnimated" || (Player.ArousalSettings.VFX == "VFXAnimatedTemp" && C.ArousalSettings.ChangeTime != null && CommonTime() - C.ArousalSettings.ChangeTime < max_time), Math.max(0, (max_time + C.ArousalSettings.ChangeTime - CommonTime()) / max_time), ((C.ArousalSettings.OrgasmTimer != null) && (typeof C.ArousalSettings.OrgasmTimer === "number") && !isNaN(C.ArousalSettings.OrgasmTimer) && (C.ArousalSettings.OrgasmTimer > 0)));
 					}
 				}
@@ -227,16 +227,16 @@ function DrawArousalMeter(C, X, Y, Zoom) {
  * @returns {void} - Nothing
  */
 function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
-	if (!DrawCanvas) DrawCanvas = MainCanvas
-	
-	var OverrideDark = CurrentModule == "MiniGame" || ((Player.Effect.includes("VRAvatars") && C.Effect.includes("VRAvatars"))) || CurrentScreen == "InformationSheet"
-	
+	if (!DrawCanvas) DrawCanvas = MainCanvas;
+
+	var OverrideDark = CurrentModule == "MiniGame" || ((Player.Effect.includes("VRAvatars") && C.Effect.includes("VRAvatars"))) || CurrentScreen == "InformationSheet";
+
 	if ((C != null) && ((C.ID == 0) || (OverrideDark || Player.GetBlindLevel() < 3 ))) {
 
-		CharacterCheckHooks(C, CurrentCharacter != null)
+		CharacterCheckHooks(C, CurrentCharacter != null);
 
 		if (ControllerActive == true) {
-			setButton(X + 100, Y + 200)
+			setButton(X + 100, Y + 200);
 		}
 
 		// If there's a fixed image to draw instead of the character
@@ -277,7 +277,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
 		// If we must dark the Canvas characters
 		if ((C.ID != 0) && Player.IsBlind() && !OverrideDark) {
 			const DarkFactor = Math.min(CharacterGetDarkFactor(Player) * 2, 1);
-			
+
 			CharacterCanvas.globalCompositeOperation = "copy";
 			CharacterCanvas.drawImage(Canvas, 0, 0);
 			// Overlay black rectangle.
@@ -321,7 +321,7 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
 			OnlineGameDrawCharacter(C, X, Y, Zoom);
 			if (C.HasHiddenItems) DrawImageZoomCanvas("Screens/Character/Player/HiddenItem.png", DrawCanvas, 0, 0, 86, 86, X + 54 * Zoom, Y + 880 * Zoom, 70 * Zoom, 70 * Zoom);
 		}
-		
+
 		// Draws the character focus zones if we need too
 		if ((C.FocusGroup != null) && (C.FocusGroup.Zone != null) && (CurrentScreen != "Preference") && (DialogColor == null)) {
 
@@ -636,7 +636,7 @@ function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageMirror(Source, X, Y) {
-	const Img = DrawGetImage(Source)
+	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
 	MainCanvas.save();
@@ -725,7 +725,7 @@ function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) 
 	// Sets the text size if there's a maximum number of lines
 	let TextSize;
 	if (MaxLine != null) {
-		TextSize = MainCanvas.font
+		TextSize = MainCanvas.font;
 		GetWrapTextSize(Text, Width, MaxLine);
 	}
 
@@ -792,14 +792,14 @@ function DrawTextFit(Text, X, Y, Width, Color, BackColor) {
 	}
 
 	// Cuts the text if it would go over the box
-    if (S <= 10) {
-        while (Text.length > 0) {
-            Text = Text.substr(1);
-            const metrics = MainCanvas.measureText(Text);
-            if (metrics.width <= Width)
-                break;
-        }
-    }
+	if (S <= 10) {
+		while (Text.length > 0) {
+			Text = Text.substr(1);
+			const metrics = MainCanvas.measureText(Text);
+			if (metrics.width <= Width)
+				break;
+		}
+	}
 
 	// Draw a back color relief text if needed
 	if ((BackColor != null) && (BackColor != "")) {
@@ -1079,14 +1079,21 @@ function DrawRect(Left, Top, Width, Height, Color) {
  * @param {number} Radius - Radius of the circle to draw
  * @param {number} LineWidth - Width of the line
  * @param {string} LineColor - Color of the circle's line
+ * @param {string} FillColor - Color of the space inside the circle
+ * @param {HTMLCanvasElement} Canvas - The canvas element to draw onto, defaults to MainCanvas
  * @returns {void} - Nothing
  */
-function DrawCircle(CenterX, CenterY, Radius, LineWidth, LineColor) {
-	MainCanvas.beginPath();
-	MainCanvas.arc(CenterX, CenterY, Radius, 0, 2 * Math.PI, false);
-	MainCanvas.lineWidth = LineWidth;
-	MainCanvas.strokeStyle = LineColor;
-	MainCanvas.stroke();
+function DrawCircle(CenterX, CenterY, Radius, LineWidth, LineColor, FillColor, Canvas) {
+	if (!Canvas) Canvas = MainCanvas;
+	Canvas.beginPath();
+	Canvas.arc(CenterX, CenterY, Radius, 0, 2 * Math.PI, false);
+	if (FillColor) {
+		Canvas.fillStyle = FillColor;
+		Canvas.fill();
+	}
+	Canvas.lineWidth = LineWidth;
+	Canvas.strokeStyle = LineColor;
+	Canvas.stroke();
 }
 
 /**
@@ -1169,7 +1176,7 @@ function DrawProcess() {
 			if (DarkFactor == 1 && (CurrentCharacter != null || ShopStarted) && !CommonPhotoMode) DarkFactor = 0.5;
 		}
 		const Invert = Player.GraphicsSettings && Player.GraphicsSettings.InvertRoom && Player.IsInverted();
-		
+
 		let customBG = DrawGetCustomBackground();
 
 		if (customBG != "" && (CurrentModule != "Character" && CurrentModule != "MiniGame") && (B != "Sheet")) {
