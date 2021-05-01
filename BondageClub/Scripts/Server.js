@@ -72,59 +72,59 @@ var ServerAccountUpdate = new class AccountUpdater {
 
 	constructor() {
 		/**
- 		 * @private
- 		 * @type {Map<string, object>}
+		 * @private
+		 * @type {Map<string, object>}
 		 */
 		this.Queue = new Map;
 		/**
- 		 * @private
- 		 * @type {null | number}
- 		 */
+		 * @private
+		 * @type {null | number}
+		 */
 		this.Timeout = null;
 		/**
- 		 * @private
- 		 * @type {number}
- 		 */
+		 * @private
+		 * @type {number}
+		 */
 		this.Start = 0;
 	}
 
 	/** Clears queue and sync with server  */
 	SyncToServer() {
 		if (this.Timeout) clearTimeout(this.Timeout);
-        this.Timeout = null;
+		this.Timeout = null;
 
-        if (this.Queue.size == 0) return;
+		if (this.Queue.size == 0) return;
 
-        const Queue = this.Queue;
-        this.Queue = new Map;
-        const Data = {};
-        Queue.forEach((value, key) => Data[key] = value);
+		const Queue = this.Queue;
+		this.Queue = new Map;
+		const Data = {};
+		Queue.forEach((value, key) => Data[key] = value);
 
-        ServerSocket.emit('AccountUpdate', Data);
-    }
+		ServerSocket.emit('AccountUpdate', Data);
+	}
 
-    /**
-     * Queues a data to be synced at a later time
-     * @param {object} Data
-     * @param {true} [Force] - force immediate sync to server
-     */
-    QueueData(Data, Force) {
-        for (const [key, value] of Object.entries(Data)) {
-            this.Queue.set(key, value);
-        }
+	/**
+	 * Queues a data to be synced at a later time
+	 * @param {object} Data
+	 * @param {true} [Force] - force immediate sync to server
+	 */
+	QueueData(Data, Force) {
+		for (const [key, value] of Object.entries(Data)) {
+			this.Queue.set(key, value);
+		}
 
 		if (Force) {
 			this.SyncToServer();
 			return;
 		}
 
-        if (this.Timeout && (this.Start - Date.now()) < 30000) {
-            clearTimeout(this.Timeout);
-            this.Timeout = null;
-        } else this.Start = Date.now();
+		if (this.Timeout && (this.Start - Date.now()) < 30000) {
+			clearTimeout(this.Timeout);
+			this.Timeout = null;
+		} else this.Start = Date.now();
 
-        if (!this.Timeout) this.Timeout = setTimeout(this.SyncToServer.bind(this), 10000);
-    }
+		if (!this.Timeout) this.Timeout = setTimeout(this.SyncToServer.bind(this), 10000);
+	}
 };
 
 /**
