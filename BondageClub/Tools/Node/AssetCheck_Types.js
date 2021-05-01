@@ -60,7 +60,6 @@ const AssetType = {
 	SetPose: "[String]",
 	AllowPose: "[String]",
 	HideForPose: "[String]",
-	OverrideAllowPose: "[String]",
 	AllowActivePose: "[String]",
 	WhitelistActivePose: "[String]",
 	Value: "Number",
@@ -130,8 +129,8 @@ const AssetType = {
 	AllowExpression: "[String]",
 	MirrorExpression: "String",
 	FixedPosition: "Boolean",
-	Layer: "[Object]",
 	CustomBlindBackground: "Object",
+	Layer: "[Object]"
 };
 
 const AssetLayerType = {
@@ -143,7 +142,7 @@ const AssetLayerType = {
 	AllowTypes: "[String]",
 	HasType: "Boolean",
 	ParentGroup: "Maybe String",
-	OverrideAllowPose: "[String]",
+	AllowPose: "[String]",
 	Priority: "Number",
 	InheritColor: "String",
 	Alpha: "[{ Group: Maybe [String], Pose: Maybe [String], Masks: [(Number, Number, Number, Number)] }]",
