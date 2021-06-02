@@ -4,12 +4,11 @@ var LoginMessage = "";
 var LoginCredits = null;
 var LoginCreditsPosition = 0;
 var LoginThankYou = "";
-var LoginThankYouList = [
-	"Anna", "Aylea", "BlueEyedCat", "BlueWinter", "Brian", "Bryce", "Christian", "Dini", "Elise", "Epona",
-	"Escurse", "FanRunner", "Flux", "Greendragon", "KamiKaze", "KBgamer", "Kimuriel", "Longwave", "Michal", "Michel",
-	"Mike", "Mindtie", "Misa", "MrUniver", "Mzklopyu", "Nick", "Nightcore", "Overlord", "Rashiash", "Ray",
-	"Rika", "Robin", "Rutherford", "Ryner", "Samuel", "SeraDenoir", "Shadow", "Somononon", "Stephanie", "Tam",
-	"TopHat", "Trent", "Troubadix", "William", "Xepherio", "Yurei", "Znarf"];
+var LoginThankYouList = ["Anna", "Aylea", "Bendy", "BlueEyedCat", "BlueWinter", "Brian", "Bryce", "Christian", "Dini", "Epona", 
+						"Escurse", "FanRunner", "Flux", "Greendragon", "KamiKaze", "Kimuriel", "Michal", "Michel", "Mike", "Mindtie", 
+						"Misa", "MrUniver", "Mzklopyu", "Nick", "Nightcore", "Overlord", "Rashiash", "Ray", "Remydy", "Rika", 
+						"Robin", "Rutherford", "Ryner", "Samuel", "SeraDenoir", "Shadow", "Stephanie", "Tam", "TopHat", "Trent", 
+						"Troubadix", "William", "Xepherio", "Yurei", "Znarf"];
 var LoginThankYouNext = 0;
 var LoginSubmitted = false;
 var LoginIsRelog = false;
@@ -218,8 +217,30 @@ function LoginStableItems() {
 		InventoryDelete(Player, "HarnessPonyBits", "ItemMouth3", false);
 		InventoryDelete(Player, "PonyBoots", "Shoes", false);
 		InventoryDelete(Player, "PonyBoots", "ItemBoots", false);
-		InventoryDelete(Player, "PonyHood", "ItemHood", false)
+		InventoryDelete(Player, "PonyHood", "ItemHood", false);
 		InventoryDelete(Player, "HoofMittens", "ItemHands", false);
+	}
+}
+
+/**
+ * Adds or confiscates maid items from the player. Only players that have joined the Maid Sorority can have these items.
+ * @returns {void} - Nothing
+ */
+function LoginMaidItems() {
+	if (LogQuery("JoinedSorority", "Maid")) {
+		InventoryAdd(Player, "MaidOutfit1", "Cloth", false);
+		InventoryAdd(Player, "MaidOutfit2", "Cloth", false);
+		InventoryAdd(Player, "MaidHairband1", "Cloth", false);
+		InventoryAdd(Player, "MaidApron1", "Cloth", false);
+		InventoryAdd(Player, "MaidHairband1", "Hat", false);
+		InventoryAdd(Player, "ServingTray", "ItemMisc", false);
+	} else {
+		InventoryDelete(Player, "MaidOutfit1", "Cloth", false);
+		InventoryDelete(Player, "MaidOutfit2", "Cloth", false);
+		InventoryDelete(Player, "MaidHairband1", "Cloth", false);
+		InventoryDelete(Player, "MaidApron1", "Cloth", false);
+		InventoryDelete(Player, "MaidHairband1", "Hat", false);
+		InventoryDelete(Player, "ServingTray", "ItemMisc", false);
 	}
 }
 
@@ -352,7 +373,7 @@ function LoginQueue(Pos) {
 
 /**
  * Handles player login response data
- * @param {Character | string} C - The Login response data - this will either be the player's character data if the
+ * @param {object | string} C - The Login response data - this will either be the player's character data if the
  * login was successful, or a string error message if the login failed.
  * @returns {void} Nothing
  */
@@ -470,14 +491,14 @@ function LoginResponse(C) {
 			Player.BlackList = ((C.BlackList == null) || !Array.isArray(C.BlackList)) ? [] : C.BlackList;
 			Player.FriendList = ((C.FriendList == null) || !Array.isArray(C.FriendList)) ? [] : C.FriendList;
 			// Attempt to parse friend names
-			if (typeof C.FriendNames === "string") { 
+			if (typeof C.FriendNames === "string") {
 				try {
 					Player.FriendNames = new Map(JSON.parse(LZString.decompressFromUTF16(C.FriendNames)));
 				} catch(err) {
 					console.warn("An error occured while parsing friendnames, entries have been reset.");
 				}
 			}
-			if (Player.FriendNames == null) { 
+			if (Player.FriendNames == null) {
 				Player.FriendNames = new Map();
 			}
 			Player.SubmissivesList = typeof C.SubmissivesList === "string" ? new Set(JSON.parse(LZString.decompressFromUTF16(C.SubmissivesList))) : new Set();
@@ -486,7 +507,7 @@ function LoginResponse(C) {
 			LoginDifficulty();
 
 			// Loads the player character model and data
-			ServerAppearanceLoadFromBundle(Player, C.AssetFamily, C.Appearance, C.MemberNumber)
+			ServerAppearanceLoadFromBundle(Player, C.AssetFamily, C.Appearance, C.MemberNumber);
 			InventoryLoad(Player, C.Inventory);
 			LogLoad(C.Log);
 			ReputationLoad(C.Reputation);
@@ -527,6 +548,7 @@ function LoginResponse(C) {
 			LoginValidCollar();
 			LoginMistressItems();
 			LoginStableItems();
+			LoginMaidItems();
 			LoginLoversItems();
 			LoginAsylumItems();
 			LoginCheatItems();
@@ -539,25 +561,34 @@ function LoginResponse(C) {
 			if (LogQuery("Locked", "Cell")) {
 				CommonSetScreen("Room", "Cell");
 			} else {
-
-				// If the player must log back in the asylum
-				if (LogQuery("Committed", "Asylum")) {
-					CharacterRelease(Player);
-					AsylumEntranceWearPatientClothes(Player);
-					if (ReputationGet("Asylum") <= -50) AsylumEntrancePlayerJacket("Normal");
-					CommonSetScreen("Room", "AsylumBedroom");
+				
+				// If the player must log back in Pandora's Box prison
+				if ((Player.Infiltration != null) && (Player.Infiltration.Punishment != null) && (Player.Infiltration.Punishment.Timer != null) && (Player.Infiltration.Punishment.Timer > CurrentTime)) {
+					PandoraWillpower = 0;
+					InfiltrationDifficulty = Player.Infiltration.Punishment.Difficulty;
+					CommonSetScreen("Room", "PandoraPrison");
 				} else {
 
-					// If the player must start in her room, in her cage
-					if (LogQuery("SleepCage", "Rule") && (Player.Owner != "") && PrivateOwnerInRoom()) {
-						InventoryRemove(Player, "ItemFeet");
-						InventoryRemove(Player, "ItemLegs");
-						Player.Cage = true;
-						CharacterSetActivePose(Player, "Kneel", true);
-						CommonSetScreen("Room", "Private");
+					// If the player must log back in the asylum
+					if (LogQuery("Committed", "Asylum")) {
+						CharacterRelease(Player);
+						AsylumEntranceWearPatientClothes(Player);
+						if (ReputationGet("Asylum") <= -50) AsylumEntrancePlayerJacket("Normal");
+						CommonSetScreen("Room", "AsylumBedroom");
 					} else {
-						CommonSetScreen("Room", "MainHall");
-						MainHallMaidIntroduction();
+
+						// If the player must start in her room, in her cage
+						if (LogQuery("SleepCage", "Rule") && (Player.Owner != "") && PrivateOwnerInRoom()) {
+							InventoryRemove(Player, "ItemFeet");
+							InventoryRemove(Player, "ItemLegs");
+							Player.Cage = true;
+							CharacterSetActivePose(Player, "Kneel", true);
+							CommonSetScreen("Room", "Private");
+						} else {
+							CommonSetScreen("Room", "MainHall");
+							MainHallMaidIntroduction();
+						}
+
 					}
 
 				}

@@ -58,7 +58,7 @@ var GameLARPTurnFocusGroup = null;
  */
 function GameLARPIsAdmin(C) {
 	if (GameLARPStatus == "")
-		return (ChatRoomData.Admin.indexOf(C.MemberNumber) >= 0)
+		return (ChatRoomData.Admin.indexOf(C.MemberNumber) >= 0);
 	else
 		return (GameLARPTurnAdmin == C.MemberNumber);
 }
@@ -469,25 +469,25 @@ function GameLARPGetOdds(Action, Source, Target) {
  * @param {Character} C - Character to check.
  * @returns {boolean} - Whether the character can talk or not
  */
-function GameLARPCanTalk(C) { return (InventoryGet(C, "ItemMouth") == null) }
+function GameLARPCanTalk(C) { return (InventoryGet(C, "ItemMouth") == null); }
 /**
  * In LARP, check if the given character can walk.
  * @param {Character} C - Character to check.
  * @returns {boolean} - Whether the character can walk or not
  */
-function GameLARPCanWalk(C) { return (InventoryGet(C, "ItemFeet") == null) }
+function GameLARPCanWalk(C) { return (InventoryGet(C, "ItemFeet") == null); }
 /**
  * In LARP, check if the given character can act.
  * @param {Character} C - Character to check.
  * @returns {boolean} - Whether the character can act or not
  */
-function GameLARPCanAct(C) { return (InventoryGet(C, "ItemArms") == null) }
+function GameLARPCanAct(C) { return (InventoryGet(C, "ItemArms") == null); }
 /**
  * In LARP, check if the given character is wearing clothes.
  * @param {Character} C - Character to check.
  * @returns {boolean} - Whether the character is wearing clothes or not
  */
-function GameLARPClothed(C) { return (InventoryGet(C, "Cloth") != null) }
+function GameLARPClothed(C) { return (InventoryGet(C, "Cloth") != null); }
 
 /**
  * Checks if an item can be removed in LARP.
@@ -506,7 +506,7 @@ function GameLARPCanRemoveItem(C, Zone) {
  * Adds all available class abilities to the built basic options
  * @param {Character} Source - Character about to do an action.
  * @param {Character} Target - The character on which an action is about to be done.
- * @param {Array.<{ Name: string, Odds: number}>} - List of the basic options the source character can perform
+ * @param {Array.<{ Name: string, Odds: number}>} Option - List of the basic options the source character can perform
  * @param {string} Ability - Character's ability.
  * @returns {void} - Nothing
  */
@@ -833,7 +833,7 @@ function GameLARPBuildPlayerList() {
 
 /**
  * Each time a game is over, in victory or defeat, the player progresses toward the next class level
- * @param {number} Progress - The progress factor to apply
+ * @param {number} NewProgress - The progress factor to apply
  * @returns {void} - Nothing
  */
 function GameLARPLevelProgress(NewProgress) {

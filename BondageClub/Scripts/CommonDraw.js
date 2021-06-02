@@ -15,7 +15,8 @@
  * @param {number} x - The x coordinate to draw the image at
  * @param {number} y - The y coordinate to draw the image at
  * @param {number[][]} alphaMasks - A list of alpha masks to apply to the image when drawing
- * @param {number} opacity - The opacity to draw the image with
+ * @param {number} [opacity=1] - The opacity at which to draw the image with
+ * @param {boolean} [rotate=false] - If the image should be rotated by 180 degress
  */
 
 /**
@@ -35,7 +36,8 @@
  * @param {string} color - The color to apply to the image
  * @param {boolean} fullAlpha - Whether or not to apply colour to the entire image
  * @param {number[][]} alphaMasks - A list of alpha masks to apply to the image when drawing
- * @param {number} opacity - The opacity to draw the image with
+ * @param {number} [opacity=1] - The opacity at which to draw the image with
+ * @param {boolean} [rotate=false] - If the image should be rotated by 180 degress
  */
 
 /**
@@ -61,14 +63,15 @@ function CommonDrawCanvasPrepare(C) {
 /**
  * Draws the given character's appearance using the provided drawing callbacks
  * @param {Character} C - The character whose appearance to draw
- * @param {clearRect} clearRect - A callback to clear an area of the main character canvas
- * @param {clearRect} clearRectBlink - A callback to clear an area of the blink character canvas
- * @param {drawCanvas} drawCanvas - Function used to draw a canvas on top of the normal canvas
- * @param {drawCanvas} drawCanvasBlink - Function used to draw a canvas on top of the blink canvas
- * @param {drawImage} drawImage - A callback to draw an image to the main character canvas
- * @param {drawImage} drawImageBlink - A callback to draw an image to the blink character canvas
- * @param {drawImageColorize} drawImageColorize - A callback to draw a colorized image to the main character canvas
- * @param {drawImageColorize} drawImageColorizeBlink - A callback to draw a colorized image to the blink character canvas
+ * @param {object} callbacks
+ * @param {clearRect} callbacks.clearRect - A callback to clear an area of the main character canvas
+ * @param {clearRect} callbacks.clearRectBlink - A callback to clear an area of the blink character canvas
+ * @param {drawCanvas} callbacks.drawCanvas - Function used to draw a canvas on top of the normal canvas
+ * @param {drawCanvas} callbacks.drawCanvasBlink - Function used to draw a canvas on top of the blink canvas
+ * @param {drawImage} callbacks.drawImage - A callback to draw an image to the main character canvas
+ * @param {drawImage} callbacks.drawImageBlink - A callback to draw an image to the blink character canvas
+ * @param {drawImageColorize} callbacks.drawImageColorize - A callback to draw a colorized image to the main character canvas
+ * @param {drawImageColorize} callbacks.drawImageColorizeBlink - A callback to draw a colorized image to the blink character canvas
  */
 function CommonDrawAppearanceBuild(C, {
 	clearRect,
@@ -104,13 +107,8 @@ function CommonDrawAppearanceBuild(C, {
 		}
 
 		// If there's a pose style we must add (items take priority over groups, layers may override completely)
-		var Pose = "";
-		if (C.DrawPose && C.DrawPose.length) {
-			let AllowPose = Layer.AllowPose;
-			if (!Array.isArray(AllowPose)) AllowPose = A.AllowPose;
-			if (!Array.isArray(AllowPose)) AllowPose = AG.AllowPose;
-			Pose = CommonDrawFindPose(C, AllowPose);
-		}
+		let Pose = CommonDrawResolveAssetPose(C, A, Layer);
+		if (Pose) Pose += "/";
 
 		// Check if we need to draw a different expression (for facial features)
 		let Expression = "";
@@ -276,57 +274,57 @@ function CommonDrawAppearanceBuild(C, {
 
 		const Rotate = A.FixedPosition && C.IsInverted();
 
-		const HideForPose = !!Pose && (A.HideForPose.find(P => Pose === P + "/") || Layer.HideForPose.find(P => Pose === P + "/"));
+		// const HideForPose = !!Pose && (A.HideForPose.find(P => Pose === P + "/") || Layer.HideForPose.find(P => Pose === P + "/"));
 		const ItemLocked = !!(Property && Property.LockedBy);
 
-		if (!HideForPose) {
-			if (Layer.HasImage && (!Layer.LockLayer || ItemLocked)) {
-				// Draw the item on the canvas (default or empty means no special color, # means apply a color, regular text means we apply
-				// that text)
-				if ((Color != null) && (Color.indexOf("#") == 0) && Layer.AllowColorize) {
-					drawImageColorize(
-						"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + Expression + A.Name + G + LayerType + L + ".png", X, Y,
-						Color,
-						AG.DrawingFullAlpha, AlphaMasks, Opacity, Rotate
-					);
-					drawImageColorizeBlink(
-						"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + BlinkExpression + A.Name + G + LayerType + L + ".png", X, Y,
-						Color, AG.DrawingFullAlpha, AlphaMasks, Opacity, Rotate
-					);
-				} else {
-					var ColorName = ((Color == null) || (Color == "Default") || (Color == "") || (Color.length == 1) ||
-						(Color.indexOf("#") == 0)) ? "" : "_" + Color;
-					drawImage(
-						"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + Expression + A.Name + G + LayerType + ColorName + L + ".png",
-						X, Y,
-						AlphaMasks, Opacity, Rotate
-					);
-					drawImageBlink(
-						"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + BlinkExpression + A.Name + G + LayerType + ColorName + L +
-						".png",
-						X, Y, AlphaMasks, Opacity, Rotate
-					);
-				}
-			}
-
-			// If the item has been locked
-			if (ItemLocked && A.DrawLocks) {
-				// How many layers should be drawn for the asset
-				const DrawableLayerCount = C.AppearanceLayers.filter(AL => AL.Asset === A).length;
-
-				// If we just drew the last drawable layer for this asset, draw the lock too (never colorized)
-				if (DrawableLayerCount === LayerCounts[CountKey]) {
-					drawImage(
-						"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + Expression + A.Name + (A.HasType ? Type : "") +
-						"_Lock.png",
-						X, Y, AlphaMasks
-					);
-					drawImageBlink(
-						"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + BlinkExpression + A.Name + (A.HasType ? Type : "") +
-						"_Lock.png", X, Y, AlphaMasks);
-				}
+		// if (!HideForPose) {
+		if (Layer.HasImage && (!Layer.LockLayer || ItemLocked)) {
+			// Draw the item on the canvas (default or empty means no special color, # means apply a color, regular text means we apply
+			// that text)
+			if ((Color != null) && (Color.indexOf("#") == 0) && Layer.AllowColorize) {
+				drawImageColorize(
+					"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + Expression + A.Name + G + LayerType + L + ".png", X, Y,
+					Color,
+					AG.DrawingFullAlpha, AlphaMasks, Opacity, Rotate
+				);
+				drawImageColorizeBlink(
+					"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + BlinkExpression + A.Name + G + LayerType + L + ".png", X, Y,
+					Color, AG.DrawingFullAlpha, AlphaMasks, Opacity, Rotate
+				);
+			} else {
+				var ColorName = ((Color == null) || (Color == "Default") || (Color == "") || (Color.length == 1) ||
+					(Color.indexOf("#") == 0)) ? "" : "_" + Color;
+				drawImage(
+					"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + Expression + A.Name + G + LayerType + ColorName + L + ".png",
+					X, Y,
+					AlphaMasks, Opacity, Rotate
+				);
+				drawImageBlink(
+					"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + BlinkExpression + A.Name + G + LayerType + ColorName + L +
+					".png",
+					X, Y, AlphaMasks, Opacity, Rotate
+				);
 			}
 		}
+
+		// If the item has been locked
+		if (ItemLocked && A.DrawLocks) {
+			// How many layers should be drawn for the asset
+			const DrawableLayerCount = C.AppearanceLayers.filter(AL => AL.Asset === A).length;
+
+			// If we just drew the last drawable layer for this asset, draw the lock too (never colorized)
+			if (DrawableLayerCount === LayerCounts[CountKey]) {
+				drawImage(
+					"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + Expression + A.Name + (A.HasType ? Type : "") +
+					"_Lock.png",
+					X, Y, AlphaMasks
+				);
+				drawImageBlink(
+					"Assets/" + AG.Family + "/" + GroupName + "/" + Pose + BlinkExpression + A.Name + (A.HasType ? Type : "") +
+					"_Lock.png", X, Y, AlphaMasks);
+			}
+		}
+		// }
 
 		// After drawing hook, receives all processed data.
 		// CAREFUL! The dynamic function should not contain heavy computations, and should not have any side effects.
@@ -344,7 +342,7 @@ function CommonDrawAppearanceBuild(C, {
 /**
  * Determines whether the provided color is valid
  * @param {any} Color - The color
- * @param {any} AssetGroup - The asset group the color is being used fo
+ * @param {AssetGroup} AssetGroup - The asset group the color is being used fo
  * @returns {boolean} - Whether the color is valid
  */
 function CommonDrawColorValid(Color, AssetGroup) {
@@ -367,8 +365,26 @@ function CommonDrawFindPose(C, AllowedPoses) {
 	var Pose = "";
 	if (AllowedPoses && AllowedPoses.length) {
 		AllowedPoses.forEach(AllowedPose => {
-			if (C.DrawPose.includes(AllowedPose)) Pose = AllowedPose + "/";
+			if (C.DrawPose.includes(AllowedPose)) Pose = AllowedPose;
 		});
+	}
+	return Pose;
+}
+
+/**
+ * Finds the pose that should be used when a given asset (and optionally layer) is drawn.
+ * @param {Character} C - The character whose poses to check
+ * @param {Asset} A - The asset to check
+ * @param {AssetLayer} [Layer] - The layer to check (optional)
+ * @returns {string} - The pose to use when drawing the given asset (or layer)
+ */
+function CommonDrawResolveAssetPose(C, A, Layer) {
+	let Pose = "";
+	if (C.DrawPose && C.DrawPose.length) {
+		let AllowPose = Layer && Layer.AllowPose;
+		if (!Array.isArray(AllowPose)) AllowPose = A.AllowPose;
+		if (!Array.isArray(AllowPose)) AllowPose = A.Group.AllowPose;
+		Pose = CommonDrawFindPose(C, AllowPose);
 	}
 	return Pose;
 }

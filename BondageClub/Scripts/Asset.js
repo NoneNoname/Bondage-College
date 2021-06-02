@@ -1,49 +1,17 @@
 "use strict";
+
+/** @type {Asset[]} */
 var Asset = [];
+/** @type {AssetGroup[]} */
 var AssetGroup = [];
+/** @type {AssetGroup} */
 var AssetCurrentGroup;
+/** @type {Pose[]} */
 var Pose = [];
-
-/**
- * An object defining a drawable layer of an asset
- * @typedef {Object} Layer
- * @property {string | null} Name - the name of the layer - may be null if the asset only contains a single default
- *     layer
- * @property {boolean} AllowColorize - whether or not this layer can be colored
- * @property {string | null} CopyLayerColor - if not null, specifies that this layer should always copy the color of
- *     the named layer
- * @property {string} [ColorGroup] - specifies the name of a color group that this layer belongs to. Any layers within
- *     the same color group can be colored together via the item color UI
- * @property {boolean} HideColoring - whether or not this layer can be coloured in the colouring UI
- * @property {string[] | null} AllowTypes - A list of allowed extended item types that this layer permits - the layer
- *     will only be drawn if the item type matches one of these types. If null, the layer is considered to permit all
- *     extended types.
- * @property {boolean} HasType - whether or not the layer has separate assets per type. If not, the extended type will
- *     not be included in the URL when fetching the layer's image
- * @property {string | null} [ParentGroupName] - The name of the parent group for this layer. If null, the layer has no
- *     parent group. If undefined, the layer inherits its parent group from it's asset/group.
- * @property {string[] | null} AllowPose - An array of poses that this layer permits. If set, it will override the
- *     poses permitted by the parent asset/group.
- * @property {string[]} HideForPose - An array of poses that this layer should be hidden for.
- * @property {number} Priority - The drawing priority of this layer. Inherited from the parent asset/group if not
- *     specified in the layer definition.
- * @property {Asset} Asset - The asset that this layer belongs to
- * @property {number} ColorIndex - The coloring index for this layer
- */
-
-/**
- * An object defining a group of alpha masks to be applied when drawing an asset layer
- * @typedef AlphaDefinition
- * @property {string[]} [Group] - A list of the group names that the given alpha masks should be applied to. If empty
- *     or not present, the alpha masks will be applied to every layer underneath the present one.
- * @property {string[]} [Pose] - A list of the poses that the given alpha masks should be applied to. If empty or not
- *     present, the alpha masks will be applied regardless of character pose.
- * @property {number[][]} Masks - A list of alpha mask definitions. A definition is a 4-tuple of numbers defining the
- *     top left coordinate of a rectangle and the rectangle's width and height - e.g. [left, top, width, height]
- */
 
 // Adds a new asset group to the main list
 function AssetGroupAdd(NewAssetFamily, NewAsset) {
+	/** @type {AssetGroup} */
 	var A = {
 		Family: NewAssetFamily,
 		Name: NewAsset.Group,
@@ -88,6 +56,7 @@ function AssetGroupAdd(NewAssetFamily, NewAsset) {
 
 // Adds a new asset to the main list
 function AssetAdd(NewAsset, ExtendedConfig) {
+	/** @type {Asset} */
 	var A = Object.assign({
 		Name: NewAsset.Name,
 		Description: NewAsset.Name,
@@ -166,7 +135,7 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		DynamicActivity: (typeof NewAsset.DynamicActivity === 'function') ? NewAsset.DynamicActivity : function () { return NewAsset.Activity; },
 		DynamicAudio: (typeof NewAsset.DynamicAudio === 'function') ? NewAsset.DynamicAudio : null,
 		CharacterRestricted: typeof NewAsset.CharacterRestricted === 'boolean' ? NewAsset.CharacterRestricted : false,
-		AllowRemoveExclusive: typeof NewAsset.AllowRemoveExclusive === 'boolean' ? NewAsset.CharacterRestricted : false,
+		AllowRemoveExclusive: typeof NewAsset.AllowRemoveExclusive === 'boolean' ? NewAsset.AllowRemoveExclusive : false,
 		InheritColor: NewAsset.InheritColor,
 		DynamicBeforeDraw: (typeof NewAsset.DynamicBeforeDraw === 'boolean') ? NewAsset.DynamicBeforeDraw : false,
 		DynamicAfterDraw: (typeof NewAsset.DynamicAfterDraw === 'boolean') ? NewAsset.DynamicAfterDraw : false,
@@ -182,7 +151,11 @@ function AssetAdd(NewAsset, ExtendedConfig) {
 		AllowExpression: NewAsset.AllowExpression,
 		MirrorExpression: NewAsset.MirrorExpression,
 		FixedPosition: typeof NewAsset.FixedPosition === "boolean" ? NewAsset.FixedPosition : false,
-	}, AssetParsePoseProperties(NewAsset, [...AssetCurrentGroup.AllowPose]));
+		Layer: [],
+		ColorableLayerCount: 0,
+		FuturisticRecolor: typeof NewAsset.FuturisticRecolor === 'boolean' ? NewAsset.FuturisticRecolor : false,
+		FuturisticRecolorDisplay: typeof NewAsset.FuturisticRecolorDisplay === 'boolean' ? NewAsset.FuturisticRecolorDisplay : false,
+	}, AssetParsePoseProperties(NewAsset, AssetCurrentGroup.AllowPose.slice()));
 
 	// Ensure opacity value is valid
 	if (A.MinOpacity > A.Opacity) A.MinOpacity = A.Opacity;
@@ -216,15 +189,24 @@ function AssetBuildExtended(A, ExtendedConfig) {
 	if (AssetConfig) {
 		switch (AssetConfig.Archetype) {
 			case ExtendedArchetype.MODULAR:
-				ModularItemRegister(A, AssetConfig.Config);
+				ModularItemRegister(A, /** @type {ModularItemConfig} */ (AssetConfig.Config));
 				break;
 			case ExtendedArchetype.TYPED:
-				TypedItemRegister(A, AssetConfig.Config);
+				TypedItemRegister(A, /** @type {TypedItemConfig} */ (AssetConfig.Config));
 				break;
 		}
+		A.Archetype = AssetConfig.Archetype;
 	}
 }
 
+/**
+ * Finds the extended item configuration for the provided group and asset name, if any exists
+ * @param {ExtendedItemConfig} ExtendedConfig - The full extended item configuration object
+ * @param {string} GroupName - The name of the asset group to find extended configuration for
+ * @param {string} AssetName - The name of the asset to find extended configuration fo
+ * @returns {ExtendedItemAssetConfig | undefined} - The extended asset configuration object for the specified asset, if
+ * any exists, or undefined otherwise
+ */
 function AssetFindExtendedConfig(ExtendedConfig, GroupName, AssetName) {
 	const GroupConfig = ExtendedConfig[GroupName] || {};
 	return GroupConfig[AssetName];
@@ -236,7 +218,7 @@ function AssetFindExtendedConfig(ExtendedConfig, GroupName, AssetName) {
  * will be created.
  * @param {Object} AssetDefinition - The raw asset definition
  * @param {Asset} A - The built asset
- * @return {Layer[]} - An array of layer objects representing the drawable layers of the asset
+ * @return {AssetLayer[]} - An array of layer objects representing the drawable layers of the asset
  */
 function AssetBuildLayer(AssetDefinition, A) {
 	var Layers = Array.isArray(AssetDefinition.Layer) ? AssetDefinition.Layer : [{}];
@@ -249,9 +231,10 @@ function AssetBuildLayer(AssetDefinition, A) {
  * @param {Object} AssetDefinition - The raw asset definition
  * @param {Asset} A - The built asset
  * @param {number} I - The index of the layer within the asset
- * @return {Layer} - A Layer object representing the drawable properties of the given layer
+ * @return {AssetLayer} - A Layer object representing the drawable properties of the given layer
  */
 function AssetMapLayer(Layer, AssetDefinition, A, I) {
+	/** @type {AssetLayer} */
 	const L = Object.assign({
 		Name: Layer.Name || null,
 		AllowColorize: AssetLayerAllowColorize(Layer, AssetDefinition),
@@ -275,9 +258,10 @@ function AssetMapLayer(Layer, AssetDefinition, A, I) {
 		LockLayer: typeof Layer.LockLayer === "boolean" ? Layer.LockLayer : false,
 		MirrorExpression: Layer.MirrorExpression,
 		AllowModuleTypes: Layer.AllowModuleTypes,
+		ColorIndex: 0
 	}, AssetParsePoseProperties(
 		Layer,
-		Array.isArray(AssetDefinition.AllowPose) ? [...AssetDefinition.AllowPose] : null)
+		Array.isArray(AssetDefinition.AllowPose) ? AssetDefinition.AllowPose.slice() : null)
 	);
 	if (L.MinOpacity > L.Opacity) L.MinOpacity = L.Opacity;
 	if (L.MaxOpacity < L.Opacity) L.MaxOpacity = L.Opacity;
@@ -286,10 +270,10 @@ function AssetMapLayer(Layer, AssetDefinition, A, I) {
 
 /**
  * Resolves the AllowPose and HideForPose properties on a layer or an asset
- * @param {Asset | Layer} obj - The asset or layer object
+ * @param {Asset | AssetLayer} obj - The asset or layer object
  * @param {string[] | null} defaultAllowPose - A fallback value for the AllowPose property if it's not defined on the
  * object
- * @return {{[AllowPose]: string[], HideForPose: string[]}} - A partial object containing AllowPose and HideForPose
+ * @return {{AllowPose?: string[], HideForPose: string[]}} - A partial object containing AllowPose and HideForPose
  * properties
  */
 function AssetParsePoseProperties(obj, defaultAllowPose = null) {
@@ -341,7 +325,7 @@ function AssetLayerAlpha(Layer, NewAsset, I) {
 /**
  * Assigns colour indices to the layers of an asset. These determine which colours get applied to the layer. Also adds
  * a count of colorable layers to the asset definition.
- * @param {Object} A - The built asset
+ * @param {Asset} A - The built asset
  * @returns {void} - Nothing
  */
 function AssetAssignColorIndices(A) {
@@ -463,7 +447,13 @@ function AssetLoadAll() {
 	Pose = PoseFemale3DCG;
 }
 
-// Gets a specific asset by family/group/name
+/**
+ * Gets a specific asset by family/group/name
+ * @param {string} Family - The family to search in
+ * @param {string} Group - Name of the group of the searched asset
+ * @param {string} Name - Name of the searched asset
+ * @returns {Asset|null}
+ */
 function AssetGet(Family, Group, Name) {
 	for (let A = 0; A < Asset.length; A++)
 		if ((Asset[A].Name == Name) && (Asset[A].Group.Name == Group) && (Asset[A].Group.Family == Family))
@@ -471,7 +461,12 @@ function AssetGet(Family, Group, Name) {
 	return null;
 }
 
-// Gets an activity asset by family and name
+/**
+ * Gets an activity asset by family and name
+ * @param {string} Family - The family to search in
+ * @param {string} Name - Name of activity to search for
+ * @returns {Activity|null}
+ */
 function AssetGetActivity(Family, Name) {
 	if (Family == "Female3DCG")
 		for (let A = 0; A < ActivityFemale3DCG.length; A++)

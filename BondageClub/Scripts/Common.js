@@ -1,9 +1,12 @@
 // Main variables
 "use strict";
+/** @type {PlayerCharacter} */
 var Player;
+/** @type {number|string} */
 var KeyPress = "";
 var CurrentModule;
 var CurrentScreen;
+/** @type {Character|null} */
 var CurrentCharacter = null;
 var CurrentOnlinePlayers = 0;
 var CurrentDarkFactor = 1.0;
@@ -85,7 +88,7 @@ function CommonGetFormatDate() {
 	var hh = d.getHours() < 10 ? "0" + d.getHours() : d.getHours();
 	var min = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes();
 	var ss = d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds();
-	return "".concat(yyyy).concat("-").concat(mm).concat("-").concat(dd).concat(" ").concat(hh).concat(":").concat(min).concat(":").concat(ss);
+	return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
 /**
@@ -135,7 +138,7 @@ function CommonGetBrowser() {
  * @returns {string[][]} Array representing each line of the parsed content, each line itself is split by commands and stored within an array.
  */
 function CommonParseCSV(str) {
-
+	/** @type {string[][]} */
 	var arr = [];
 	var quote = false;  // true means we're inside a quoted field
 	var c;
@@ -341,7 +344,7 @@ function CommonDynamicFunctionParams(FunctionName) {
  *  passed directly into the function call, allowing for more complex JS objects to be passed in. This
  *  function will not log to console if the provided function name does not exist as a global function.
  * @param {string} FunctionName - The name of the global function to call
- * @param {...*} [args] - zero or more arguments to be passed to the function (optional)
+ * @param {any[]} [args] - zero or more arguments to be passed to the function (optional)
  * @returns {any} - returns the result of the function call, or undefined if the function name isn't valid
  */
 function CommonCallFunctionByName(FunctionName/*, ...args */) {
@@ -355,7 +358,7 @@ function CommonCallFunctionByName(FunctionName/*, ...args */) {
 /**
  * Behaves exactly like CommonCallFunctionByName, but logs a warning if the function name is invalid.
  * @param {string} FunctionName - The name of the global function to call
- * @param {...*} [args] - zero or more arguments to be passed to the function (optional)
+ * @param {any[]} [args] - zero or more arguments to be passed to the function (optional)
  * @returns {any} - returns the result of the function call, or undefined if the function name isn't valid
  */
 function CommonCallFunctionByNameWarn(FunctionName/*, ...args */) {
@@ -524,16 +527,52 @@ function CommonDebounce(func, wait) {
 		return result;
 	};
 }
+
+/**
+ * Creates a throttling wrapper for the provided function with the provided wait time. If the wrapped function has been successfully called
+ * within the wait time, further call attempts will be delayed until the wait time has passed.
+ * @param {function} func - The function to throttle
+ * @param {number} wait - The wait time in milliseconds that needs to pass until the throttled function will be invoked again
+ * @returns {function} - A throttled version of the provided function
+ */
+function CommonThrottle(func, wait) {
+	let timeout, args, context, timestamp = 0, result;
+	wait = typeof wait === "number" ? wait : 100;
+
+	function run() {
+		timeout = null;
+		result = func.apply(context, args);
+		timestamp = CommonTime();
+	}
+
+	return function () {
+		context = this;
+		args = arguments;
+		if (!timeout) {
+			const last = CommonTime() - timestamp;
+			if (last >= 0 && last < wait) {
+				timeout = setTimeout(run, wait - last);
+			} else {
+				run();
+			}
+		}
+		return result;
+	};
+}
+
 /**
  * Creates a simple memoizer.
  * The memoized function does calculate its result exactly once and from that point on, uses
  * the result stored in a local cache to speed up things.
- * @param {function} func - The function to memoize
- * @returns {any} - The result of the memoized function
+ * @template {Function} T
+ * @param {T} func - The function to memoize
+ * @returns {MemoizedFunction<T>} - The result of the memoized function
  */
 function CommonMemoize(func) {
 	var memo = {};
 
+	/** @type {MemoizedFunction<T>} */
+	// @ts-ignore
 	var memoized = function () {
 		var index = [];
 		for (var i = 0; i < arguments.length; i++) {
@@ -560,10 +599,9 @@ function CommonMemoize(func) {
  * Memoized getter function. Returns a font string specifying the player's
  * preferred font and the provided size. This is memoized as it is called on
  * every frame in many cases.
- * @function
- * @param {Number} size - The font size that should be specified in the
+ * @param {number} size - The font size that should be specified in the
  * returned font string
- * @returns {String} - A font string specifying the requested font size and
+ * @returns {string} - A font string specifying the requested font size and
  * the player's preferred font stack. For example:
  * 12px "Courier New", "Courier", monospace
  */
@@ -575,8 +613,7 @@ const CommonGetFont = CommonMemoize((size) => {
  * Memoized getter function. Returns a font string specifying the player's
  * preferred font stack. This is memoized as it is called on every frame in
  * many cases.
- * @function
- * @returns {String} - A font string specifying the player's preferred font
+ * @returns {string} - A font string specifying the player's preferred font
  * stack. For example:
  * "Courier New", "Courier", monospace
  */
@@ -602,7 +639,7 @@ function CommonTakePhoto(Left, Top, Width, Height) {
 	DrawProcess();
 
 	// Capture screen as image URL
-	const ImgData = document.getElementById("MainCanvas").getContext('2d').getImageData(Left, Top, Width, Height);
+	const ImgData = /** @type {HTMLCanvasElement} */ (document.getElementById("MainCanvas")).getContext('2d').getImageData(Left, Top, Width, Height);
 	let PhotoCanvas = document.createElement('canvas');
 	PhotoCanvas.width = Width;
 	PhotoCanvas.height = Height;
@@ -622,6 +659,7 @@ function CommonTakePhoto(Left, Top, Width, Height) {
  * @returns { { [group: string]: { [name: string]: string[] } } } Output in object foramat
  */
 function CommonPackItemArray(arr) {
+	/** @type { Record<string, Record<string, string[]>> } */
 	const res = {};
 	for (const I of arr) {
 		let G = res[I.Group];
@@ -736,7 +774,27 @@ function CommonDeepEqual(obj1, obj2) {
  * @returns {void} - Nothing
  */
 function CommonArrayConcatDedupe(dest, src) {
-	src.forEach(item => {
-		if (!dest.includes(item)) dest.push(item);
-	});
+	if (Array.isArray(src) && Array.isArray(dest)) {
+		for (const item of src) {
+			if (!dest.includes(item)) dest.push(item);
+		}
+	}
+}
+
+/**
+ * Common function for removing a padlock from an item and publishing a corresponding chat message (must be called with
+ * the item's group focused)
+ * @param {Character} C - The character on whom the item is equipped
+ * @param {Item} Item - The item to unlock
+ * @returns {void} - Nothing
+ */
+function CommonPadlockUnlock(C, Item) {
+	for (let A = 0; A < C.Appearance.length; A++) {
+		if (C.Appearance[A].Asset.Group.Name === C.FocusGroup.Name) {
+			C.Appearance[A] = Item;
+			break;
+		}
+	}
+	InventoryUnlock(C, C.FocusGroup.Name);
+	ChatRoomPublishAction(C, Item, null, true, "ActionUnlock");
 }

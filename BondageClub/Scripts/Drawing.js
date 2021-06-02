@@ -1,8 +1,4 @@
 // The main game canvas where everything will be drawn
-/**
- * An item is a pair of asset and its dynamic properties that define a worn asset.
- * @typedef {{Asset: object, Color: string, Difficulty: number, Property: object | undefined}} Item
- */
 "use strict";
 /** @type {CanvasRenderingContext2D} */
 let MainCanvas;
@@ -12,18 +8,24 @@ let TempCanvas;
 let ColorCanvas;
 /** @type {CanvasRenderingContext2D} */
 let CharacterCanvas;
-/** @type {Map<string, () => {}>} */
+/** @type {Map<string, () => void>} */
 const DrawRunMap = new Map();
 let DrawRun = () => { };
 /** @type {string} */
 let DrawScreen;
 var DialogLeaveDueToItem = false;
 
+var BlindFlash = false;
+var DrawingBlindFlashTimer = 0;
+
 // A bank of all the chached images
 /** @type {Map<string, HTMLImageElement>} */
 const DrawCacheImage = new Map;
 let DrawCacheLoadedImages = 0;
 let DrawCacheTotalImages = 0;
+
+// Last dark factor for blindflash
+var DrawLastDarkFactor = 0;
 
 /**
  * Converts a hex color string to a RGB color
@@ -65,10 +67,12 @@ function DrawRGBToHex(color) {
 function DrawLoad() {
 
 	// Creates the objects used in the game
-	MainCanvas = document.getElementById("MainCanvas").getContext("2d");
+	MainCanvas = /** @type {HTMLCanvasElement} */ (document.getElementById("MainCanvas")).getContext("2d");
 	TempCanvas = document.createElement("canvas").getContext("2d");
 	ColorCanvas = document.createElement("canvas").getContext("2d");
 	CharacterCanvas = document.createElement("canvas").getContext("2d");
+	CharacterCanvas.canvas.width = 500;
+	CharacterCanvas.canvas.height = CanvasDrawHeight;
 	document.getElementById("MainCanvas").addEventListener("keypress", KeyDown);
 	document.getElementById("MainCanvas").tabIndex = 1000;
 	document.addEventListener("keydown", DocumentKeyDown);
@@ -138,6 +142,18 @@ function DrawGetImageOnError(Img, IsAsset) {
 		console.log("Error loading image " + Img.src);
 		if (IsAsset) DrawGetImageOnLoad();
 	}
+}
+
+
+/**
+ * Gets the alpha of a screen flash. append to a color like "#111111" + DrawGetScreenFlash(FlashTime)
+ * @param {number} FlashTime - Time remaining as part of the screen flash
+ * @returns {string} - alpha of screen flash
+ */
+function DrawGetScreenFlash(FlashTime) {
+	let alpha = Math.max(0, Math.min(255, Math.floor(140 * (1 - Math.exp(-FlashTime/2500))))).toString(16);
+	if (alpha.length < 2) alpha = "0" + alpha;
+	return alpha;
 }
 
 /**
@@ -223,7 +239,8 @@ function DrawArousalMeter(C, X, Y, Zoom) {
  * @param {number} X - Position of the character on the X axis
  * @param {number} Y - Position of the character on the Y axis
  * @param {number} Zoom - Zoom factor
- * @param {boolean} IsHeightResizeAllowed - Whether or not the settings allow for the height modifier to be applied
+ * @param {boolean} [IsHeightResizeAllowed=true] - Whether or not the settings allow for the height modifier to be applied
+ * @param {CanvasRenderingContext2D} [DrawCanvas] - The canvas to draw to; If undefined `MainCanvas` is used
  * @returns {void} - Nothing
  */
 function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
@@ -270,10 +287,6 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
 		// There's 2 different canvas, one blinking and one that doesn't
 		let Canvas = (Math.round(CurrentTime / 400) % C.BlinkFactor == 0 && !CommonPhotoMode) ? C.CanvasBlink : C.Canvas;
 
-		// Initialize the working canvas
-		CharacterCanvas.canvas.width = Canvas.width;
-		CharacterCanvas.canvas.height = Canvas.height;
-
 		// If we must dark the Canvas characters
 		if ((C.ID != 0) && Player.IsBlind() && !OverrideDark) {
 			const DarkFactor = Math.min(CharacterGetDarkFactor(Player) * 2, 1);
@@ -281,24 +294,15 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
 			CharacterCanvas.globalCompositeOperation = "copy";
 			CharacterCanvas.drawImage(Canvas, 0, 0);
 			// Overlay black rectangle.
-			CharacterCanvas.globalCompositeOperation = "source-over";
-			CharacterCanvas.fillStyle = "rgba(0,0,0," + (1.0 - DarkFactor) + ")";
+			CharacterCanvas.globalCompositeOperation = "source-atop";
+			CharacterCanvas.fillStyle = `rgba(0,0,0,${1.0 - DarkFactor})`;
 			CharacterCanvas.fillRect(0, 0, Canvas.width, Canvas.height);
-			// Re-apply character alpha channel
-			CharacterCanvas.globalCompositeOperation = 'destination-in';
-			CharacterCanvas.drawImage(Canvas, 0, 0);
+
 			Canvas = CharacterCanvas.canvas;
 		}
 
 		// If we must flip the canvas vertically
-		const IsInverted = CharacterAppearsInverted(C);
-		if (IsInverted) {
-			CharacterCanvas.rotate(Math.PI);
-			CharacterCanvas.translate(-Canvas.width, -Canvas.height);
-			CharacterCanvas.globalCompositeOperation = "copy";
-			CharacterCanvas.drawImage(Canvas, 0, 0);
-			Canvas = CharacterCanvas.canvas;
-		}
+		const IsInverted = (CurrentScreen != "KinkyDungeon") ? CharacterAppearsInverted(C) : false;
 
 		// Get the height ratio and X & Y offsets based on it
 		const HeightRatio = (IsHeightResizeAllowed == null || IsHeightResizeAllowed == true) ? C.HeightRatio : 1;
@@ -309,11 +313,17 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed, DrawCanvas) {
 		const YCutOff = YOffset >= 0 || CurrentScreen == "ChatRoom";
 		const YStart = CanvasUpperOverflow + (YCutOff ? -YOffset / HeightRatio : 0);
 		const SourceHeight = 1000 / HeightRatio + (YCutOff ? 0 : -YOffset / HeightRatio);
-		const SourceY = IsInverted ? Canvas.height - (YStart + SourceHeight) : YStart;
 		const DestY = (IsInverted || YCutOff) ? 0 : YOffset;
 
 		// Draw the character
-		DrawCanvas.drawImage(Canvas, 0, SourceY, Canvas.width, SourceHeight, X + XOffset * Zoom, Y + DestY * Zoom, 500 * HeightRatio * Zoom, (1000 - DestY) * Zoom);
+		DrawImageEx(Canvas, X + XOffset * Zoom, Y + DestY * Zoom, {
+			Canvas: DrawCanvas,
+			SourcePos: [0, YStart, Canvas.width, SourceHeight],
+			Width: 500 * HeightRatio * Zoom,
+			Height: (1000 - DestY) * Zoom,
+			Invert: IsInverted,
+			Mirror: IsInverted
+		});
 
 		// Draw the arousal meter & game images on certain conditions
 		if (CurrentScreen != "ChatRoom" || ChatRoomHideIconState <= 1) {
@@ -413,12 +423,13 @@ function DrawAlpha(Canvas, Alpha) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Width, Height, Invert) {
-	let Img = DrawGetImage(Source);
-	if (!Img.complete) return false;
-	if (!Img.naturalWidth) return true;
-	if (Invert) Img = DrawImageInvert(Img);
-	Canvas.drawImage(Img, SX, SY, Math.round(SWidth), Math.round(SHeight), X, Y, Width, Height);
-	return true;
+	return DrawImageEx(Source, X, Y, {
+		Canvas,
+		SourcePos: [SX, SY, SWidth, SHeight],
+		Width,
+		Height,
+		Invert
+	});
 }
 
 /**
@@ -431,11 +442,7 @@ function DrawImageZoomCanvas(Source, Canvas, SX, SY, SWidth, SHeight, X, Y, Widt
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageResize(Source, X, Y, Width, Height) {
-	const Img = DrawGetImage(Source);
-	if (!Img.complete) return false;
-	if (!Img.naturalWidth) return true;
-	MainCanvas.drawImage(Img, 0, 0, Img.width, Img.height, X, Y, Width, Height);
-	return true;
+	return DrawImageEx(Source, X, Y, { Width, Height });
 }
 
 /**
@@ -444,14 +451,16 @@ function DrawImageResize(Source, X, Y, Width, Height) {
  * @param {CanvasRenderingContext2D} Canvas - Canvas on which to draw the image
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
- * @param {number[][]} AlphaMasks - A list of alpha masks to apply to the asset
- * @param {number} Opacity - The opacity at which to draw the image
+ * @param {number[][]} [AlphaMasks] - A list of alpha masks to apply to the asset
+ * @param {number} [Opacity=1] - The opacity at which to draw the image
+ * @param {boolean} [Rotate=false] - If the image should be rotated by 180 degress
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity, Rotate) {
 	const Img = DrawGetImage(Source);
 	if (!Img.complete) return false;
 	if (!Img.naturalWidth) return true;
+	/** @type {CanvasImageSource} */
 	let SourceImage = Img;
 	if ((AlphaMasks && AlphaMasks.length) || Rotate) {
 		TempCanvas.canvas.width = Img.width;
@@ -479,7 +488,7 @@ function DrawImageCanvas(Source, Canvas, X, Y, AlphaMasks, Opacity, Rotate) {
 
 /**
  * Draws a canvas to a specific canvas
- * @param {CanvasImageSource} Img - Canvas to draw
+ * @param {HTMLImageElement | HTMLCanvasElement} Img - Canvas to draw
  * @param {CanvasRenderingContext2D} Canvas - Canvas on which to draw the image
  * @param {number} X - Position of the image on the X axis
  * @param {number} Y - Position of the image on the Y axis
@@ -501,14 +510,14 @@ function DrawCanvas(Img, Canvas, X, Y, AlphaMasks) {
 
 /**
  * Draws a specific canvas with a zoom on the main canvas
- * @param {CanvasImageSource} Canvas - Canvas to draw on the main canvas
+ * @param {HTMLImageElement | HTMLCanvasElement} Canvas - Canvas to draw on the main canvas
  * @param {number} X - Position of the canvas on the X axis
  * @param {number} Y - Position of the canvas on the Y axis
  * @param {number} Zoom - Zoom factor
- * @returns {void} - Nothing
+ * @returns {boolean} - whether the image was complete or not
  */
 function DrawCanvasZoom(Canvas, X, Y, Zoom) {
-	MainCanvas.drawImage(Canvas, 0, 0, Canvas.width, Canvas.height, X, Y, Canvas.width * Zoom, Canvas.height * Zoom);
+	return DrawImageEx(Canvas, X, Y, { Zoom });
 }
 
 /**
@@ -521,14 +530,10 @@ function DrawCanvasZoom(Canvas, X, Y, Zoom) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageZoomMirror(Source, X, Y, Width, Height) {
-	const Img = DrawGetImage(Source);
-	if (!Img.complete) return false;
-	if (!Img.naturalWidth) return true;
-	MainCanvas.save();
-	MainCanvas.scale(-1, 1);
-	MainCanvas.drawImage(Img, X * -1, Y, Width * -1, Height);
-	MainCanvas.restore();
-	return true;
+	return DrawImageEx(Source, X, Y, {
+		Width, Height,
+		Mirror: true
+	});
 }
 
 /**
@@ -540,12 +545,7 @@ function DrawImageZoomMirror(Source, X, Y, Width, Height) {
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImage(Source, X, Y, Invert) {
-	let Img = DrawGetImage(Source);
-	if (!Img.complete) return false;
-	if (!Img.naturalWidth) return true;
-	if (Invert) Img = DrawImageInvert(Img);
-	MainCanvas.drawImage(Img, X, Y);
-	return true;
+	return DrawImageEx(Source, X, Y, { Invert });
 }
 
 /**
@@ -558,7 +558,8 @@ function DrawImage(Source, X, Y, Invert) {
  * @param {string} HexColor - Color of the image to draw
  * @param {boolean} FullAlpha - Whether or not it is drawn in full alpha mode
  * @param {number[][]} AlphaMasks - A list of alpha masks to apply to the asset
- * @param {number} Opacity - The opacity at which to draw the image
+ * @param {number} [Opacity=1] - The opacity at which to draw the image
+ * @param {boolean} [Rotate=false] - If the image should be rotated by 180 degress
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha, AlphaMasks, Opacity, Rotate) {
@@ -636,14 +637,7 @@ function DrawImageCanvasColorize(Source, Canvas, X, Y, Zoom, HexColor, FullAlpha
  * @returns {boolean} - whether the image was complete or not
  */
 function DrawImageMirror(Source, X, Y) {
-	const Img = DrawGetImage(Source);
-	if (!Img.complete) return false;
-	if (!Img.naturalWidth) return true;
-	MainCanvas.save();
-	MainCanvas.scale(-1, 1);
-	MainCanvas.drawImage(Img, X * -1, Y);
-	MainCanvas.restore();
-	return true;
+	return DrawImageEx(Source, X, Y, { Mirror: true });
 }
 
 /**
@@ -658,6 +652,81 @@ function DrawImageInvert(Img) {
 	TempCanvas.translate(0, -Img.height);
 	TempCanvas.drawImage(Img, 0, 0);
 	return TempCanvas.canvas;
+}
+
+/**
+ * Draws an image on canvas, applying all options
+ * @param {string | HTMLImageElement | HTMLCanvasElement} Source - URL of image or image itself
+ * @param {number} X - Position of the image on the X axis
+ * @param {number} Y - Position of the image on the Y axis
+ * @param {object} [options] - any extra options, optional
+ * @param {CanvasRenderingContext2D} [options.Canvas] - Canvas on which to draw the image, defaults to `MainCanvas`
+ * @param {number} [options.Alpha] - transparency between 0-1
+ * @param {[number, number, number, number]} [options.SourcePos] - Area in original image to draw in format `[left, top, width, height]`
+ * @param {number} [options.Width] - Width of the drawn image, defaults to width of original image
+ * @param {number} [options.Height] - Height of the drawn image, defaults to height of original image
+ * @param {boolean} [options.Invert=false] - If image should be flipped vertically
+ * @param {boolean} [options.Mirror=false] - If image should be flipped horizontally
+ * @param {number} [options.Zoom=1] - Zoom factor
+ * @returns {boolean} - whether the image was complete or not
+ */
+function DrawImageEx(
+	Source,
+	X,
+	Y,
+	{
+		Canvas = MainCanvas,
+		Alpha = 1,
+		SourcePos,
+		Width,
+		Height,
+		Invert = false,
+		Mirror = false,
+		Zoom = 1
+	}
+) {
+	if (typeof Source === "string") {
+		Source = DrawGetImage(Source);
+		if (!Source.complete) return false;
+		if (!Source.naturalWidth) return true;
+	}
+
+	const sizeChanged = Width != null || Height != null;
+	if (Width == null) {
+		Width = SourcePos ? SourcePos[2] : Source.width;
+	}
+	if (Height == null) {
+		Height = SourcePos ? SourcePos[3] : Source.height;
+	}
+
+	Canvas.save();
+
+	Canvas.globalCompositeOperation = "source-over";
+	Canvas.globalAlpha = Alpha;
+	Canvas.translate(X, Y);
+
+	if (Zoom != 1) {
+		Canvas.scale(Zoom, Zoom);
+	}
+
+	if (Invert) {
+		Canvas.transform(1, 0, 0, -1, 0, Height);
+	}
+
+	if (Mirror) {
+		Canvas.transform(-1, 0, 0, 1, Width, 0);
+	}
+
+	if (SourcePos) {
+		Canvas.drawImage(Source, SourcePos[0], SourcePos[1], SourcePos[2], SourcePos[3], 0, 0, Width, Height);
+	} else if (sizeChanged) {
+		Canvas.drawImage(Source, 0, 0, Width, Height);
+	} else {
+		Canvas.drawImage(Source, 0, 0);
+	}
+
+	Canvas.restore();
+	return true;
 }
 
 /**
@@ -700,8 +769,8 @@ function GetWrapTextSize(Text, Width, MaxLine) {
  * @param {number} Width - Width of the rectangle
  * @param {number} Height - Height of the rectangle
  * @param {string} ForeColor - Foreground color
- * @param {string} BackColor - Background color
- * @param {number} MaxLine - Maximum of lines the word can wrap for
+ * @param {string} [BackColor] - Background color
+ * @param {number} [MaxLine] - Maximum of lines the word can wrap for
  * @returns {void} - Nothing
  */
 function DrawTextWrap(Text, X, Y, Width, Height, ForeColor, BackColor, MaxLine) {
@@ -820,7 +889,7 @@ function DrawTextFit(Text, X, Y, Width, Color, BackColor) {
  * @param {number} X - Position of the text on the X axis
  * @param {number} Y - Position of the text on the Y axis
  * @param {string} Color - Color of the text
- * @param {string} BackColor - Color of the background
+ * @param {string} [BackColor] - Color of the background
  * @returns {void} - Nothing
  */
 function DrawText(Text, X, Y, Color, BackColor) {
@@ -886,42 +955,13 @@ function DrawButton(Left, Top, Width, Height, Label, Color, Image, HoveringText,
  * @param {number} Height - Height of the component
  * @param {string} Text - Label associated with the checkbox
  * @param {boolean} IsChecked - Whether or not the checkbox is checked
+ * @param {boolean} [Disabled] - Disables the hovering options if set to true
+ * @param {string} [TextColor] - Color of the text
  * @returns {void} - Nothing
  */
-function DrawCheckbox(Left, Top, Width, Height, Text, IsChecked) {
-	DrawText(Text, Left + 100, Top + 33, "Black", "Gray");
-	DrawButton(Left, Top, Width, Height, "", "White", IsChecked ? "Icons/Checked.png" : "");
-}
-
-/**
- * Draws a checkbox component
- * @param {number} Left - Position of the component from the left of the canvas
- * @param {number} Top - Position of the component from the top of the canvas
- * @param {number} Width - Width of the component
- * @param {number} Height - Height of the component
- * @param {string} Text - Label associated with the checkbox
- * @param {boolean} IsChecked - Whether or not the checkbox is checked
- * @param {string} Color - Color of the text
- * @returns {void} - Nothing
- */
-function DrawCheckboxColor(Left, Top, Width, Height, Text, IsChecked, Color) {
-	DrawText(Text, Left + 100, Top + 33, Color, "Gray");
-	DrawButton(Left, Top, Width, Height, "", "White", IsChecked ? "Icons/Checked.png" : "");
-}
-
-/**
- * Draw a grey-filled rectangle to represent a disabled checkbox
- * @param {number} Left - Position of the component from the left of the canvas
- * @param {number} Top - Position of the component from the top of the canvas
- * @param {number} Width - Width of the component
- * @param {number} Height - Height of the component
- * @param {string} Text - The text to follow the checkbox
- * @returns {void} - Nothing
- */
-function DrawCheckboxDisabled(Left, Top, Width, Height, Text) {
-	DrawRect(Left, Top, Width, Height, "#ebebe4");
-	DrawEmptyRect(Left, Top, Width, Height, "Black", 2);
-	DrawText(Text, Left + 100, Top + 33, "Black", "Gray");
+function DrawCheckbox(Left, Top, Width, Height, Text, IsChecked, Disabled = false, TextColor = "Black") {
+	DrawText(Text, Left + 100, Top + 33, TextColor, "Gray");
+	DrawButton(Left, Top, Width, Height, "", Disabled ? "#ebebe4" : "White", IsChecked ? "Icons/Checked.png" : "", null, Disabled);
 }
 
 /**
@@ -936,7 +976,7 @@ function DrawCheckboxDisabled(Left, Top, Width, Height, Text) {
  * @param {() => string} [BackText] - Text for the back button tooltip
  * @param {() => string} [NextText] - Text for the next button tooltip
  * @param {boolean} [Disabled] - Disables the hovering options if set to true
- * @param {number} ArrowWidth - How much of the button the previous/next sections cover. By default, half each.
+ * @param {number} [ArrowWidth] - How much of the button the previous/next sections cover. By default, half each.
  * @returns {void} - Nothing
  */
 function DrawBackNextButton(Left, Top, Width, Height, Label, Color, Image, BackText, NextText, Disabled, ArrowWidth) {
@@ -1079,8 +1119,8 @@ function DrawRect(Left, Top, Width, Height, Color) {
  * @param {number} Radius - Radius of the circle to draw
  * @param {number} LineWidth - Width of the line
  * @param {string} LineColor - Color of the circle's line
- * @param {string} FillColor - Color of the space inside the circle
- * @param {HTMLCanvasElement} Canvas - The canvas element to draw onto, defaults to MainCanvas
+ * @param {string} [FillColor] - Color of the space inside the circle
+ * @param {CanvasRenderingContext2D} [Canvas] - The canvas element to draw onto, defaults to MainCanvas
  * @returns {void} - Nothing
  */
 function DrawCircle(CenterX, CenterY, Radius, LineWidth, LineColor, FillColor, Canvas) {
@@ -1154,6 +1194,11 @@ function DrawGetCustomBackground() {
 	return customBG;
 }
 
+function DrawBlindFlash(intensity) {
+	DrawingBlindFlashTimer = CurrentTime + 2000 * intensity;
+	BlindFlash = true;
+}
+
 
 /**
  * Constantly looping draw process. Draws beeps, handles the screen size, handles the current blindfold state and draws the current screen.
@@ -1171,7 +1216,7 @@ function DrawProcess() {
 
 	if ((B != null) && (B != "")) {
 		let DarkFactor = 1.0;
-		if ((CurrentModule != "Character" && CurrentModule != "MiniGame") && (B != "Sheet")) {
+		if ((CurrentModule != "Character") && (B != "Sheet")) {
 			DarkFactor = CharacterGetDarkFactor(Player) * CurrentDarkFactor;
 			if (DarkFactor == 1 && (CurrentCharacter != null || ShopStarted) && !CommonPhotoMode) DarkFactor = 0.5;
 		}
@@ -1179,7 +1224,7 @@ function DrawProcess() {
 
 		let customBG = DrawGetCustomBackground();
 
-		if (customBG != "" && (CurrentModule != "Character" && CurrentModule != "MiniGame") && (B != "Sheet")) {
+		if (customBG != "" && (CurrentModule != "Character") && (B != "Sheet")) {
 			B = customBG;
 			if (DarkFactor == 0)
 				DarkFactor = CharacterGetDarkFactor(Player, true);
@@ -1229,8 +1274,8 @@ function DrawProcess() {
  * @param {number} X - Position of the preview box on the X axis
  * @param {number} Y - Position of the preview box on the Y axis
  * @param {Asset} A - The asset to draw the preview for
- * @Param {object} [Options] - Additional optional drawing options
- * @param {Character} Options.[C] - The character using the item (used to calculate dynamic item descriptions/previews)
+ * @param {object} [Options] - Additional optional drawing options
+ * @param {Character} [Options.C] - The character using the item (used to calculate dynamic item descriptions/previews)
  * @param {string} [Options.Description] - The preview box description
  * @param {string} [Options.Background] - The background color to draw the preview box in - defaults to white
  * @param {string} [Options.Foreground] - The foreground (text) color to draw the description in - defaults to black

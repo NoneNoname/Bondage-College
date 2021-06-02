@@ -94,6 +94,7 @@ ColorNames,Color names
 ColorActions,Color actions
 ColorEmotes,Color emotes
 ColorActivities,Color Activities
+ShrinkNonDialogue,Shrink all messages except dialogue
 ShowActivities,Show sexual activities & orgasms
 AutoBanBlackList,Ban blacklist when creating a room
 AutoBanGhostList,Ban ghostlist when creating a room
@@ -120,6 +121,7 @@ SensDepLight,Light
 SensDepNames,Hide names
 SensDepTotal,Heavy
 SensDepExtreme,Total
+DoBlindFlash,Flash after blindness
 AllowPlayerLeashing,"Players can drag you to rooms when leashed"
 DisableAutoMaid,Maids come automatically when restrained
 DisablePickingLocksOnSelf,Locks on you can't be picked
@@ -285,3 +287,4 @@ NotificationsLarp,Your turn in a LARP game
 NotificationsTestRaise,Raise a test notification
 NotificationsTestReset,Clear raised notifications
 NotificationsTestMessage,Hello there!
+Page,Page

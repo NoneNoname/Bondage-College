@@ -7,9 +7,9 @@ var KidnapOpponent = null;
 var KidnapPlayerCloth = null;
 var KidnapPlayerClothAccessory = null;
 var KidnapPlayerClothLower = null;
-var	KidnapOpponentCloth = null;
-var	KidnapOpponentClothAccessory = null;
-var	KidnapOpponentClothLower = null;
+var KidnapOpponentCloth = null;
+var KidnapOpponentClothAccessory = null;
+var KidnapOpponentClothLower = null;
 var KidnapTimer = 0;
 var KidnapMode = "";
 var KidnapDialog = "";
@@ -476,7 +476,7 @@ function KidnapRun() {
 	// If the time is over, we go to the next step
 	if (CommonTime() >= KidnapTimer) {
 		if (KidnapMode == "SelectMove") { KidnapSelectMove(3); return; }
-		if (KidnapMode == "End") { CommonDynamicFunction(KidnapReturnFunction); return }
+		if (KidnapMode == "End") { CommonDynamicFunction(KidnapReturnFunction); return; }
 		if ((KidnapMode == "Intro") || (KidnapMode == "SuddenDeath") || (KidnapMode == "ShowMove") || (KidnapMode == "UpperHand") || (KidnapMode == "SelectItem")) KidnapSetMode("SelectMove");
 	} else KidnapShowTimer();
 

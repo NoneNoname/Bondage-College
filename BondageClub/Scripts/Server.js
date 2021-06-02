@@ -1,25 +1,8 @@
 /**
- * An item is a pair of asset and its dynamic properties that define a worn asset.
- * @typedef {{Asset: object, Color: string, Difficulty: number, Property: object | undefined}} Item
- */
-
-/**
- * An appearance array is an array of object defining each appearance item of a character in all of its details.
- * @typedef {Array.<Item>} AppearanceArray
- */
-
-/**
- * An appearance bundle is an array of object defining each appearance item of a character. It's a minified version of
- * the normal appearance array
- * @typedef {Array.<{Group: string, Name: string, Difficulty: number | undefined, Color: string | undefined, Property:
- *     object | undefined}>} AppearanceBundle
- */
-
-/**
  * A map containing appearance item diffs, keyed according to the item group. Used to compare and validate before/after
  * for appearance items.
  * @typedef AppearanceDiffMap
- * @type {object.<string, Item[]>}
+ * @type {Record.<string, Item[]>}
  */
 
 "use strict";
@@ -49,6 +32,8 @@ function ServerInit() {
 	ServerSocket.on("ChatRoomSync", function (data) { ChatRoomSync(data); });
 	ServerSocket.on("ChatRoomSyncMemberJoin", function (data) { ChatRoomSyncMemberJoin(data); });
 	ServerSocket.on("ChatRoomSyncMemberLeave", function (data) { ChatRoomSyncMemberLeave(data); });
+	ServerSocket.on("ChatRoomSyncRoomProperties", function (data) { ChatRoomSyncRoomProperties(data); });
+	ServerSocket.on("ChatRoomSyncCharacter", function (data) { ChatRoomSyncCharacter(data); });
 	ServerSocket.on("ChatRoomSyncSwapPlayers", function (data) { ChatRoomSyncSwapPlayers(data); });
 	ServerSocket.on("ChatRoomSyncMovePlayer", function (data) { ChatRoomSyncMovePlayer(data); });
 	ServerSocket.on("ChatRoomSyncReorderPlayers", function (data) { ChatRoomSyncReorderPlayers(data); });
@@ -130,7 +115,7 @@ var ServerAccountUpdate = new class AccountUpdater {
 /**
  * Sets the connection status of the server and updates the login page message
  * @param {boolean} connected - whether or not the websocket connection to the server has been established successfully
- * @param {string} errorMessage - the error message to display if not connected
+ * @param {string} [errorMessage] - the error message to display if not connected
  */
 function ServerSetConnected(connected, errorMessage) {
 	ServerIsConnected = connected;
@@ -334,7 +319,7 @@ function ServerPlayerRelationsSync() {
 /**
  * Prepares an appearance bundle so we can push it to the server. It minimizes it by keeping only the necessary
  * information. (Asset name, group name, color, properties and difficulty)
- * @param {AppearanceArray} Appearance - The appearance array to bundle
+ * @param {Item[]} Appearance - The appearance array to bundle
  * @returns {AppearanceBundle} - The appearance bundle created from the given appearance array
  */
 function ServerAppearanceBundle(Appearance) {
@@ -357,12 +342,12 @@ function ServerAppearanceBundle(Appearance) {
  * @param {Character} C - Character for which to load the appearance
  * @param {string} AssetFamily - Family of assets used for the appearance array
  * @param {AppearanceBundle} Bundle - Bundled appearance
- * @param {number} SourceMemberNumber - Member number of the user who triggered the change
- * @param {boolean} AppearanceFull - Whether or not the appearance should be assigned to an NPC's AppearanceFull
+ * @param {number} [SourceMemberNumber] - Member number of the user who triggered the change
+ * @param {boolean} [AppearanceFull=false] - Whether or not the appearance should be assigned to an NPC's AppearanceFull
  * property
  * @returns {boolean} - Whether or not the appearance bundle update contained invalid items
  */
-function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumber, AppearanceFull) {
+function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumber, AppearanceFull=false) {
 	const appearanceDiffs = ServerBuildAppearanceDiff(AssetFamily, C.Appearance, Bundle);
 	ServerAddRequiredAppearance(AssetFamily, appearanceDiffs);
 
@@ -395,12 +380,13 @@ function ServerAppearanceLoadFromBundle(C, AssetFamily, Bundle, SourceMemberNumb
 /**
  * Builds a diff map for comparing changes to a character's appearance, keyed by asset group name
  * @param {string} assetFamily - The asset family of the appearance
- * @param {AppearanceItem[]} appearance - The current appearance to compare against
+ * @param {Item[]} appearance - The current appearance to compare against
  * @param {AppearanceBundle} bundle - The new appearance bundle
  * @returns {AppearanceDiffMap} - An appearance diff map representing the changes that have been made to the character's
  * appearance
  */
 function ServerBuildAppearanceDiff(assetFamily, appearance, bundle) {
+	/** @type {AppearanceDiffMap} */
 	const diffMap = {};
 	appearance.forEach((item) => {
 		diffMap[item.Asset.Group.Name] = [item, null];
@@ -419,8 +405,8 @@ function ServerBuildAppearanceDiff(assetFamily, appearance, bundle) {
  * Maps a bundled appearance item, as stored on the server and used for appearance update messages, into a full
  * appearance item, as used by the game client
  * @param {string} assetFamily - The asset family of the appearance item
- * @param {AppearanceBundleItem} item - The bundled appearance item
- * @returns {AppearanceItem} - A full appearance item representation of the provided bundled appearance item
+ * @param {ItemBundle} item - The bundled appearance item
+ * @returns {Item} - A full appearance item representation of the provided bundled appearance item
  */
 function ServerBundledItemToAppearanceItem(assetFamily, item) {
 	if (!item || typeof item !== "object" || typeof item.Name !== "string" || typeof item.Group !== "string") return null;
@@ -684,4 +670,42 @@ function ServerAccountLovership(data) {
 		Player.Lovership = data.Lovership;
 		LoginLoversItems();
 	}
+}
+
+/**
+ * Compares the source account and target account to check if we allow using an item
+ *
+ * **This function MUST match server's identical function!**
+ * @param {Character} Source
+ * @param {Character} Target
+ * @returns {boolean}
+ */
+function ServerChatRoomGetAllowItem(Source, Target) {
+
+	// Make sure we have the required data
+	if ((Source == null) || (Target == null)) return false;
+
+	// NPC
+	if (typeof Target.MemberNumber !== "number") return true;
+
+	// At zero permission level or if target is source or if owner, we allow it
+	if ((Target.ItemPermission <= 0) || (Source.MemberNumber == Target.MemberNumber) || ((Target.Ownership != null) && (Target.Ownership.MemberNumber != null) && (Target.Ownership.MemberNumber == Source.MemberNumber))) return true;
+
+	// At one, we allow if the source isn't on the blacklist
+	if ((Target.ItemPermission == 1) && (Target.BlackList.indexOf(Source.MemberNumber) < 0)) return true;
+
+	var LoversNumbers = CharacterGetLoversNumbers(Target, true);
+
+	// At two, we allow if the source is Dominant compared to the Target (25 points allowed) or on whitelist or a lover
+	if ((Target.ItemPermission == 2) && (Target.BlackList.indexOf(Source.MemberNumber) < 0) && ((ReputationCharacterGet(Source, "Dominant") + 25 >= ReputationCharacterGet(Target, "Dominant")) || (Target.WhiteList.indexOf(Source.MemberNumber) >= 0) || (LoversNumbers.indexOf(Source.MemberNumber) >= 0))) return true;
+
+	// At three, we allow if the source is on the whitelist of the Target or a lover
+	if ((Target.ItemPermission == 3) && ((Target.WhiteList.indexOf(Source.MemberNumber) >= 0) || (LoversNumbers.indexOf(Source.MemberNumber) >= 0))) return true;
+
+	// At four, we allow if the source is a lover
+	if ((Target.ItemPermission == 4) && (LoversNumbers.indexOf(Source.MemberNumber) >= 0)) return true;
+
+	// No valid combo, we don't allow the item
+	return false;
+
 }
